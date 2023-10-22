@@ -1,9 +1,10 @@
+#pragma once
+
 #include <iostream>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#include "Grid.hpp"
 
 class GUI {
 
@@ -17,6 +18,7 @@ class GUI {
 
         bool getWindowClose();
 
+        SDL_Renderer *getRenderer();
 
     private:
         int m_windowWidth; 

@@ -29,7 +29,7 @@ GUI::GUI(const char *title, int windowWidth, int windowHeight, bool fullscreen) 
 }
 
 GUI::~GUI() {
-    
+
 }
 
 void GUI::update() {
@@ -58,4 +58,8 @@ void GUI::clearRenderer() {
 
 bool GUI::getWindowClose() {
     return !m_windowClose;
+}
+
+SDL_Renderer *GUI::getRenderer() {
+    return m_renderer;
 }
