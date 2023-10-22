@@ -8,7 +8,8 @@ Snake::Snake(SDL_Renderer *renderer, int snakeWidth, int snakeHeight, int snakeS
     this->m_snakeSize = snakeSize;
 
     m_snakeDirection = DIR_RIGHT;
-
+    m_newSnakeDirection = m_snakeDirection;
+    
     for(int i = 0; i < snakeSize; i++) {
         snakeBlocks.push_back(Snakeblock(m_renderer, 10 + i*m_snakeWidth, 10, m_snakeWidth-2, m_snakeHeight-2));
     }
@@ -39,24 +40,24 @@ void Snake::update(double deltaTime, float limit) {
     
     
     if(key_state[SDL_SCANCODE_S] || key_state[SDL_SCANCODE_DOWN]) {
-        if(m_snakeDirection != DIR_UP) m_snakeDirection = DIR_DOWN;        
+        if(m_snakeDirection != DIR_UP) m_newSnakeDirection = DIR_DOWN;        
     }
 
     if(key_state[SDL_SCANCODE_W] || key_state[SDL_SCANCODE_UP]) {
-        if(m_snakeDirection != DIR_UP) m_snakeDirection = DIR_UP;
+        if(m_snakeDirection != DIR_DOWN) m_newSnakeDirection = DIR_UP;
     }
 
     if(key_state[SDL_SCANCODE_D] || key_state[SDL_SCANCODE_RIGHT]) {
-        if(m_snakeDirection != DIR_LEFT) m_snakeDirection = DIR_RIGHT;
+        if(m_snakeDirection != DIR_LEFT) m_newSnakeDirection = DIR_RIGHT;
     }
 
     if(key_state[SDL_SCANCODE_A] || key_state[SDL_SCANCODE_LEFT]) {
-        if(m_snakeDirection != DIR_RIGHT) m_snakeDirection = DIR_LEFT;
+        if(m_snakeDirection != DIR_RIGHT) m_newSnakeDirection = DIR_LEFT;
     }
 
     if(m_limit < limit) return;
     m_limit = 0;
-
+    m_snakeDirection = m_newSnakeDirection;
     snakeBlocks.pop_back();
     int newPosX = (snakeBlocks[0].getPosX() + m_snakeDirection.x * m_snakeWidth);
     int newPosY = (snakeBlocks[0].getPosY() + m_snakeDirection.y * m_snakeHeight);

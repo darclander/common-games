@@ -57,6 +57,7 @@ class Snake {
         double m_limit;
         
         direction m_snakeDirection;
+        direction m_newSnakeDirection;
 
         std::vector<Snakeblock> snakeBlocks;
 
