@@ -5,6 +5,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+#include "Grid.hpp"
+
 struct direction {
     int x;
     int y;
@@ -41,7 +43,7 @@ class Snakeblock {
 class Snake {
 
     public:
-        Snake(SDL_Renderer *renderer, int snakeWidth, int snakeHeight, int snakeSize);
+        Snake(SDL_Renderer *renderer, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize);
         ~Snake();
 
         void render();
@@ -58,6 +60,8 @@ class Snake {
         
         direction m_snakeDirection;
         direction m_newSnakeDirection;
+
+        Grid *m_grid;
 
         std::vector<Snakeblock> snakeBlocks;
 

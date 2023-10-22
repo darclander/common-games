@@ -1,17 +1,18 @@
 #include "Snake.hpp"
 
-Snake::Snake(SDL_Renderer *renderer, int snakeWidth, int snakeHeight, int snakeSize) {
+Snake::Snake(SDL_Renderer *renderer, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize) {
 
     this->m_renderer = renderer;
     this->m_snakeWidth = snakeWidth;
     this->m_snakeHeight = snakeHeight;
     this->m_snakeSize = snakeSize;
+    this->m_grid = grid;
 
     m_snakeDirection = DIR_RIGHT;
     m_newSnakeDirection = m_snakeDirection;
     
     for(int i = 0; i < snakeSize; i++) {
-        snakeBlocks.push_back(Snakeblock(m_renderer, 10 + i*m_snakeWidth, 10, m_snakeWidth-2, m_snakeHeight-2));
+        snakeBlocks.push_back(Snakeblock(m_renderer, i*m_snakeWidth, 1, m_snakeWidth-2, m_snakeHeight-2));
     }
 
 }
@@ -58,9 +59,25 @@ void Snake::update(double deltaTime, float limit) {
     if(m_limit < limit) return;
     m_limit = 0;
     m_snakeDirection = m_newSnakeDirection;
-    snakeBlocks.pop_back();
+
     int newPosX = (snakeBlocks[0].getPosX() + m_snakeDirection.x * m_snakeWidth);
-    int newPosY = (snakeBlocks[0].getPosY() + m_snakeDirection.y * m_snakeHeight);
+    int newPosY = (snakeBlocks[0].getPosY() + m_snakeDirection.y * m_snakeHeight);    
+    Gridpoint *newPoint = m_grid->getPoint(newPosX + m_snakeWidth / 2, newPosY + m_snakeHeight / 2);
+
+    int oldPosX = snakeBlocks.back().getPosX();
+    int oldPosY = snakeBlocks.back().getPosY();
+    Gridpoint *oldPoint = m_grid->getPoint(oldPosX + m_snakeWidth / 2, oldPosY + m_snakeHeight / 2);
+
+    if(oldPoint != nullptr) oldPoint->setEmpty();
+    if(newPoint != nullptr) {
+        if(!newPoint->isEmpty()) {
+            std::cout << "GAME OVER!" << std::endl;
+        }
+        newPoint->setNotEmpty();
+    }
+
+    snakeBlocks.pop_back();
+
     Snakeblock newSnakeBlock = Snakeblock(m_renderer, newPosX, newPosY, m_snakeWidth - 2, m_snakeHeight - 2);
     snakeBlocks.insert(snakeBlocks.begin(), newSnakeBlock);
 

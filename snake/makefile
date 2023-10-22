@@ -7,11 +7,11 @@ CFLAGS= -I$(IDIR) -lmingw32 -lSDL2main -lSDL2 -lSDL2_Image
 
 
 IDIR = ./src/headers
-_DEPS = Gui.hpp Snake.hpp
+_DEPS = Gui.hpp Snake.hpp Grid.hpp
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 ODIR = ./obj
-_OBJ = main.o Gui.o Snake.o
+_OBJ =  Gui.o Snake.o Grid.o main.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 all: snake

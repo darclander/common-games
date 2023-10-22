@@ -21,7 +21,10 @@ void fpsCap(Uint32 starting_tick) {
 int main(int argc, char **argv) {
 
     GUI ui = GUI("LÄBÄF", 800, 600, 0);
-    Snake snake = Snake(ui.getRenderer(), 40, 40, 10);
+    Grid grid = Grid(ui.getRenderer(), 800, 600, 20);
+    Snake snake = Snake(ui.getRenderer(), &grid, 40, 40, 10);
+
+    
 
     double deltaTime = 0;
     uint32_t startingTick = 0;
@@ -37,7 +40,8 @@ int main(int argc, char **argv) {
 
         ui.update();
 
-        
+        grid.render();
+
         snake.render();
         snake.update(deltaTime, 250.f);
 
