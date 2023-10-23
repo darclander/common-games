@@ -10,7 +10,10 @@ Snake::Snake(SDL_Renderer *renderer, Grid *grid, int snakeWidth, int snakeHeight
 
     m_snakeDirection = DIR_RIGHT;
     m_newSnakeDirection = m_snakeDirection;
-    
+
+    m_snakeWidth = m_grid->getGridPointWidth(); // Retrieve from grid
+    m_snakeHeight = m_grid->getGridPointHeight(); // Retrieve from grid 
+
     for(int i = 0; i < snakeSize; i++) {
         snakeBlocks.push_back(Snakeblock(m_renderer, i*m_snakeWidth, 1, m_snakeWidth-2, m_snakeHeight-2));
     }
@@ -74,12 +77,17 @@ void Snake::update(double deltaTime, float limit) {
             std::cout << "GAME OVER!" << std::endl;
         }
         newPoint->setNotEmpty();
+
+        snakeBlocks.pop_back();
+        newPosX = newPoint->getGridPointX() + 2;
+        newPosY = newPoint->getGridPointY() + 2;
+        Snakeblock newSnakeBlock = Snakeblock(m_renderer, newPosX, newPosY, m_snakeWidth - 2, m_snakeHeight - 2);
+        snakeBlocks.insert(snakeBlocks.begin(), newSnakeBlock);
+    } else {
+        return;
     }
 
-    snakeBlocks.pop_back();
-
-    Snakeblock newSnakeBlock = Snakeblock(m_renderer, newPosX, newPosY, m_snakeWidth - 2, m_snakeHeight - 2);
-    snakeBlocks.insert(snakeBlocks.begin(), newSnakeBlock);
+    
 
 }
 

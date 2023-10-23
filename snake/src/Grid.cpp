@@ -6,12 +6,15 @@ Grid::Grid(SDL_Renderer *renderer, int width, int height, int granularity) {
     this->m_granularity = granularity;
     this->m_renderer = renderer;
 
-    int rows = width / granularity;
-    int cols = height / 15;
+    m_gridPointWidth = width / granularity;
+    m_gridPointHeight = height / 15;
+
+    int rows = 20;
+    int cols = 15;
 
     for(int i = 0; i < rows; i++) {
         for(int j = 0; j < cols; j++) {
-            m_gridpoints.push_back(Gridpoint(m_renderer, i * rows, j * cols, rows, cols));
+            m_gridpoints.push_back(Gridpoint(m_renderer, i * m_gridPointWidth, j * m_gridPointHeight, m_gridPointWidth, m_gridPointHeight));
         }
     }    
 }
@@ -20,6 +23,14 @@ void Grid::render() {
     for(auto &gp : m_gridpoints) {
         gp.render();
     }
+}
+
+int Grid::getGridPointWidth() {
+    return m_gridPointWidth;
+}
+
+int Grid::getGridPointHeight() {
+    return m_gridPointHeight;
 }
 
 Gridpoint *Grid::getPoint(int x, int y) {
@@ -84,6 +95,14 @@ void Gridpoint::setEmpty() {
 
 bool Gridpoint::isEmpty() {
     return m_gridPointIsEmpty;
+}
+
+int Gridpoint::getGridPointX() {
+    return m_gridPointX;
+}
+
+int Gridpoint::getGridPointY() {
+    return m_gridPointY;
 }
 
 Gridpoint::~Gridpoint() {}

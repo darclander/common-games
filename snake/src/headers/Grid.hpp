@@ -21,6 +21,10 @@ class Gridpoint {
 
         void setEmpty();
 
+        int getGridPointX();
+
+        int getGridPointY();
+
     private:
         SDL_Renderer *m_renderer;
 
@@ -40,6 +44,9 @@ class Grid {
 
         void render();
 
+        int getGridPointWidth();
+        int getGridPointHeight();
+
         Gridpoint *getPoint(int x, int y);
         bool isPointEmpty(Gridpoint point);
 
@@ -51,6 +58,8 @@ class Grid {
         int m_gridWidth;
         int m_gridHeight;
         int m_granularity;
+        int m_gridPointWidth;
+        int m_gridPointHeight;
 
         std::vector<Gridpoint> m_gridpoints;
 };
