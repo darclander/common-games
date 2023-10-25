@@ -17,10 +17,10 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 all: snake
 
 ./obj/%.o: ./src/%.cpp $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -O3 -o $@ $< $(CFLAGS)
 
 snake: $(OBJ)
-	$(CC) -o ./debug/$@ $^ $(CFLAGS) 
+	$(CC) -O3 -o ./debug/$@ $^ $(CFLAGS) 
 
 run: snake
 	./debug/snake
