@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
 
     double deltaTime = 0;
     uint32_t startingTick = 0;
-
+    
 
     while(ui.getWindowClose()) {
         auto t1 = Clock::now();

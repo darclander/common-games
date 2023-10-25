@@ -10,7 +10,7 @@ GUI::GUI(const char *title, int windowWidth, int windowHeight, bool fullscreen) 
         flags = SDL_WINDOW_FULLSCREEN;
     }
 
-    if (SDL_Init(SDL_INIT_EVERYTHING) == 0) {
+    if (SDL_Init(SDL_INIT_AUDIO || SDL_INIT_VIDEO) == 0) {
         m_window = SDL_CreateWindow(
                                     title,
                                     SDL_WINDOWPOS_CENTERED,
@@ -20,7 +20,7 @@ GUI::GUI(const char *title, int windowWidth, int windowHeight, bool fullscreen) 
                                     SDL_WINDOW_RESIZABLE
         );
 
-        m_renderer = SDL_CreateRenderer(m_window, -1, 0);
+        m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_PRESENTVSYNC);
 
         if(m_renderer) {
             SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);

@@ -20,10 +20,11 @@ struct direction {
 class Snakeblock {
 
     public: 
-        Snakeblock(SDL_Renderer *renderer, int snakeBlockXpos, int snakeBlockYpos, int snakeBlockWidth, int snakeBlockHeight);
+        Snakeblock(SDL_Renderer *renderer, int snakeBlockXpos, int snakeBlockYpos, int snakeBlockWidth, int snakeBlockHeight, SDL_Texture *textureSnakeHead, int degrees);
         ~Snakeblock();
 
         void render();
+        void renderHead();
 
         int getPosX();
         int getPosY();
@@ -34,9 +35,12 @@ class Snakeblock {
 
         int m_snakeBlockXpos;
         int m_snakeBlockYpos;
+        int m_degrees;
 
         SDL_Rect snakeblock;
         SDL_Renderer *m_renderer;
+
+        SDL_Texture *m_textureSnakeHead;
 
 };
 
@@ -51,10 +55,14 @@ class Snake {
 
     private:
         SDL_Renderer *m_renderer;
+        SDL_Texture *m_textureSnakeHead;
+
 
         int m_snakeSize;
         int m_snakeWidth;
         int m_snakeHeight;
+        int m_degrees;
+        int m_newDegrees;
 
         double m_limit;
         
