@@ -5,6 +5,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+#include <vector>
+#include <memory>
+
+#include "Menu.hpp"
 
 class GUI {
 
@@ -29,6 +33,10 @@ class GUI {
         SDL_Renderer *m_renderer;
         SDL_Window *m_window;
         SDL_Event m_event;
+
+        TTF_Font *m_font;
+
+        std::vector<std::unique_ptr<Menu>> menus;
 
 
 };
