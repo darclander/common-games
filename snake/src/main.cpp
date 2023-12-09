@@ -5,6 +5,7 @@
 #include "Gui.hpp"
 #include "Snake.hpp"
 #include "Grid.hpp"
+#include "Menu.hpp"
 
 typedef std::chrono::high_resolution_clock Clock;
 
@@ -20,9 +21,9 @@ void fpsCap(Uint32 starting_tick) {
 
 int main(int argc, char **argv) {
 
-    GUI ui = GUI("LÄBÄF", 800, 600, 0);
+    GUI ui = GUI("Snake", 800, 600, 0);
     Grid grid = Grid(ui.getRenderer(), 800, 600, 20);
-    Snake snake = Snake(ui.getRenderer(), &grid, 40, 40, 10);
+    Snake snake = Snake(ui.getRenderer(), &grid, 40, 40, 3);
 
     
 

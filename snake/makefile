@@ -3,24 +3,26 @@ OBJS = ./src/*.cpp
 
 CC=g++
 
-CFLAGS= -I$(IDIR) -lmingw32 -lSDL2main -lSDL2 -lSDL2_Image 
+OPTIMIZATION= # O3
+
+CFLAGS= -I$(IDIR) -lmingw32 -lSDL2main -lSDL2 -lSDL2_Image -lSDL2_TTF
 
 
 IDIR = ./src/headers
-_DEPS = Gui.hpp Snake.hpp Grid.hpp
+_DEPS = Gui.hpp Snake.hpp Grid.hpp Menu.hpp
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 ODIR = ./obj
-_OBJ =  Gui.o Snake.o Grid.o main.o
+_OBJ =  Gui.o Snake.o Grid.o main.o Menu.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 all: snake
 
 ./obj/%.o: ./src/%.cpp $(DEPS)
-	$(CC) -c -O3 -o $@ $< $(CFLAGS)
+	$(CC) -c $(OPTIMIZATION) -o $@ $< $(CFLAGS)
 
 snake: $(OBJ)
-	$(CC) -O3 -o ./debug/$@ $^ $(CFLAGS) 
+	$(CC) $(OPTIMIZATION) -o ./debug/$@ $^ $(CFLAGS) 
 
 run: snake
 	./debug/snake

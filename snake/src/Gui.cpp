@@ -46,9 +46,10 @@ GUI::GUI(const char *title, int windowWidth, int windowHeight, bool fullscreen) 
 
     // // menus.emplace_back(std::make_shared<Menu>(startMenu));
 
-    menus.emplace_back(std::make_unique<Menu>(m_renderer, m_font));
-    menus[0]->addItem("hello");
-    menus[0]->addItem("hello2");
+    menus.emplace_back(std::make_unique<Menu>(m_renderer, 0, 0, 100, 100, m_font));
+    int sound;
+    menus[0]->addItem("Sound", sound);
+    menus[0]->addItem("Test", sound);
 }
 
 void GUI::update() {

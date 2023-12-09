@@ -6,9 +6,10 @@ Grid::Grid(SDL_Renderer *renderer, int width, int height, int granularity) {
     this->m_granularity = granularity;
     this->m_renderer = renderer;
 
-    m_gridPointWidth = width / granularity;
-    m_gridPointHeight = height / 15;
+    m_gridPointWidth = width / 20; // width / granularity;
+    m_gridPointHeight = height / 15; // height / 15;
 
+    // Wrong order here?
     int rows = 20;
     int cols = 15;
 
