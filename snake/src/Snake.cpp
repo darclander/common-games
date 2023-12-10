@@ -126,25 +126,35 @@ Snakeblock::Snakeblock(SDL_Renderer *renderer, int snakeBlockXpos, int snakeBloc
     this->m_textureSnakeHead = textureSnakeHead;
     this->m_degrees = degrees;
 
-    snakeblock.w = m_snakeBlockWidth;
-    snakeblock.h = m_snakeBlockheight;
-    snakeblock.x = m_snakeBlockXpos;
-    snakeblock.y = m_snakeBlockYpos;
+    m_snakeblock.w = m_snakeBlockWidth;
+    m_snakeblock.h = m_snakeBlockheight;
+    m_snakeblock.x = m_snakeBlockXpos;
+    m_snakeblock.y = m_snakeBlockYpos;
+
+    m_snakeblockOverlay.w = m_snakeBlockWidth - 4;
+    m_snakeblockOverlay.h = m_snakeBlockWidth - 4;
+    m_snakeblockOverlay.x = m_snakeBlockXpos + 2;
+    m_snakeblockOverlay.y = m_snakeBlockYpos + 2;
 }
 
 void Snakeblock::render() {
     SDL_SetRenderDrawColor(m_renderer, 0, 255, 0, 255);
-    SDL_RenderDrawRect(m_renderer, &snakeblock);
-    SDL_RenderFillRect(m_renderer, &snakeblock);
+    SDL_RenderDrawRect(m_renderer, &m_snakeblock);
+    SDL_RenderFillRect(m_renderer, &m_snakeblock);
+
+    SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
+    SDL_RenderDrawRect(m_renderer, &m_snakeblockOverlay);
+    SDL_RenderFillRect(m_renderer, &m_snakeblockOverlay);
 }
 
 void Snakeblock::renderHead() {
-    SDL_Rect tmp;
-    tmp.w = m_snakeBlockWidth * 2;
-    tmp.h = m_snakeBlockheight * 2;
-    tmp.x = m_snakeBlockXpos - tmp.w / 4;
-    tmp.y = m_snakeBlockYpos - tmp.h / 4;
-    SDL_RenderCopyEx(m_renderer, m_textureSnakeHead, NULL, &tmp, m_degrees, NULL, SDL_FLIP_NONE);
+    this->render();
+    // SDL_Rect tmp;
+    // tmp.w = m_snakeBlockWidth * 2;
+    // tmp.h = m_snakeBlockheight * 2;
+    // tmp.x = m_snakeBlockXpos - tmp.w / 4;
+    // tmp.y = m_snakeBlockYpos - tmp.h / 4;
+    // SDL_RenderCopyEx(m_renderer, m_textureSnakeHead, NULL, &tmp, m_degrees, NULL, SDL_FLIP_NONE);
 }
 
 int Snakeblock::getPosX() {

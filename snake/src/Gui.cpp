@@ -46,10 +46,10 @@ GUI::GUI(const char *title, int windowWidth, int windowHeight, bool fullscreen) 
 
     // // menus.emplace_back(std::make_shared<Menu>(startMenu));
 
-    menus.emplace_back(std::make_unique<Menu>(m_renderer, 0, 0, 100, 100, m_font));
-    int sound;
-    menus[0]->addItem("Sound", sound);
-    menus[0]->addItem("Test", sound);
+    // menus.emplace_back(std::make_unique<Menu>(m_renderer, 0, 0, 100, 100, m_font));
+    // int sound;
+    // menus[0]->addItem("Sound", MENU_OPTION, sound);
+    // menus[0]->addItem("Test", MENU_OPTION, sound);
 }
 
 void GUI::update() {
@@ -63,13 +63,15 @@ void GUI::update() {
             break;
     }
 
-    for (auto &m : menus) {
+    // for (auto &m : menus) {
         
-        m->render();
+    //     m->render();
         
-    }
+    // }
 
 }
+
+
 
 void GUI::render() {
     SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
@@ -87,6 +89,10 @@ bool GUI::getWindowClose() {
 
 SDL_Renderer *GUI::getRenderer() {
     return m_renderer;
+}
+
+TTF_Font *GUI::getFont() {
+    return m_font;
 }
 
 GUI::~GUI() {

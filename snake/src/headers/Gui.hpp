@@ -18,11 +18,17 @@ class GUI {
 
         void render();
         void update();
+
+        template <typename T>
+        void render(T &object) {
+            object.render();
+        }
         void clearRenderer();
 
         bool getWindowClose();
 
         SDL_Renderer *getRenderer();
+        TTF_Font *getFont();
 
     private:
         int m_windowWidth; 

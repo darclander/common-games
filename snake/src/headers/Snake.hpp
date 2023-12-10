@@ -37,7 +37,8 @@ class Snakeblock {
         int m_snakeBlockYpos;
         int m_degrees;
 
-        SDL_Rect snakeblock;
+        SDL_Rect m_snakeblock;
+        SDL_Rect m_snakeblockOverlay;
         SDL_Renderer *m_renderer;
 
         SDL_Texture *m_textureSnakeHead;
