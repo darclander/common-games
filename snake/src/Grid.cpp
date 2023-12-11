@@ -90,6 +90,18 @@ void Gridpoint::setNotEmpty() {
     m_gridPointIsEmpty = false;
 }
 
+void Gridpoint::setScore() {
+    m_gridPointHasScore = true;
+}
+
+void Gridpoint::removeScore() {
+    m_gridPointHasScore = false;
+}
+
+bool Gridpoint::hasScore() {
+    return m_gridPointHasScore;
+}
+
 void Gridpoint::setEmpty() {
     m_gridPointIsEmpty = true;
 }
@@ -105,5 +117,14 @@ int Gridpoint::getGridPointX() {
 int Gridpoint::getGridPointY() {
     return m_gridPointY;
 }
+
+int Gridpoint::getGridPointWidth() {
+    return m_gridWidth;
+}
+
+int Gridpoint::getGridPointHeight() {
+    return m_gridHeight;
+}
+
 
 Gridpoint::~Gridpoint() {}
