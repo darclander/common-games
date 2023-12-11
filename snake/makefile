@@ -3,17 +3,17 @@ OBJS = ./src/*.cpp
 
 CC=g++
 
-OPTIMIZATION= # O3
+OPTIMIZATION= -O3
 
 CFLAGS= -I$(IDIR) -lmingw32 -lSDL2main -lSDL2 -lSDL2_Image -lSDL2_TTF
 
 
 IDIR = ./src/headers
-_DEPS = Gui.hpp Snake.hpp Grid.hpp Menu.hpp
+_DEPS = Gui.hpp Snake.hpp Grid.hpp Menu.hpp Score.hpp
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 ODIR = ./obj
-_OBJ =  Gui.o Snake.o Grid.o main.o Menu.o
+_OBJ =  Gui.o Snake.o Grid.o main.o Menu.o Score.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 all: snake
