@@ -50,6 +50,7 @@ GUI::GUI(const char *title, int windowWidth, int windowHeight, bool fullscreen) 
     // int sound;
     // menus[0]->addItem("Sound", MENU_OPTION, sound);
     // menus[0]->addItem("Test", MENU_OPTION, sound);
+
 }
 
 void GUI::update() {
