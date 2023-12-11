@@ -3,8 +3,8 @@
 Snake::Snake(SDL_Renderer *renderer, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize) {
 
     this->m_renderer = renderer;
-    this->m_snakeWidth = snakeWidth;
-    this->m_snakeHeight = snakeHeight;
+    // this->m_snakeWidth = snakeWidth;
+    // this->m_snakeHeight = snakeHeight;
     this->m_snakeSize = snakeSize;
     this->m_grid = grid;
 

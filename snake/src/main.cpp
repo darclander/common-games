@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
 
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20);
-    Snake snake = Snake(ui.getRenderer(), &grid, 40, 40, 3);
+    Snake snake = Snake(ui.getRenderer(), &grid, 40, 40, 30);
 
 
 
@@ -108,8 +108,8 @@ int main(int argc, char **argv) {
                 if(scorePoint != nullptr && scorePoint->isEmpty()) {
                     scorePoint->setScore();
                     score.move(scorePoint->getGridPointX(), scorePoint->getGridPointY());
+                    hasScore = true;
                 }
-                hasScore = true;
             } else {
                 score.render();
                 if(scorePoint != nullptr) hasScore = scorePoint->hasScore();

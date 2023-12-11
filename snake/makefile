@@ -5,7 +5,7 @@ CC=g++
 
 OPTIMIZATION= -O3
 
-CFLAGS= -I$(IDIR) -lmingw32 -lSDL2main -lSDL2 -lSDL2_Image -lSDL2_TTF
+CFLAGS= -I$(IDIR) -lmingw32 -lSDL2main -lSDL2 -lSDL2_Image -lSDL2_TTF -lSDL2_Mixer
 
 
 IDIR = ./src/headers
@@ -27,6 +27,9 @@ snake: $(OBJ)
 run: snake
 	./debug/snake
 
-clean:
+clean: remove snake
+
+remove:
 	rm -r **/*.o
 	rm ./debug/snake.exe
+
