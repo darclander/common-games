@@ -21,9 +21,16 @@ class Gridpoint {
 
         void setEmpty();
 
-        int getGridPointX();
+        void setScore();
+        void removeScore();
 
+        bool hasScore();
+
+        int getGridPointX();
         int getGridPointY();
+
+        int getGridPointWidth();
+        int getGridPointHeight();
 
     private:
         SDL_Renderer *m_renderer;
@@ -33,6 +40,7 @@ class Gridpoint {
         int m_gridWidth;
         int m_gridHeight;
         bool m_gridPointIsEmpty = true;
+        bool m_gridPointHasScore = false;
     
 };
 

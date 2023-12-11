@@ -51,14 +51,12 @@ void Snake::update(double deltaTime, float limit) {
     m_limit += deltaTime;   
 
     const Uint8 *key_state = SDL_GetKeyboardState(NULL);
-    
-    
+
     if(key_state[SDL_SCANCODE_S] || key_state[SDL_SCANCODE_DOWN]) {
         if(m_snakeDirection != DIR_UP) {
             m_newSnakeDirection = DIR_DOWN;
             m_newDegrees = 90;
         }
-        
     }
 
     if(key_state[SDL_SCANCODE_W] || key_state[SDL_SCANCODE_UP]) {
@@ -99,6 +97,11 @@ void Snake::update(double deltaTime, float limit) {
     if(newPoint != nullptr) {
         if(!newPoint->isEmpty()) {
             std::cout << "GAME OVER!" << std::endl;
+        }
+
+        if(newPoint->hasScore()) {
+            snakeBlocks.push_back(Snakeblock(m_renderer, (snakeBlocks.size()-1)*m_snakeWidth, 1, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees));
+            newPoint->removeScore();
         }
         newPoint->setNotEmpty();
 
