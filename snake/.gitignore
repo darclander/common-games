@@ -45,3 +45,6 @@ src/SDL2
 *.zip
 *.png
 *.mp4
+
+# Python files
+*.py
