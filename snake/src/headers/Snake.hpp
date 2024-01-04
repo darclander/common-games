@@ -6,6 +6,7 @@
 #include <SDL2/SDL_image.h>
 
 #include "Grid.hpp"
+#include "Controller.hpp"
 
 struct direction {
     int x;
@@ -45,7 +46,7 @@ class Snakeblock {
 
 };
 
-class Snake {
+class Snake : public Observer {
 
     public:
         Snake(SDL_Renderer *renderer, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize);
@@ -53,6 +54,8 @@ class Snake {
 
         void render();
         void update(double deltaTime, float limit);
+
+        void onEvent(const SDL_Event& event) override;
 
     private:
         SDL_Renderer *m_renderer;

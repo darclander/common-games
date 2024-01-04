@@ -46,45 +46,49 @@ bool operator!=(const direction& lhs, const direction& rhs) {
     return (lhs.x != rhs.x) || (lhs.y != rhs.y);
 }
 
+void Snake::onEvent(const SDL_Event& event) {
+    if (event.type == SDL_KEYDOWN) {
+        const Uint8 *key_state = SDL_GetKeyboardState(NULL);
+
+        if(key_state[SDL_SCANCODE_S] || key_state[SDL_SCANCODE_DOWN]) {
+            if((m_snakeDirection != DIR_UP) && (m_snakeDirection != DIR_DOWN)) {
+                m_newSnakeDirection = DIR_DOWN;
+                m_newDegrees = 90;
+            }
+        }
+
+        if(key_state[SDL_SCANCODE_W] || key_state[SDL_SCANCODE_UP]) {
+            if((m_snakeDirection != DIR_DOWN) && (m_snakeDirection != DIR_UP)) {
+                m_newSnakeDirection = DIR_UP;
+                m_newDegrees = -90;
+            }
+        }
+
+        if(key_state[SDL_SCANCODE_D] || key_state[SDL_SCANCODE_RIGHT]) {
+            if((m_snakeDirection != DIR_LEFT) && (m_snakeDirection != DIR_RIGHT)) {
+                m_newSnakeDirection = DIR_RIGHT;
+                m_newDegrees = 0;
+            }
+        }
+
+        if(key_state[SDL_SCANCODE_A] || key_state[SDL_SCANCODE_LEFT]) {
+            if((m_snakeDirection != DIR_RIGHT) && (m_snakeDirection != DIR_LEFT)) {
+                m_newSnakeDirection = DIR_LEFT;
+                m_newDegrees = 180;
+            }
+        }
+    }
+}
+
+
 void Snake::update(double deltaTime, float limit) {
 
     m_limit += deltaTime;   
-
-    const Uint8 *key_state = SDL_GetKeyboardState(NULL);
-
-    if(key_state[SDL_SCANCODE_S] || key_state[SDL_SCANCODE_DOWN]) {
-        if(m_snakeDirection != DIR_UP) {
-            m_newSnakeDirection = DIR_DOWN;
-            m_newDegrees = 90;
-        }
-    }
-
-    if(key_state[SDL_SCANCODE_W] || key_state[SDL_SCANCODE_UP]) {
-        if(m_snakeDirection != DIR_DOWN) {
-            m_newSnakeDirection = DIR_UP;
-            m_newDegrees = -90;
-        }
-    }
-
-    if(key_state[SDL_SCANCODE_D] || key_state[SDL_SCANCODE_RIGHT]) {
-        if(m_snakeDirection != DIR_LEFT) {
-            m_newSnakeDirection = DIR_RIGHT;
-            m_newDegrees = 0;
-        }
-    }
-
-    if(key_state[SDL_SCANCODE_A] || key_state[SDL_SCANCODE_LEFT]) {
-        if(m_snakeDirection != DIR_RIGHT) {
-            m_newSnakeDirection = DIR_LEFT;
-            m_newDegrees = 180;
-        }
-    }
 
     if(m_limit < limit) return;
     m_limit = 0;
     m_snakeDirection = m_newSnakeDirection;
     m_degrees = m_newDegrees;
-
     int newPosX = (snakeBlocks[0].getPosX() + m_snakeDirection.x * m_snakeWidth);
     int newPosY = (snakeBlocks[0].getPosY() + m_snakeDirection.y * m_snakeHeight);    
     Gridpoint *newPoint = m_grid->getPoint(newPosX + m_snakeWidth / 2, newPosY + m_snakeHeight / 2);
