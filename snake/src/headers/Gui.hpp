@@ -42,7 +42,7 @@ class GUI : public Observer {
         
         bool m_windowClose;
 
-        std::thread m_guiThread;
+        // std::thread m_guiThread;
 
         SDL_Renderer *m_renderer;
         SDL_Window *m_window;

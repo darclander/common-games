@@ -108,4 +108,7 @@ TTF_Font *GUI::getFont() {
 
 GUI::~GUI() {
     TTF_CloseFont(m_font);
+    TTF_Quit();
+    Mix_Quit();
+    SDL_Quit();
 }

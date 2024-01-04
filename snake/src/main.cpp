@@ -48,6 +48,7 @@ std::pair<int, int> getRandomCoordinate() {
 
 int main(int argc, char **argv) {
 
+    
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20);
     Snake snake = Snake(ui.getRenderer(), &grid, 40, 40, 30);
@@ -63,15 +64,18 @@ int main(int argc, char **argv) {
                     OPTIONS     = 2, 
                     GAME_QUIT   = 3};
 
-    gameState state = START_MENU;
+    gameState state         = START_MENU;
+    gameState previousState = START_MENU;
 
     Menu startMenu = Menu(ui.getRenderer(), 0, 0, 100, 100, ui.getFont());
+    Menu optionsMenu = Menu(ui.getRenderer(), 0, 0, 100, 100, ui.getFont());
     int option = 0;
-    startMenu.addItem("Start game", MENU_OPTION, option);
-    startMenu.addItem("Options",    MENU_OPTION, option);
-    startMenu.addItem("Quit game",  MENU_OPTION, option);
+    startMenu.addItem("START GAME", MENU_OPTION, option);
+    startMenu.addItem("OPTIONS",    MENU_OPTION, option);
+    startMenu.addItem("QUIT",       MENU_OPTION, option);
 
     controller.attachObserver(&startMenu);
+    controller.attachObserver(&optionsMenu);
     controller.attachObserver(&ui);
     controller.attachObserver(&snake);
 
@@ -80,9 +84,8 @@ int main(int argc, char **argv) {
 
     Score score = Score(ui.getRenderer(), grid.getGridPointWidth(), grid.getGridPointHeight());
 
-    SDL_Event event;
-
-    while(ui.getWindowClose()) {
+    bool running = true;
+    while(ui.getWindowClose() && running) {
 
         controller.update();
 
@@ -98,19 +101,29 @@ int main(int argc, char **argv) {
             startMenu.render();
             int menuChoice = 0;
             menuChoice = startMenu.update(deltaTime, ui.getWindowClose());
-            if (menuChoice) {
-                menuChoice--;
-                if(menuChoice == 0) {
-                    state = GAME_PLAY;
-                } else if (menuChoice == 1) {
-                    state = OPTIONS;
-                }
+            
+            if(menuChoice < 0) {
+                state = previousState;
+            }
+
+            menuChoice--;
+            if(menuChoice == 0) {
+                state = GAME_PLAY;
+            } else if (menuChoice == 1) {
+                state = OPTIONS;
+            } else if (menuChoice == 2) {
+                state = GAME_QUIT;
+                running = false;
+            }
+        } else if (state == OPTIONS) {
+            optionsMenu.render();
+            int menuChoice = 0;
+            menuChoice = optionsMenu.update(deltaTime, ui.getWindowClose());
+            
+            if(menuChoice < 0) {
+                state = previousState;
             }
         } else if(state == GAME_PLAY) {
-            // std::thread t1(updateSnake, std::ref(snake), deltaTime, 100.f);
-            // grid.render();
-            // snake.render();
-            // ui.render(grid);
             
             if(!hasScore) {
                 std::pair<int, int> pos = getRandomCoordinate();
@@ -130,12 +143,12 @@ int main(int argc, char **argv) {
             ui.render(snake); // Perhaps a better solution?
 
             snake.update(deltaTime, 100.f);
-            // t1.join();
         }
         
         ui.render();
 
         auto t3 = Clock::now();
+        
         // See method-description
         deltaTime = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t1).count())/ 1000000.f;
         // fpsCap(startingTick);

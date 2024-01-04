@@ -47,7 +47,7 @@ bool operator!=(const direction& lhs, const direction& rhs) {
 }
 
 void Snake::onEvent(const SDL_Event& event) {
-    if (event.type == SDL_KEYDOWN) {
+    // if (event.type == SDL_KEYDOWN) {
         const Uint8 *key_state = SDL_GetKeyboardState(NULL);
 
         if(key_state[SDL_SCANCODE_S] || key_state[SDL_SCANCODE_DOWN]) {
@@ -77,7 +77,7 @@ void Snake::onEvent(const SDL_Event& event) {
                 m_newDegrees = 180;
             }
         }
-    }
+    // }
 }
 
 

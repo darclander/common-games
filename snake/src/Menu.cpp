@@ -13,7 +13,7 @@ Menu::Menu(SDL_Renderer *renderer, int xPos, int yPos, int width, int height, TT
 
     m_font = font;
     // m_menuThread = std::thread(&Menu::updateMenu, this);
-    std::cout << &m_items << std::endl;
+    // std::cout << &m_items << std::endl;
 }
 
 Text Menu::createText(const std::string &name, int xPos, int yPos, SDL_Color textColor) {
@@ -82,16 +82,18 @@ void Menu::updateMenu() {
 }
 
 void Menu::onEvent(const SDL_Event& event) {
-    const Uint8 *key_state = SDL_GetKeyboardState(NULL);
-    if (event.type == SDL_KEYDOWN) {
-        if(key_state[SDL_SCANCODE_DOWN]) {
-            updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
-            if(m_menuIndex < m_items.size()-1) m_menuIndex++;
-            updateText(m_items[m_menuIndex].menuText, menuc::RED);
-        } else if (key_state[SDL_SCANCODE_UP]) {
-            updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
-            if(m_menuIndex > 0) m_menuIndex--;
-            updateText(m_items[m_menuIndex].menuText, menuc::RED);
+    if(m_items.size() > 0) {
+        if (event.type == SDL_KEYDOWN) {
+            const Uint8 *key_state = SDL_GetKeyboardState(NULL);
+            if(key_state[SDL_SCANCODE_DOWN]) {
+                updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+                if(m_menuIndex < m_items.size()-1) m_menuIndex++;
+                updateText(m_items[m_menuIndex].menuText, menuc::RED);
+            } else if (key_state[SDL_SCANCODE_UP]) {
+                updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+                if(m_menuIndex > 0) m_menuIndex--;
+                updateText(m_items[m_menuIndex].menuText, menuc::RED);
+            }
         }
     }
 }
@@ -140,11 +142,11 @@ int Menu::update(double deltaTime, bool gameRunning) {
 
 void Menu::render() {
 
-    SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
+    // SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
 
-    SDL_Rect rect = {375, 275, 50, 50};
+    // SDL_Rect rect = {375, 275, 50, 50};
 
-    SDL_RenderFillRect(m_renderer, &rect);
+    // SDL_RenderFillRect(m_renderer, &rect);
 
 
     for (auto &m : m_items) {

@@ -20,7 +20,7 @@ class Controller {
         }
 
         ~Controller() {
-            m_controllerThread.join();
+            // m_controllerThread.join();
         }
 
         // Attach an observer to the controller
@@ -55,7 +55,7 @@ class Controller {
         }
 
         std::vector<Observer*> observers;
-        std::thread m_controllerThread;
+        // std::thread m_controllerThread;
         SDL_Event m_event;
         bool running = true;
 };
