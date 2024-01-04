@@ -51,7 +51,7 @@ class Menu : public Observer {
 
     private:
 
-        std::thread m_menuThread;
+        // std::thread m_menuThread;
 
         int m_width;
         int m_height;
