@@ -73,6 +73,7 @@ int main(int argc, char **argv) {
 
     controller.attachObserver(&startMenu);
     controller.attachObserver(&ui);
+    controller.attachObserver(&snake);
 
     bool hasScore = false;
     Gridpoint *scorePoint;
