@@ -7,13 +7,13 @@ Menu::Menu(SDL_Renderer *renderer, int xPos, int yPos, int width, int height, TT
     m_yPos      = yPos;
     m_width     = width;
     m_height    = height;
+    m_running   = true;
     m_limit     = 0;
     m_menuIndex = 0; // Starting at first value of a menu.
 
     m_font = font;
+    // m_menuThread = std::thread(&Menu::updateMenu, this);
     std::cout << &m_items << std::endl;
-
-
 }
 
 Text Menu::createText(const std::string &name, int xPos, int yPos, SDL_Color textColor) {
@@ -66,6 +66,9 @@ template <typename T>
 int Menu::addItem(const std::string &name, int type, T &reference_value) {
 
     Text textInfo = createText(name, m_xPos, m_yPos + m_items.size() * 50, menuc::WHITE);
+    if(m_items.size() == 0) {
+        updateText(textInfo, menuc::RED);
+    }
     MenuItem mi;
     mi.menuText = textInfo;
 
@@ -74,12 +77,13 @@ int Menu::addItem(const std::string &name, int type, T &reference_value) {
     return m_items.size(); 
 }
 
-int Menu::update(double deltaTime) {
-    m_limit += deltaTime;  
-    const Uint8 *key_state = SDL_GetKeyboardState(NULL);
+void Menu::updateMenu() {
+    
+}
 
-    if(m_limit > 100.f) {
-        m_limit = 0;
+void Menu::onEvent(const SDL_Event& event) {
+    const Uint8 *key_state = SDL_GetKeyboardState(NULL);
+    if (event.type == SDL_KEYDOWN) {
         if(key_state[SDL_SCANCODE_DOWN]) {
             updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
             if(m_menuIndex < m_items.size()-1) m_menuIndex++;
@@ -90,6 +94,42 @@ int Menu::update(double deltaTime) {
             updateText(m_items[m_menuIndex].menuText, menuc::RED);
         }
     }
+}
+
+
+int Menu::update(double deltaTime, bool gameRunning) {
+    m_limit += deltaTime;  
+    const Uint8 *key_state = SDL_GetKeyboardState(NULL);
+    m_running = gameRunning;
+
+
+    // SDL_Event event;
+    // SDL_PollEvent( &event );
+    //     if (event.type == SDL_KEYDOWN) {
+    //         std::cout << "KEYDOWN";
+    //         if(key_state[SDL_SCANCODE_DOWN]) {
+    //             updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+    //             if(m_menuIndex < m_items.size()-1) m_menuIndex++;
+    //             updateText(m_items[m_menuIndex].menuText, menuc::RED);
+    //         } else if (key_state[SDL_SCANCODE_UP]) {
+    //             updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+    //             if(m_menuIndex > 0) m_menuIndex--;
+    //             updateText(m_items[m_menuIndex].menuText, menuc::RED);
+    //         }
+    //     }
+    
+    // if(m_limit > 100.f) {
+    //     m_limit = 0;
+    //     if(key_state[SDL_SCANCODE_DOWN]) {
+    //         updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+    //         if(m_menuIndex < m_items.size()-1) m_menuIndex++;
+    //         updateText(m_items[m_menuIndex].menuText, menuc::RED);
+    //     } else if (key_state[SDL_SCANCODE_UP]) {
+    //         updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+    //         if(m_menuIndex > 0) m_menuIndex--;
+    //         updateText(m_items[m_menuIndex].menuText, menuc::RED);
+    //     }
+    // }
 
     if(key_state[SDL_SCANCODE_RETURN]) {
         return m_menuIndex + 1;
@@ -118,4 +158,5 @@ Menu::~Menu() {
     for (auto &m : m_items) {
         SDL_DestroyTexture(m.menuText.texture);
     }
+    // m_menuThread.join();
 }

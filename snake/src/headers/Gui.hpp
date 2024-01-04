@@ -9,10 +9,12 @@
 
 #include <vector>
 #include <memory>
+#include <thread>
 
 #include "Menu.hpp"
+#include "Controller.hpp"
 
-class GUI {
+class GUI : public Observer {
 
     public:
         GUI(const char *title, int windowWidth, int windowHeight, bool fullscreen);
@@ -20,6 +22,8 @@ class GUI {
 
         void render();
         void update();
+
+        void onEvent(const SDL_Event& event) override;
 
         template <typename T>
         void render(T &object) {
@@ -37,6 +41,8 @@ class GUI {
         int m_windowHeight;
         
         bool m_windowClose;
+
+        std::thread m_guiThread;
 
         SDL_Renderer *m_renderer;
         SDL_Window *m_window;

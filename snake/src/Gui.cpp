@@ -36,6 +36,8 @@ GUI::GUI(const char *title, int windowWidth, int windowHeight, bool fullscreen) 
     if (!m_font) {
         std::cerr << "Failed to load font! SDL_ttf Error: " << TTF_GetError() << std::endl;
     }
+
+    
     
     // Menu startMenu = Menu(m_renderer, m_font);
     // startMenu.addItem("Hello");
@@ -53,16 +55,24 @@ GUI::GUI(const char *title, int windowWidth, int windowHeight, bool fullscreen) 
 
 }
 
+void GUI::onEvent(const SDL_Event& event) {
+    if(event.type == SDL_QUIT) {
+        m_windowClose = true;
+    }
+}
+
 void GUI::update() {
 
-    SDL_PollEvent(&m_event);
-    switch (m_event.type) {
-        case SDL_QUIT :
-            m_windowClose = true;
-            break;
-        default:
-            break;
-    }
+    // while(SDL_PollEvent(&m_event)) {
+    //     switch (m_event.type) {
+    //         case SDL_QUIT :
+    //             m_windowClose = true;
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    // }
+
 
     // for (auto &m : menus) {
         

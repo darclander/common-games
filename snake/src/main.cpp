@@ -8,6 +8,7 @@
 #include "Grid.hpp"
 #include "Menu.hpp"
 #include "Score.hpp"
+#include "Controller.hpp"
 
 typedef std::chrono::high_resolution_clock Clock;
 
@@ -50,6 +51,7 @@ int main(int argc, char **argv) {
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20);
     Snake snake = Snake(ui.getRenderer(), &grid, 40, 40, 30);
+    Controller controller = Controller();
 
 
 
@@ -69,12 +71,20 @@ int main(int argc, char **argv) {
     startMenu.addItem("Options",    MENU_OPTION, option);
     startMenu.addItem("Quit game",  MENU_OPTION, option);
 
+    controller.attachObserver(&startMenu);
+    controller.attachObserver(&ui);
+
     bool hasScore = false;
     Gridpoint *scorePoint;
 
     Score score = Score(ui.getRenderer(), grid.getGridPointWidth(), grid.getGridPointHeight());
 
+    SDL_Event event;
+
     while(ui.getWindowClose()) {
+
+        controller.update();
+
         auto t1 = Clock::now();
 
         startingTick = SDL_GetTicks();
@@ -86,7 +96,7 @@ int main(int argc, char **argv) {
         if (state == START_MENU) {
             startMenu.render();
             int menuChoice = 0;
-            menuChoice = startMenu.update(deltaTime);
+            menuChoice = startMenu.update(deltaTime, ui.getWindowClose());
             if (menuChoice) {
                 menuChoice--;
                 if(menuChoice == 0) {

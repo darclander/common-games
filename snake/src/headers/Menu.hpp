@@ -5,6 +5,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <vector>
+#include <thread>
+
+#include "Controller.hpp"
 
 #define MENU_OPTION     0x0
 #define MENU_BAR        0x1
@@ -32,20 +35,23 @@ struct MenuItem {
     int type;
 };
 
-class Menu {
+class Menu : public Observer {
 
     public:
         Menu(SDL_Renderer *renderer, int xPos, int yPos, int width, int height, TTF_Font *font);
         ~Menu();
 
+        void onEvent(const SDL_Event& event) override;
 
         template <typename T>
         int addItem(const std::string &name, int type, T &referenceValue);
 
         void render();
-        int update(double deltaTime); 
+        int update(double deltaTime, bool gameRunning); 
 
     private:
+
+        std::thread m_menuThread;
 
         int m_width;
         int m_height;
@@ -53,7 +59,11 @@ class Menu {
         int m_yPos;
         int m_menuIndex;
         int m_limit;
+        bool m_running;
 
+        SDL_Event m_event;
+
+        void updateMenu();
         Text createText(const std::string &name, int xPos, int yPos, SDL_Color textColor);
         bool updateText(Text &t, SDL_Color textColor);
         std::vector<MenuItem> m_items;
