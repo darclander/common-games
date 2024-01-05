@@ -1,6 +1,6 @@
 #include "Menu.hpp"
 
-Menu::Menu(SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, int height, TTF_Font *font) {
+Menu::Menu(SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, int height, TTF_Font *font, int &state, int previousState) {
     m_renderer = renderer;
 
     m_xPos          = xPos;
@@ -13,6 +13,9 @@ Menu::Menu(SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, in
     m_activeMenu    = false;
     m_limit         = 0;
     m_menuIndex     = 0; // Starting at first value of a menu.
+
+    m_state         = &state;
+    m_previousState = previousState;
 
     m_font = font;
     // m_menuThread = std::thread(&Menu::updateMenu, this);
@@ -82,7 +85,7 @@ int Menu::addItem(const std::string &name, int type, T &reference_value) {
 }
 
 
-int Menu::addItem(const std::string &name, int type, int &reference_value, const int &newValue) {
+int Menu::addItemState(const std::string &name, const int &newValue) {
 
     Text textInfo = createText(name, m_xPos, m_yPos + m_items.size() * 50, menuc::WHITE);
     if(m_items.size() == 0) {
@@ -90,9 +93,8 @@ int Menu::addItem(const std::string &name, int type, int &reference_value, const
     }
     MenuItem mi;
     mi.menuText = textInfo;
-    mi.referenceValue = &reference_value;
     mi.nextState = newValue;
-    mi.type = type;
+    mi.type = MENU_STATE;
 
 
     m_items.push_back(mi);
@@ -129,17 +131,26 @@ void Menu::onEvent(const SDL_Event& event) {
                 }
             }
         
+            // if (key_state[SDL_SCANCODE_ESCAPE]) {
+            //     std::cout << "ESCAPE" << std::endl;
+            //     if(m_items.size() > 0) updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+            //     m_menuIndex = -2;
+            //     m_updateMenu = true;
+            // }
+
             if (key_state[SDL_SCANCODE_ESCAPE]) {
-                std::cout << "ESCAPE" << std::endl;
-                if(m_items.size() > 0) updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
-                m_menuIndex = -2;
-                m_updateMenu = true;
+                std::cout << "PREVIOUS:" << m_previousState << std::endl;
+                *m_state = m_previousState;
             }
+
             if (key_state[SDL_SCANCODE_RETURN]) {
+                if(m_items.size() > 0) {
                 // m_updateMenu = true;
                 // m_items[m_menuIndex].menuText
-                if(m_items[m_menuIndex].type == MENU_STATE) {
-                    *m_items[m_menuIndex].referenceValue = m_items[m_menuIndex].nextState;
+                    if(m_items[m_menuIndex].type == MENU_STATE) {
+                        updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+                        *m_state = m_items[m_menuIndex].nextState;
+                    }
                 }
             }
         }

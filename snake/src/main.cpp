@@ -98,12 +98,12 @@ int main(int argc, char **argv) {
     // gameState state         = START_MENU;
     // gameState previousState = START_MENU;
 
-    Menu startMenu      = Menu(ui.getRenderer(), 0, 0, 0, 100, 100, ui.getFont());
-    Menu optionsMenu    = Menu(ui.getRenderer(), 1, 0, 0, 100, 100, ui.getFont());
+    Menu startMenu      = Menu(ui.getRenderer(), 0, 0, 0, 100, 100, ui.getFont(), state, START_MENU);
+    Menu optionsMenu    = Menu(ui.getRenderer(), 1, 0, 0, 100, 100, ui.getFont(), state, START_MENU);
     int option = 0;
-    startMenu.addItem("START GAME", MENU_STATE,  state, GAME_PLAY);
-    startMenu.addItem("OPTIONS",    MENU_STATE,  state, OPTIONS);
-    startMenu.addItem("QUIT",       MENU_OPTION, option);
+    startMenu.addItemState("START GAME", GAME_PLAY);
+    startMenu.addItemState("OPTIONS",    OPTIONS  );
+    startMenu.addItemState("QUIT",       GAME_QUIT);
 
     controller.attachObserver(&startMenu);
     controller.attachObserver(&optionsMenu);
@@ -127,43 +127,14 @@ int main(int argc, char **argv) {
 
         ui.clearRenderer();
         ui.update();
-
+        std::cout << state << std::endl;
         if (state == START_MENU) {
             controller.broadcastNewMenu(0);
             startMenu.render();
-            // menuHandler(startMenu, state, previousState);
-            // startMenu.render();
-            // int menuChoice = 0;
-            // menuChoice = startMenu.update(deltaTime, ui.getWindowClose());
-            // if(menuChoice > 0) {
-            //     gameState newState = static_cast<gameState>(menuChoice);
-            //     state = newState;
-            // }
-            // if(menuChoice < 0) {
-            //     state = previousState;
-            // }
-
-            // menuChoice--;
-            // if(menuChoice == 0) {
-            //     state = GAME_PLAY;
-            // } else if (menuChoice == 1) {
-            //     state = OPTIONS;
-            // } else if (menuChoice == 2) {
-            //     state = GAME_QUIT;
-            //     running = false;
-            // }
         } else if (state == OPTIONS) {
             controller.broadcastNewMenu(1);
-            // menuHandler(optionsMenu, state, previousState);
-            // optionsMenu.render();
-            // int menuChoice = 0;
-            // menuChoice = optionsMenu.update(deltaTime, ui.getWindowClose());
-            
-            // if(menuChoice < 0) {
-            //     state = previousState;
-            // }
-        } else if(state == GAME_PLAY) {
-            
+        } else if (state == GAME_PLAY) {
+            controller.broadcastNewMenu(0);
             if(!hasScore) {
                 std::pair<int, int> pos = getRandomCoordinate();
                 std::cout << "X: " << pos.first << " Y: " << pos.second << std::endl;
@@ -182,6 +153,8 @@ int main(int argc, char **argv) {
             ui.render(snake); // Perhaps a better solution?
 
             snake.update(deltaTime, 100.f);
+        } else if (state == GAME_QUIT) {
+            running = false;
         }
         
         ui.render();

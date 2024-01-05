@@ -35,6 +35,7 @@ struct MenuItem {
     int *referenceValue;
     int menuWidth;
     int menuHeight;
+    int previousState;
     int nextState;
     int type;
 };
@@ -42,7 +43,7 @@ struct MenuItem {
 class Menu : public Observer {
 
     public:
-        Menu(SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, int height, TTF_Font *font);
+        Menu(SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, int height, TTF_Font *font, int &state, int previousState);
         ~Menu();
 
         void onEvent(const SDL_Event& event) override;
@@ -50,7 +51,7 @@ class Menu : public Observer {
         template <typename T>
         int addItem(const std::string &name, int type, T &referenceValue);
 
-        int addItem(const std::string &name, int type, int &referenceValue, const int &newValue);
+        int addItemState(const std::string &name, const int &newValue);
 
         void render();
         int update(double deltaTime, bool gameRunning);
@@ -67,6 +68,9 @@ class Menu : public Observer {
         int m_menuIndex;
         int m_limit;
         int m_menuid;
+
+        int *m_state;
+        int m_previousState;
         
         bool m_activeMenu;
         bool m_running;
