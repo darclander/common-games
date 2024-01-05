@@ -28,6 +28,15 @@ struct Text {
     int yPos;
     std::string name;
     SDL_Texture *texture;
+
+    void updateX(int newX) {
+        xPos = newX;
+    }
+
+    void updateY(int newY) {
+        yPos = newY;
+    }
+
 };
 
 struct MenuItem {
@@ -82,6 +91,7 @@ class Menu : public Observer {
         void updateMenu();
         Text createText(const std::string &name, int xPos, int yPos, SDL_Color textColor);
         bool updateText(Text &t, SDL_Color textColor);
+
         std::vector<MenuItem> m_items;
 
         TTF_Font *m_font;

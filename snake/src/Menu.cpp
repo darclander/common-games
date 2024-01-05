@@ -65,6 +65,8 @@ bool Menu::updateText(Text &txt, SDL_Color textColor) {
     return true;
 }
 
+
+
 template int Menu::addItem(const std::string &name, int type, int   &reference_value);
 template int Menu::addItem(const std::string &name, int type, float &reference_value);
 
@@ -88,6 +90,8 @@ int Menu::addItem(const std::string &name, int type, T &reference_value) {
 int Menu::addItemState(const std::string &name, const int &newValue) {
 
     Text textInfo = createText(name, m_xPos, m_yPos + m_items.size() * 50, menuc::WHITE);
+    textInfo.updateX(m_xPos + (m_width - textInfo.width) / 2);
+
     if(m_items.size() == 0) {
         updateText(textInfo, menuc::RED);
     }
@@ -95,7 +99,6 @@ int Menu::addItemState(const std::string &name, const int &newValue) {
     mi.menuText = textInfo;
     mi.nextState = newValue;
     mi.type = MENU_STATE;
-
 
     m_items.push_back(mi);
 
@@ -212,12 +215,13 @@ int Menu::getMenuIndex() {
 
 void Menu::render() {
 
-    // SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
+    SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
 
-    // SDL_Rect rect = {375, 275, 50, 50};
+    SDL_Rect rectL = {m_xPos, m_yPos, 1, m_height};
+    SDL_Rect rectR = {m_xPos + m_width, m_yPos, 1, m_height};
 
-    // SDL_RenderFillRect(m_renderer, &rect);
-
+    SDL_RenderFillRect(m_renderer, &rectL);
+    SDL_RenderFillRect(m_renderer, &rectR);
 
     for (auto &m : m_items) {
         SDL_Rect renderQuad = {m.menuText.xPos, m.menuText.yPos, m.menuText.width, m.menuText.height};
