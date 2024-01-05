@@ -1,6 +1,7 @@
 #include <iostream>
 #include <chrono>
 #include <random>
+#include <string>
 #include <thread>
 
 #include "Gui.hpp"
@@ -17,8 +18,6 @@ typedef std::chrono::high_resolution_clock Clock;
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
-
-
 
 void fpsCap(Uint32 starting_tick) {
     // '1000 / FPS' is meant to be replaced with 'frameDelay'
@@ -46,6 +45,41 @@ std::pair<int, int> getRandomCoordinate() {
     return std::make_pair(x, y);
 }
 
+enum gameState {START_MENU  = 0, 
+                GAME_PLAY   = 1,
+                OPTIONS     = 2, 
+                GAME_QUIT   = 3};
+
+std::string gameStateToString(gameState value) {
+    switch (value) {
+        case START_MENU:
+            return "START_MENU";
+        case GAME_PLAY:
+            return "GAME_PLAY";
+        case OPTIONS:
+            return "OPTIONS";
+        case GAME_QUIT:
+            return "GAME_QUIT";
+        default:
+            return "UNKNOWN_GAME_STATE";
+    }
+}
+
+void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
+    menu.render();
+    int menuChoice = 0;
+    menuChoice = menu.getMenuIndex();
+    std::cout << menuChoice << std::endl;
+    if(menuChoice > 0) {
+        gameState newState = static_cast<gameState>(menuChoice);
+        previousState = state;
+        state = newState;
+        std::cout << gameStateToString(previousState) << " -> " << gameStateToString(state) << std::endl;
+    } else if (menuChoice == -1) {
+        state = previousState;
+    }
+}
+
 int main(int argc, char **argv) {
 
     
@@ -59,19 +93,16 @@ int main(int argc, char **argv) {
     double deltaTime = 0;
     uint32_t startingTick = 0;
 
-    enum gameState {START_MENU  = 0, 
-                    GAME_PLAY   = 1,
-                    OPTIONS     = 2, 
-                    GAME_QUIT   = 3};
 
-    gameState state         = START_MENU;
-    gameState previousState = START_MENU;
+    int state = START_MENU;
+    // gameState state         = START_MENU;
+    // gameState previousState = START_MENU;
 
-    Menu startMenu = Menu(ui.getRenderer(), 0, 0, 100, 100, ui.getFont());
-    Menu optionsMenu = Menu(ui.getRenderer(), 0, 0, 100, 100, ui.getFont());
+    Menu startMenu      = Menu(ui.getRenderer(), 0, 0, 0, 100, 100, ui.getFont());
+    Menu optionsMenu    = Menu(ui.getRenderer(), 1, 0, 0, 100, 100, ui.getFont());
     int option = 0;
-    startMenu.addItem("START GAME", MENU_OPTION, option);
-    startMenu.addItem("OPTIONS",    MENU_OPTION, option);
+    startMenu.addItem("START GAME", MENU_STATE,  state, GAME_PLAY);
+    startMenu.addItem("OPTIONS",    MENU_STATE,  state, OPTIONS);
     startMenu.addItem("QUIT",       MENU_OPTION, option);
 
     controller.attachObserver(&startMenu);
@@ -89,6 +120,7 @@ int main(int argc, char **argv) {
 
         controller.update();
 
+
         auto t1 = Clock::now();
 
         startingTick = SDL_GetTicks();
@@ -96,33 +128,40 @@ int main(int argc, char **argv) {
         ui.clearRenderer();
         ui.update();
 
-
         if (state == START_MENU) {
+            controller.broadcastNewMenu(0);
             startMenu.render();
-            int menuChoice = 0;
-            menuChoice = startMenu.update(deltaTime, ui.getWindowClose());
-            
-            if(menuChoice < 0) {
-                state = previousState;
-            }
+            // menuHandler(startMenu, state, previousState);
+            // startMenu.render();
+            // int menuChoice = 0;
+            // menuChoice = startMenu.update(deltaTime, ui.getWindowClose());
+            // if(menuChoice > 0) {
+            //     gameState newState = static_cast<gameState>(menuChoice);
+            //     state = newState;
+            // }
+            // if(menuChoice < 0) {
+            //     state = previousState;
+            // }
 
-            menuChoice--;
-            if(menuChoice == 0) {
-                state = GAME_PLAY;
-            } else if (menuChoice == 1) {
-                state = OPTIONS;
-            } else if (menuChoice == 2) {
-                state = GAME_QUIT;
-                running = false;
-            }
+            // menuChoice--;
+            // if(menuChoice == 0) {
+            //     state = GAME_PLAY;
+            // } else if (menuChoice == 1) {
+            //     state = OPTIONS;
+            // } else if (menuChoice == 2) {
+            //     state = GAME_QUIT;
+            //     running = false;
+            // }
         } else if (state == OPTIONS) {
-            optionsMenu.render();
-            int menuChoice = 0;
-            menuChoice = optionsMenu.update(deltaTime, ui.getWindowClose());
+            controller.broadcastNewMenu(1);
+            // menuHandler(optionsMenu, state, previousState);
+            // optionsMenu.render();
+            // int menuChoice = 0;
+            // menuChoice = optionsMenu.update(deltaTime, ui.getWindowClose());
             
-            if(menuChoice < 0) {
-                state = previousState;
-            }
+            // if(menuChoice < 0) {
+            //     state = previousState;
+            // }
         } else if(state == GAME_PLAY) {
             
             if(!hasScore) {

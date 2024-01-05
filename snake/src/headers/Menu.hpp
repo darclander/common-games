@@ -9,8 +9,10 @@
 
 #include "Controller.hpp"
 
-#define MENU_OPTION     0x0
-#define MENU_BAR        0x1
+#define MENU_STATE      0x0
+#define MENU_OPTION     0x1
+#define MENU_BAR        0x2
+
 
 namespace menuc {
     const SDL_Color RED     = {255, 0,   0,   255};
@@ -30,15 +32,17 @@ struct Text {
 
 struct MenuItem {
     Text menuText;
+    int *referenceValue;
     int menuWidth;
     int menuHeight;
+    int nextState;
     int type;
 };
 
 class Menu : public Observer {
 
     public:
-        Menu(SDL_Renderer *renderer, int xPos, int yPos, int width, int height, TTF_Font *font);
+        Menu(SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, int height, TTF_Font *font);
         ~Menu();
 
         void onEvent(const SDL_Event& event) override;
@@ -46,8 +50,11 @@ class Menu : public Observer {
         template <typename T>
         int addItem(const std::string &name, int type, T &referenceValue);
 
+        int addItem(const std::string &name, int type, int &referenceValue, const int &newValue);
+
         void render();
-        int update(double deltaTime, bool gameRunning); 
+        int update(double deltaTime, bool gameRunning);
+        int getMenuIndex();
 
     private:
 
@@ -59,7 +66,12 @@ class Menu : public Observer {
         int m_yPos;
         int m_menuIndex;
         int m_limit;
+        int m_menuid;
+        
+        bool m_activeMenu;
         bool m_running;
+        bool m_updateMenu;
+        
 
         SDL_Event m_event;
 
