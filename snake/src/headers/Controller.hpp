@@ -42,6 +42,13 @@ class Controller {
             notifyEvent(event);
         }
 
+        void broadcastNewMenu(int menuid) {
+            SDL_Event event;
+            event.type = SDL_USEREVENT;
+            event.user.code = menuid;
+            notifyEvent(event);
+        }
+
         void update() {
             listener();
         }
