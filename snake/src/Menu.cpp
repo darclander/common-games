@@ -1,15 +1,18 @@
 #include "Menu.hpp"
 
-Menu::Menu(SDL_Renderer *renderer, int xPos, int yPos, int width, int height, TTF_Font *font) {
+Menu::Menu(SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, int height, TTF_Font *font) {
     m_renderer = renderer;
 
-    m_xPos      = xPos;
-    m_yPos      = yPos;
-    m_width     = width;
-    m_height    = height;
-    m_running   = true;
-    m_limit     = 0;
-    m_menuIndex = 0; // Starting at first value of a menu.
+    m_xPos          = xPos;
+    m_yPos          = yPos;
+    m_width         = width;
+    m_height        = height;
+    m_menuid        = menuid;
+    m_running       = true;
+    m_updateMenu    = false;
+    m_activeMenu    = false;
+    m_limit         = 0;
+    m_menuIndex     = 0; // Starting at first value of a menu.
 
     m_font = font;
     // m_menuThread = std::thread(&Menu::updateMenu, this);
@@ -71,6 +74,26 @@ int Menu::addItem(const std::string &name, int type, T &reference_value) {
     }
     MenuItem mi;
     mi.menuText = textInfo;
+    mi.nextState = -5;
+
+    m_items.push_back(mi);
+
+    return m_items.size(); 
+}
+
+
+int Menu::addItem(const std::string &name, int type, int &reference_value, const int &newValue) {
+
+    Text textInfo = createText(name, m_xPos, m_yPos + m_items.size() * 50, menuc::WHITE);
+    if(m_items.size() == 0) {
+        updateText(textInfo, menuc::RED);
+    }
+    MenuItem mi;
+    mi.menuText = textInfo;
+    mi.referenceValue = &reference_value;
+    mi.nextState = newValue;
+    mi.type = type;
+
 
     m_items.push_back(mi);
 
@@ -82,20 +105,46 @@ void Menu::updateMenu() {
 }
 
 void Menu::onEvent(const SDL_Event& event) {
-    if(m_items.size() > 0) {
+
+    if(event.type == SDL_USEREVENT) {
+        if(event.user.code == m_menuid) {
+            m_activeMenu = true;
+        } else {
+            m_activeMenu = false;
+        }
+    }
+
+    if (m_activeMenu) {
         if (event.type == SDL_KEYDOWN) {
             const Uint8 *key_state = SDL_GetKeyboardState(NULL);
-            if(key_state[SDL_SCANCODE_DOWN]) {
-                updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
-                if(m_menuIndex < m_items.size()-1) m_menuIndex++;
-                updateText(m_items[m_menuIndex].menuText, menuc::RED);
-            } else if (key_state[SDL_SCANCODE_UP]) {
-                updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
-                if(m_menuIndex > 0) m_menuIndex--;
-                updateText(m_items[m_menuIndex].menuText, menuc::RED);
+            if(m_items.size() > 0) {
+                if(key_state[SDL_SCANCODE_DOWN]) {
+                    updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+                    if(m_menuIndex < m_items.size()-1) m_menuIndex++;
+                    updateText(m_items[m_menuIndex].menuText, menuc::RED);
+                } else if (key_state[SDL_SCANCODE_UP]) {
+                    updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+                    if(m_menuIndex > 0) m_menuIndex--;
+                    updateText(m_items[m_menuIndex].menuText, menuc::RED);
+                }
+            }
+        
+            if (key_state[SDL_SCANCODE_ESCAPE]) {
+                std::cout << "ESCAPE" << std::endl;
+                if(m_items.size() > 0) updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+                m_menuIndex = -2;
+                m_updateMenu = true;
+            }
+            if (key_state[SDL_SCANCODE_RETURN]) {
+                // m_updateMenu = true;
+                // m_items[m_menuIndex].menuText
+                if(m_items[m_menuIndex].type == MENU_STATE) {
+                    *m_items[m_menuIndex].referenceValue = m_items[m_menuIndex].nextState;
+                }
             }
         }
     }
+
 }
 
 
@@ -138,6 +187,16 @@ int Menu::update(double deltaTime, bool gameRunning) {
     }
 
     return 0;
+}
+
+int Menu::getMenuIndex() {
+    if(m_updateMenu) {
+        m_updateMenu = false;
+        int newIndex = m_menuIndex + 1; 
+        return newIndex;
+    } else {
+        return -2;
+    }
 }
 
 void Menu::render() {
