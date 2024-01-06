@@ -68,7 +68,6 @@ class Menu : public Observer {
 
     private:
 
-        // std::thread m_menuThread;
 
         int m_width;
         int m_height;
@@ -82,7 +81,7 @@ class Menu : public Observer {
         int m_previousState;
         
         bool m_activeMenu;
-        bool m_running;
+        // bool m_running;
         bool m_updateMenu;
         
 
