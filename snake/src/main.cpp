@@ -91,8 +91,6 @@ int main(int argc, char **argv) {
     Snake snake = Snake(ui.getRenderer(), &grid, 40, 40, 30);
     Controller controller = Controller();
 
-
-
     double deltaTime = 0;
     uint32_t startingTick = 0;
 
@@ -107,11 +105,20 @@ int main(int argc, char **argv) {
                                                     200, 
                                                     ui.getFont(), state, START_MENU);
     
-    Menu optionsMenu    = Menu(ui.getRenderer(), 1, 0, 0, 100, 100, ui.getFont(), state, START_MENU);
+    Menu optionsMenu    = Menu(ui.getRenderer(), 1, WINDOW_MIDDLE_X - (250 / 2), 
+                                                    WINDOW_MIDDLE_Y - (200 / 2), 
+                                                    250, 
+                                                    200, 
+                                                    ui.getFont(), state, START_MENU);
     int option = 0;
     startMenu.addItemState("START GAME", GAME_PLAY);
     startMenu.addItemState("OPTIONS",    OPTIONS  );
     startMenu.addItemState("QUIT",       GAME_QUIT);
+
+    int playSound;
+    int soundVolume;
+    optionsMenu.addItem("sound: ", MENU_ON_OFF, playSound);
+    optionsMenu.addItem("sound", MENU_BAR, soundVolume);
 
     controller.attachObserver(&startMenu);
     controller.attachObserver(&optionsMenu);
@@ -141,6 +148,7 @@ int main(int argc, char **argv) {
             startMenu.render();
         } else if (state == OPTIONS) {
             controller.broadcastNewMenu(1);
+            optionsMenu.render();
         } else if (state == GAME_PLAY) {
             controller.broadcastNewMenu(0);
             if(!hasScore) {

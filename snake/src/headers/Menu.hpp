@@ -12,6 +12,7 @@
 #define MENU_STATE      0x0
 #define MENU_OPTION     0x1
 #define MENU_BAR        0x2
+#define MENU_ON_OFF     0x3
 
 
 namespace menuc {
@@ -41,12 +42,15 @@ struct Text {
 
 struct MenuItem {
     Text menuText;
+    std::string textString;
     int *referenceValue;
     int menuWidth;
     int menuHeight;
     int previousState;
     int nextState;
     int type;
+    bool onoff;
+    SDL_Color color;
 };
 
 class Menu : public Observer {
@@ -58,7 +62,7 @@ class Menu : public Observer {
         void onEvent(const SDL_Event& event) override;
 
         template <typename T>
-        int addItem(const std::string &name, int type, T &referenceValue);
+        int addItem(const std::string name, int type, T &referenceValue);
 
         int addItemState(const std::string &name, const int &newValue);
 
@@ -90,6 +94,7 @@ class Menu : public Observer {
         void updateMenu();
         Text createText(const std::string &name, int xPos, int yPos, SDL_Color textColor);
         bool updateText(Text &t, SDL_Color textColor);
+        bool updateTextValue(Text &t, const std::string newText, MenuItem &mi);
 
         std::vector<MenuItem> m_items;
 
