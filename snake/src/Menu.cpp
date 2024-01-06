@@ -8,7 +8,7 @@ Menu::Menu(SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, in
     m_width         = width;
     m_height        = height;
     m_menuid        = menuid;
-    m_running       = true;
+    // m_running       = true;
     m_updateMenu    = false;
     m_activeMenu    = false;
     m_limit         = 0;
@@ -165,7 +165,7 @@ void Menu::onEvent(const SDL_Event& event) {
 int Menu::update(double deltaTime, bool gameRunning) {
     m_limit += deltaTime;  
     const Uint8 *key_state = SDL_GetKeyboardState(NULL);
-    m_running = gameRunning;
+    // m_running = gameRunning;
 
 
     // SDL_Event event;
@@ -234,5 +234,4 @@ Menu::~Menu() {
     for (auto &m : m_items) {
         SDL_DestroyTexture(m.menuText.texture);
     }
-    // m_menuThread.join();
 }
