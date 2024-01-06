@@ -65,22 +65,52 @@ bool Menu::updateText(Text &txt, SDL_Color textColor) {
     return true;
 }
 
+bool Menu::updateTextValue(Text &txt, const std::string newText, MenuItem &mi) {
+    std::string newValue = mi.textString + newText;
+    SDL_Surface *textSurface = TTF_RenderText_Solid(m_font, newValue.c_str(), mi.color);
+    if (!textSurface) {
+        std::cerr << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << std::endl;
+    }
+
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(m_renderer, textSurface);
+    if (!textTexture) {
+        std::cerr << "Unable to create texture from rendered text! SDL_Error: " << SDL_GetError() << std::endl;
+        SDL_FreeSurface(textSurface);
+    }
+    SDL_FreeSurface(textSurface);
+
+    txt.texture = textTexture;
+    return true;
+}
 
 
-template int Menu::addItem(const std::string &name, int type, int   &reference_value);
-template int Menu::addItem(const std::string &name, int type, float &reference_value);
+
+template int Menu::addItem(std::string name, int type, int   &reference_value);
+template int Menu::addItem(std::string name, int type, float &reference_value);
 
 template <typename T>
-int Menu::addItem(const std::string &name, int type, T &reference_value) {
+int Menu::addItem(std::string name, int type, T &reference_value) {
+
+    MenuItem mi;
+    mi.type = type;
+    mi.onoff = true;
+    mi.nextState = -5;
+    mi.color = menuc::WHITE;
+    mi.textString = name;
+
+    if(type == MENU_ON_OFF) {
+        name = name + "on";
+    }
 
     Text textInfo = createText(name, m_xPos, m_yPos + m_items.size() * 50, menuc::WHITE);
+
+    textInfo.updateX(m_xPos + (m_width - textInfo.width) / 2);
     if(m_items.size() == 0) {
         updateText(textInfo, menuc::RED);
+        mi.color = menuc::RED;
     }
-    MenuItem mi;
-    mi.menuText = textInfo;
-    mi.nextState = -5;
 
+    mi.menuText = textInfo;
     m_items.push_back(mi);
 
     return m_items.size(); 
@@ -153,6 +183,15 @@ void Menu::onEvent(const SDL_Event& event) {
                     if(m_items[m_menuIndex].type == MENU_STATE) {
                         updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
                         *m_state = m_items[m_menuIndex].nextState;
+                    } else if (m_items[m_menuIndex].type == MENU_ON_OFF) {
+                        if (m_items[m_menuIndex].onoff) {
+                            updateTextValue(m_items[m_menuIndex].menuText, "off", m_items[m_menuIndex]);
+                            m_items[m_menuIndex].onoff = false;
+                        } else {
+                            updateTextValue(m_items[m_menuIndex].menuText, "on", m_items[m_menuIndex]);
+                            m_items[m_menuIndex].onoff = true;
+                        }
+                        
                     }
                 }
             }
