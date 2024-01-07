@@ -1,11 +1,13 @@
 #pragma once
 
 #include <iostream>
+#include <memory>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <vector>
 #include <thread>
+#include <functional>
 
 #include "Controller.hpp"
 
@@ -41,30 +43,65 @@ struct Text {
 };
 
 struct MenuItem {
+
     Text menuText;
     std::string textString;
-    int *referenceValue;
+    int &referenceValue;
     int menuWidth;
     int menuHeight;
+    int menuXpos;
+    int menuYpos;
     int previousState;
     int nextState;
     int type;
     bool onoff;
+    std::function<void()> refFunc;
     SDL_Color color;
+    SDL_Renderer *m_renderer;
+
+    MenuItem(int &refValue) : referenceValue(refValue) {}
+
+    void render() {
+        if(type == MENU_BAR) {
+            SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
+            SDL_Rect rectA = {menuXpos + (menuWidth / 10), menuText.yPos, menuWidth - (menuWidth / 5), menuText.height};
+            SDL_RenderFillRect(m_renderer, &rectA);
+            SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
+            SDL_Rect rectB = {menuXpos + (menuWidth / 10), menuText.yPos, int(5*referenceValue), menuText.height};
+            SDL_RenderFillRect(m_renderer, &rectB);
+
+        } else {
+            SDL_Rect renderQuad = {menuText.xPos, menuText.yPos, menuText.width, menuText.height};
+            SDL_RenderCopy(m_renderer, menuText.texture, nullptr, &renderQuad);
+        }
+
+    }
+   
+
 };
 
 class Menu : public Observer {
 
     public:
-        Menu(SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, int height, TTF_Font *font, int &state, int previousState);
+        Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, int height, TTF_Font *font, int &state, int previousState);
         ~Menu();
 
-        void onEvent(const SDL_Event& event) override;
+        
 
         template <typename T>
         int addItem(const std::string name, int type, T &referenceValue);
 
         int addItemState(const std::string &name, const int &newValue);
+
+        template <typename ClassType>
+        int addItemBar(std::string name, ClassType& object, void (ClassType::*memberFunction)()) {
+            int x = 0;
+            MenuItem mi(x);
+
+            mi.refFunc = std::bind(memberFunction, std::ref(object));
+            mi.refFunc();
+            return 0;
+        }
 
         void render();
         int update(double deltaTime, bool gameRunning);
@@ -81,6 +118,8 @@ class Menu : public Observer {
         int m_limit;
         int m_menuid;
 
+        Controller *m_controller;
+
         int *m_state;
         int m_previousState;
         
@@ -92,6 +131,7 @@ class Menu : public Observer {
         SDL_Event m_event;
 
         void updateMenu();
+        void onEvent(const SDL_Event& event) override;
         Text createText(const std::string &name, int xPos, int yPos, SDL_Color textColor);
         bool updateText(Text &t, SDL_Color textColor);
         bool updateTextValue(Text &t, const std::string newText, MenuItem &mi);
