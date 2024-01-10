@@ -42,43 +42,112 @@ struct Text {
 
 };
 
-struct MenuItem {
+class MenuItem {
 
-    Text menuText;
-    std::string textString;
-    int &referenceValue;
-    int menuWidth;
-    int menuHeight;
-    int menuXpos;
-    int menuYpos;
-    int previousState;
-    int nextState;
-    int type;
-    bool onoff;
-    std::function<void()> refFunc;
-    SDL_Color color;
-    SDL_Renderer *m_renderer;
-
-    MenuItem(int &refValue) : referenceValue(refValue) {}
-
-    void render() {
-        if(type == MENU_BAR) {
-            SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
-            SDL_Rect rectA = {menuXpos + (menuWidth / 10), menuText.yPos, menuWidth - (menuWidth / 5), menuText.height};
-            SDL_RenderFillRect(m_renderer, &rectA);
-            SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
-            SDL_Rect rectB = {menuXpos + (menuWidth / 10), menuText.yPos, int(5*referenceValue), menuText.height};
-            SDL_RenderFillRect(m_renderer, &rectB);
-
-        } else {
-            SDL_Rect renderQuad = {menuText.xPos, menuText.yPos, menuText.width, menuText.height};
-            SDL_RenderCopy(m_renderer, menuText.texture, nullptr, &renderQuad);
+    public:
+        MenuItem(SDL_Renderer *renderer) {
+            m_renderer = renderer;
         }
 
-    }
-   
+        std::string getTextString() {
+            return m_textString;
+        }
+
+        SDL_Color getColor() {
+            return m_color;
+        }
+
+        virtual void render() {
+            std::cout << "Base render" << std::endl;
+        }
+
+    protected:
+        Text menuText;
+
+        SDL_Color m_color;
+        SDL_Renderer *m_renderer;
+
+    private:
+        std::string m_textString;
 
 };
+
+class MenuState : public MenuItem {
+    public:
+        MenuState(SDL_Renderer *renderer, int nextState/*std::function<void()> refFunc*/) : MenuItem(renderer) {
+            // m_referenceFunction = refFunc;
+            m_nextState = nextState;
+        }
+
+        void render() override {
+            // SDL_Rect renderQuad = {menuText.xPos, menuText.yPos, menuText.width, menuText.height};
+            // SDL_RenderCopy(m_renderer, menuText.texture, nullptr, &renderQuad);
+        }
+
+    private:
+        int m_nextState;
+        std::function<void()> m_referenceFunction;
+};
+
+class MenuBar : public MenuItem {
+    
+    public:
+        MenuBar(SDL_Renderer *renderer, std::function<void()> refFuncL, std::function<void()> refFuncR) : MenuItem(renderer) {
+            m_referenceFunctionLeft     = refFuncL;
+            m_referenceFunctionRight    = refFuncR;
+        }
+
+        void render() override {
+            // SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
+            // SDL_Rect rectA = {menuXpos + (menuWidth / 10), menuText.yPos, menuWidth - (menuWidth / 5), menuText.height};
+            // SDL_RenderFillRect(m_renderer, &rectA);
+            // SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
+            // SDL_Rect rectB = {menuXpos + (menuWidth / 10), menuText.yPos, int(5*referenceValue), menuText.height};
+            // SDL_RenderFillRect(m_renderer, &rectB);
+        }
+
+
+    private:
+
+        std::function<void()> m_referenceFunctionLeft;
+        std::function<void()> m_referenceFunctionRight;
+
+};
+
+// struct MenuItem {
+
+//     Text menuText;
+//     std::string textString;
+//     int &referenceValue;
+//     int menuWidth;
+//     int menuHeight;
+//     int menuXpos;
+//     int menuYpos;
+//     int previousState;
+//     int nextState;
+//     int type;
+//     bool onoff;
+//     std::function<void()> refFunc;
+
+
+//     MenuItem(int &refValue) : referenceValue(refValue) {}
+
+//     void render() {
+//         if(type == MENU_BAR) {
+//             SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
+//             SDL_Rect rectA = {menuXpos + (menuWidth / 10), menuText.yPos, menuWidth - (menuWidth / 5), menuText.height};
+//             SDL_RenderFillRect(m_renderer, &rectA);
+//             SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
+//             SDL_Rect rectB = {menuXpos + (menuWidth / 10), menuText.yPos, int(5*referenceValue), menuText.height};
+//             SDL_RenderFillRect(m_renderer, &rectB);
+
+//         } else {
+//             SDL_Rect renderQuad = {menuText.xPos, menuText.yPos, menuText.width, menuText.height};
+//             SDL_RenderCopy(m_renderer, menuText.texture, nullptr, &renderQuad);
+//         }
+
+//     }
+// };
 
 class Menu : public Observer {
 
@@ -88,20 +157,12 @@ class Menu : public Observer {
 
         
 
-        template <typename T>
-        int addItem(const std::string name, int type, T &referenceValue);
+        int addItem(const std::string name, int type, int &referenceValue);
 
-        int addItemState(const std::string &name, const int &newValue);
+        int addItemState(const std::string &name, int nextState);
 
-        template <typename ClassType>
-        int addItemBar(std::string name, ClassType& object, void (ClassType::*memberFunction)()) {
-            int x = 0;
-            MenuItem mi(x);
+        int addItemBar(std::string name, std::function<void()> refFuncL, std::function<void()> refFuncR);
 
-            mi.refFunc = std::bind(memberFunction, std::ref(object));
-            mi.refFunc();
-            return 0;
-        }
 
         void render();
         int update(double deltaTime, bool gameRunning);
@@ -136,7 +197,7 @@ class Menu : public Observer {
         bool updateText(Text &t, SDL_Color textColor);
         bool updateTextValue(Text &t, const std::string newText, MenuItem &mi);
 
-        std::vector<MenuItem> m_items;
+        std::vector<std::unique_ptr<MenuItem>> m_items;
 
         TTF_Font *m_font;
         SDL_Renderer *m_renderer;
