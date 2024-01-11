@@ -10,6 +10,7 @@
 #include "Menu.hpp"
 #include "Score.hpp"
 #include "Controller.hpp"
+#include "Soundmanager.hpp"
 
 typedef std::chrono::high_resolution_clock Clock;
 
@@ -68,6 +69,11 @@ std::string gameStateToString(gameState value) {
     }
 }
 
+template <typename ClassType>
+std::function<void()> bindMemberFunction(ClassType& object, void (ClassType::*memberFunction)()) {
+    return std::bind(memberFunction, std::ref(object));
+}
+
 void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
     menu.render();
     int menuChoice = 0;
@@ -84,12 +90,16 @@ void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
 }
 
 int main(int argc, char **argv) {
-
-    
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20);
     Snake snake = Snake(ui.getRenderer(), &grid, 40, 40, 30);
     Controller controller = Controller();
+    int volume = 64;
+    int playSound = 1;
+    SoundManager sound = SoundManager(volume, playSound);
+    sound.loadSound("./debug/sounds/s.wav", "song");
+    sound.setVolume("song", volume); // 50%
+    sound.playSound("song", -1);
 
     double deltaTime = 0;
     uint32_t startingTick = 0;
@@ -99,13 +109,13 @@ int main(int argc, char **argv) {
     // gameState state         = START_MENU;
     // gameState previousState = START_MENU;
 
-    Menu startMenu      = Menu(ui.getRenderer(), 0, WINDOW_MIDDLE_X - (250 / 2), 
+    Menu startMenu      = Menu(&controller, ui.getRenderer(), 0, WINDOW_MIDDLE_X - (250 / 2), 
                                                     WINDOW_MIDDLE_Y - (200 / 2), 
                                                     250, 
                                                     200, 
                                                     ui.getFont(), state, START_MENU);
     
-    Menu optionsMenu    = Menu(ui.getRenderer(), 1, WINDOW_MIDDLE_X - (250 / 2), 
+    Menu optionsMenu    = Menu(&controller, ui.getRenderer(), 1, WINDOW_MIDDLE_X - (250 / 2), 
                                                     WINDOW_MIDDLE_Y - (200 / 2), 
                                                     250, 
                                                     200, 
@@ -115,15 +125,19 @@ int main(int argc, char **argv) {
     startMenu.addItemState("OPTIONS",    OPTIONS  );
     startMenu.addItemState("QUIT",       GAME_QUIT);
 
-    int playSound;
-    int soundVolume;
-    optionsMenu.addItem("sound: ", MENU_ON_OFF, playSound);
-    optionsMenu.addItem("sound", MENU_BAR, soundVolume);
+    std::function<void()> funcL = bindMemberFunction(sound, &SoundManager::decreaseVolume);
+    std::function<void()> funcR = bindMemberFunction(sound, &SoundManager::increaseVolume);
+    startMenu.addItemBar("test", funcL, funcR);
+
+    // int soundVolume;
+    // optionsMenu.addItem("sound: ", MENU_ON_OFF, playSound);
+    // optionsMenu.addItem("sound", MENU_BAR, volume);
 
     controller.attachObserver(&startMenu);
     controller.attachObserver(&optionsMenu);
     controller.attachObserver(&ui);
     controller.attachObserver(&snake);
+    controller.attachObserver(&sound);
 
     bool hasScore = false;
     Gridpoint *scorePoint;
@@ -149,6 +163,8 @@ int main(int argc, char **argv) {
         } else if (state == OPTIONS) {
             controller.broadcastNewMenu(1);
             optionsMenu.render();
+            // sound.setVolume("song", volume);
+            // std::cout << volume << std::endl;
         } else if (state == GAME_PLAY) {
             controller.broadcastNewMenu(0);
             if(!hasScore) {

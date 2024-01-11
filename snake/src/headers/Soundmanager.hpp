@@ -5,10 +5,12 @@
 #include <unordered_map>
 #include <string>
 
+#include "Controller.hpp"
 
-class SoundManager {
+
+class SoundManager : public Observer {
 public:
-    SoundManager();
+    SoundManager(int &volume, int &playSound);
     ~SoundManager();
 
 
@@ -17,9 +19,24 @@ public:
     void stopSound(const char* soundKey);
     void setVolume(const char* soundKey, int volume); // New function for volume control
 
+    void increaseVolume();
+    void decreaseVolume();
+
+    void setVolumeAll();
+    void stopSoundAll();
+    void playSoundAll();
+
 private:
-    std::unordered_map<std::string, Mix_Chunk*> soundMap;
+    std::unordered_map<std::string, Mix_Chunk*> m_soundMap;
+
+    int *m_volume;
+    int *m_playSound;
+    int m_loops;
+
+    int m_volumeMax = 128;
+    int m_volumeMin = 0; 
 
     Mix_Chunk* loadChunk(const char* filePath);
+    void onEvent(const SDL_Event& event) override;
 };
 

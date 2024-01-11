@@ -49,6 +49,13 @@ class Controller {
             notifyEvent(event);
         }
 
+        void broadcastEvent(int eventId) {
+            SDL_Event event;
+            event.type = SDL_USEREVENT;
+            event.user.code = eventId;
+            notifyEvent(event);
+        }
+
         void update() {
             listener();
         }

@@ -1,6 +1,6 @@
 #include "Menu.hpp"
 
-Menu::Menu(SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, int height, TTF_Font *font, int &state, int previousState) {
+Menu::Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, int height, TTF_Font *font, int &state, int previousState) {
     m_renderer = renderer;
 
     m_xPos          = xPos;
@@ -20,6 +20,11 @@ Menu::Menu(SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, in
     m_font = font;
     // m_menuThread = std::thread(&Menu::updateMenu, this);
     // std::cout << &m_items << std::endl;
+
+
+
+    m_controller = controller;
+
 }
 
 Text Menu::createText(const std::string &name, int xPos, int yPos, SDL_Color textColor) {
@@ -66,8 +71,8 @@ bool Menu::updateText(Text &txt, SDL_Color textColor) {
 }
 
 bool Menu::updateTextValue(Text &txt, const std::string newText, MenuItem &mi) {
-    std::string newValue = mi.textString + newText;
-    SDL_Surface *textSurface = TTF_RenderText_Solid(m_font, newValue.c_str(), mi.color);
+    std::string newValue = mi.getTextString() + newText;
+    SDL_Surface *textSurface = TTF_RenderText_Solid(m_font, newValue.c_str(), mi.getColor());
     if (!textSurface) {
         std::cerr << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << std::endl;
     }
@@ -85,55 +90,84 @@ bool Menu::updateTextValue(Text &txt, const std::string newText, MenuItem &mi) {
 
 
 
-template int Menu::addItem(std::string name, int type, int   &reference_value);
-template int Menu::addItem(std::string name, int type, float &reference_value);
 
-template <typename T>
-int Menu::addItem(std::string name, int type, T &reference_value) {
+// template int Menu::addItem(std::string name, int type, float *reference_value);
 
-    MenuItem mi;
-    mi.type = type;
-    mi.onoff = true;
-    mi.nextState = -5;
-    mi.color = menuc::WHITE;
-    mi.textString = name;
+int Menu::addItem(std::string name, int type, int &reference_value) {
 
-    if(type == MENU_ON_OFF) {
-        name = name + "on";
-    }
+    // MenuItem mi(reference_value);
+    // mi.type = type;
+    // mi.onoff = true;
+    // mi.nextState = -5;
+    // mi.color = menuc::WHITE;
+    // mi.textString = name;
+    // mi.menuWidth = m_width;
+    // mi.menuHeight = m_height;
+    // mi.menuXpos = m_xPos;
+    // mi.menuYpos = m_yPos;
+    // mi.m_renderer = m_renderer;
 
-    Text textInfo = createText(name, m_xPos, m_yPos + m_items.size() * 50, menuc::WHITE);
 
-    textInfo.updateX(m_xPos + (m_width - textInfo.width) / 2);
-    if(m_items.size() == 0) {
-        updateText(textInfo, menuc::RED);
-        mi.color = menuc::RED;
-    }
+    // if(type == MENU_ON_OFF) {
+    //     name = name + "on";
+    // }
 
-    mi.menuText = textInfo;
-    m_items.push_back(mi);
+    // Text textInfo = createText(name, m_xPos, m_yPos + m_items.size() * 50, menuc::WHITE);
+
+    // textInfo.updateX(m_xPos + (m_width - textInfo.width) / 2);
+    // if(m_items.size() == 0) {
+    //     updateText(textInfo, menuc::RED);
+    //     mi.color = menuc::RED;
+    // }
+
+    // mi.menuText = textInfo;
+    // m_items.push_back(mi);
+
+    // return m_items.size(); 
+}
+
+
+
+
+int Menu::addItemState(const std::string &name, int nextState) {
+
+    // std::unique_ptr<MenuState> mi = std::make_unique<MenuState>(m_renderer, refFunc);
+    // m_items.push_back(std::move(mi));
+
+    std::unique_ptr<MenuState> mi = std::make_unique<MenuState>(m_renderer, name, nextState, m_xPos, m_yPos + m_items.size() * 50, m_font, *this);
+    m_items.push_back(std::move(mi));
+    // Text textInfo = createText(name, m_xPos, m_yPos + m_items.size() * 50, menuc::WHITE);
+    // textInfo.updateX(m_xPos + (m_width - textInfo.width) / 2);
+
+    // if(m_items.size() == 0) {
+    //     updateText(textInfo, menuc::RED);
+    // }
+    // int x = 3;
+    // // MenuItem mi(x);
+    // // mi.menuText = textInfo;
+    // // mi.nextState = newValue;
+    // // mi.type = MENU_STATE;
+    // // mi.m_renderer = m_renderer;
+    // auto myLambda = []() {
+        
+    // };
+
+    // // std::function using the lambda
+    // std::function<void()> myFunction = myLambda;
+    // MenuState mi = MenuState(m_renderer, myFunction);
+
+    // m_items.push_back(&mi);
 
     return m_items.size(); 
 }
 
-
-int Menu::addItemState(const std::string &name, const int &newValue) {
-
-    Text textInfo = createText(name, m_xPos, m_yPos + m_items.size() * 50, menuc::WHITE);
-    textInfo.updateX(m_xPos + (m_width - textInfo.width) / 2);
-
-    if(m_items.size() == 0) {
-        updateText(textInfo, menuc::RED);
-    }
-    MenuItem mi;
-    mi.menuText = textInfo;
-    mi.nextState = newValue;
-    mi.type = MENU_STATE;
-
-    m_items.push_back(mi);
-
-    return m_items.size(); 
+int Menu::addItemBar(std::string name, std::function<void()> refFuncL, std::function<void()> refFuncR) {
+    std::unique_ptr<MenuBar> mi = std::make_unique<MenuBar>(m_renderer, name, m_xPos, m_yPos + m_items.size() * 50, m_font, refFuncL, refFuncR, *this);
+    m_items.push_back(std::move(mi));
+    return 0;
 }
+
+
 
 void Menu::updateMenu() {
     
@@ -154,15 +188,46 @@ void Menu::onEvent(const SDL_Event& event) {
             const Uint8 *key_state = SDL_GetKeyboardState(NULL);
             if(m_items.size() > 0) {
                 if(key_state[SDL_SCANCODE_DOWN]) {
-                    updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
-                    if(m_menuIndex < m_items.size()-1) m_menuIndex++;
-                    updateText(m_items[m_menuIndex].menuText, menuc::RED);
+                    m_items[m_menuIndex]->reset();
+                    if(m_menuIndex < m_items.size() - 1) m_menuIndex++;
+                    m_items[m_menuIndex]->update();
                 } else if (key_state[SDL_SCANCODE_UP]) {
-                    updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+                    m_items[m_menuIndex]->reset();
                     if(m_menuIndex > 0) m_menuIndex--;
-                    updateText(m_items[m_menuIndex].menuText, menuc::RED);
+                    m_items[m_menuIndex]->update();
+                }
+                // if(key_state[SDL_SCANCODE_DOWN]) {
+                //     updateText(m_items[m_menuIndex]->getColor(), menuc::WHITE);
+                //     if(m_menuIndex < m_items.size()-1) m_menuIndex++;
+                //     updateText(m_items[m_menuIndex].menuText, menuc::RED);
+                // } else if (key_state[SDL_SCANCODE_UP]) {
+                //     updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+                //     if(m_menuIndex > 0) m_menuIndex--;
+                //     updateText(m_items[m_menuIndex].menuText, menuc::RED);
+                // }
+            
+                else if(key_state[SDL_SCANCODE_RIGHT]) {
+                    m_items[m_menuIndex]->trigger(KEY_RIGHT);
+                } 
+
+                else if(key_state[SDL_SCANCODE_LEFT]) {
+                    m_items[m_menuIndex]->trigger(KEY_LEFT);
+                }
+
+                else if(key_state[SDL_SCANCODE_RETURN]) {
+                    m_items[m_menuIndex]->trigger(-1);
                 }
             }
+
+            // if(key_state[SDL_SCANCODE_RIGHT] && m_items[m_menuIndex].type == MENU_BAR) {
+            //     (m_items[m_menuIndex].referenceValue) += 128 / 10;
+            //     m_controller->broadcastEvent(5); // Sound change
+            // }
+
+            // if(key_state[SDL_SCANCODE_LEFT] && m_items[m_menuIndex].type == MENU_BAR) {
+            //     (m_items[m_menuIndex].referenceValue) -= 128 / 10;
+            //     m_controller->broadcastEvent(5);
+            // }
         
             // if (key_state[SDL_SCANCODE_ESCAPE]) {
             //     std::cout << "ESCAPE" << std::endl;
@@ -180,19 +245,21 @@ void Menu::onEvent(const SDL_Event& event) {
                 if(m_items.size() > 0) {
                 // m_updateMenu = true;
                 // m_items[m_menuIndex].menuText
-                    if(m_items[m_menuIndex].type == MENU_STATE) {
-                        updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
-                        *m_state = m_items[m_menuIndex].nextState;
-                    } else if (m_items[m_menuIndex].type == MENU_ON_OFF) {
-                        if (m_items[m_menuIndex].onoff) {
-                            updateTextValue(m_items[m_menuIndex].menuText, "off", m_items[m_menuIndex]);
-                            m_items[m_menuIndex].onoff = false;
-                        } else {
-                            updateTextValue(m_items[m_menuIndex].menuText, "on", m_items[m_menuIndex]);
-                            m_items[m_menuIndex].onoff = true;
-                        }
-                        
-                    }
+                    // if(m_items[m_menuIndex].type == MENU_STATE) {
+                    //     updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+                    //     *m_state = m_items[m_menuIndex].nextState;
+                    // } else if (m_items[m_menuIndex].type == MENU_ON_OFF) {
+                    //     if (m_items[m_menuIndex].onoff) {
+                    //         updateTextValue(m_items[m_menuIndex].menuText, "off", m_items[m_menuIndex]);
+                    //         m_items[m_menuIndex].onoff = false;
+                    //         m_items[m_menuIndex].referenceValue = 0;
+                    //     } else {
+                    //         updateTextValue(m_items[m_menuIndex].menuText, "on", m_items[m_menuIndex]);
+                    //         m_items[m_menuIndex].onoff = true;
+                    //         m_items[m_menuIndex].referenceValue = 1;
+                    //     }
+                    //     m_controller->broadcastEvent(5);
+                    // }
                 }
             }
         }
@@ -252,6 +319,18 @@ int Menu::getMenuIndex() {
     }
 }
 
+int *Menu::getMenuState() {
+    return m_state;
+}
+
+int Menu::getMenuXpos() {
+    return m_xPos;
+}
+
+int Menu::getMenuWidth() {
+    return m_width;
+}
+
 void Menu::render() {
 
     SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
@@ -263,14 +342,15 @@ void Menu::render() {
     SDL_RenderFillRect(m_renderer, &rectR);
 
     for (auto &m : m_items) {
-        SDL_Rect renderQuad = {m.menuText.xPos, m.menuText.yPos, m.menuText.width, m.menuText.height};
-        SDL_RenderCopy(m_renderer, m.menuText.texture, nullptr, &renderQuad);
+        // SDL_Rect renderQuad = {m.menuText.xPos, m.menuText.yPos, m.menuText.width, m.menuText.height};
+        // SDL_RenderCopy(m_renderer, m.menuText.texture, nullptr, &renderQuad); 
+        m->render();
     }
 
 }
 
 Menu::~Menu() {
-    for (auto &m : m_items) {
-        SDL_DestroyTexture(m.menuText.texture);
-    }
+    // for (auto &m : m_items) {
+    //     SDL_DestroyTexture(m.menuText.texture);
+    // }
 }
