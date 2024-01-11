@@ -21,6 +21,8 @@ Menu::Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos,
     // m_menuThread = std::thread(&Menu::updateMenu, this);
     // std::cout << &m_items << std::endl;
 
+
+
     m_controller = controller;
 
 }
@@ -132,7 +134,7 @@ int Menu::addItemState(const std::string &name, int nextState) {
     // std::unique_ptr<MenuState> mi = std::make_unique<MenuState>(m_renderer, refFunc);
     // m_items.push_back(std::move(mi));
 
-    std::unique_ptr<MenuState> mi = std::make_unique<MenuState>(m_renderer, nextState);
+    std::unique_ptr<MenuState> mi = std::make_unique<MenuState>(m_renderer, name, nextState, m_xPos, m_yPos + m_items.size() * 50, m_font, *this);
     m_items.push_back(std::move(mi));
     // Text textInfo = createText(name, m_xPos, m_yPos + m_items.size() * 50, menuc::WHITE);
     // textInfo.updateX(m_xPos + (m_width - textInfo.width) / 2);
@@ -160,7 +162,7 @@ int Menu::addItemState(const std::string &name, int nextState) {
 }
 
 int Menu::addItemBar(std::string name, std::function<void()> refFuncL, std::function<void()> refFuncR) {
-    std::unique_ptr<MenuBar> mi = std::make_unique<MenuBar>(m_renderer, refFuncL, refFuncR);
+    std::unique_ptr<MenuBar> mi = std::make_unique<MenuBar>(m_renderer, name, m_xPos, m_yPos + m_items.size() * 50, m_font, refFuncL, refFuncR, *this);
     m_items.push_back(std::move(mi));
     return 0;
 }
@@ -185,6 +187,15 @@ void Menu::onEvent(const SDL_Event& event) {
         if (event.type == SDL_KEYDOWN) {
             const Uint8 *key_state = SDL_GetKeyboardState(NULL);
             if(m_items.size() > 0) {
+                if(key_state[SDL_SCANCODE_DOWN]) {
+                    m_items[m_menuIndex]->reset();
+                    if(m_menuIndex < m_items.size() - 1) m_menuIndex++;
+                    m_items[m_menuIndex]->update();
+                } else if (key_state[SDL_SCANCODE_UP]) {
+                    m_items[m_menuIndex]->reset();
+                    if(m_menuIndex > 0) m_menuIndex--;
+                    m_items[m_menuIndex]->update();
+                }
                 // if(key_state[SDL_SCANCODE_DOWN]) {
                 //     updateText(m_items[m_menuIndex]->getColor(), menuc::WHITE);
                 //     if(m_menuIndex < m_items.size()-1) m_menuIndex++;
@@ -194,8 +205,19 @@ void Menu::onEvent(const SDL_Event& event) {
                 //     if(m_menuIndex > 0) m_menuIndex--;
                 //     updateText(m_items[m_menuIndex].menuText, menuc::RED);
                 // }
-            }
+            
+                else if(key_state[SDL_SCANCODE_RIGHT]) {
+                    m_items[m_menuIndex]->trigger(KEY_RIGHT);
+                } 
 
+                else if(key_state[SDL_SCANCODE_LEFT]) {
+                    m_items[m_menuIndex]->trigger(KEY_LEFT);
+                }
+
+                else if(key_state[SDL_SCANCODE_RETURN]) {
+                    m_items[m_menuIndex]->trigger(-1);
+                }
+            }
 
             // if(key_state[SDL_SCANCODE_RIGHT] && m_items[m_menuIndex].type == MENU_BAR) {
             //     (m_items[m_menuIndex].referenceValue) += 128 / 10;
@@ -295,6 +317,18 @@ int Menu::getMenuIndex() {
     } else {
         return -2;
     }
+}
+
+int *Menu::getMenuState() {
+    return m_state;
+}
+
+int Menu::getMenuXpos() {
+    return m_xPos;
+}
+
+int Menu::getMenuWidth() {
+    return m_width;
 }
 
 void Menu::render() {
