@@ -290,11 +290,11 @@ class MenuBar : public MenuItem {
     private:
 
         void progressIncrease() {
-            m_progress += m_step;
+            if(m_progress < m_max * m_step) m_progress += m_step;
         }
 
         void progressDecrease() {
-            m_progress -= m_step;
+            if(m_progress > 0)m_progress -= m_step;
         }
 
         int m_progress;
