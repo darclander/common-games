@@ -92,7 +92,7 @@ void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
 int main(int argc, char **argv) {
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20, 15);
-    Snake snake = Snake(ui.getRenderer(), &grid, 40, 40, 30);
+    Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 4);
     Controller controller = Controller();
     int volume = 64;
     int playSound = 1;
