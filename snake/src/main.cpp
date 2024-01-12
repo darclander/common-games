@@ -91,7 +91,7 @@ void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
 
 int main(int argc, char **argv) {
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
-    Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20);
+    Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20, 15);
     Snake snake = Snake(ui.getRenderer(), &grid, 40, 40, 30);
     Controller controller = Controller();
     int volume = 64;
@@ -127,7 +127,8 @@ int main(int argc, char **argv) {
 
     std::function<void()> funcL = bindMemberFunction(sound, &SoundManager::decreaseVolume);
     std::function<void()> funcR = bindMemberFunction(sound, &SoundManager::increaseVolume);
-    startMenu.addItemBar("test", funcL, funcR);
+    optionsMenu.addItemBar("sound", funcL, funcR);
+    optionsMenu.addItemState("asd", 1);
 
     // int soundVolume;
     // optionsMenu.addItem("sound: ", MENU_ON_OFF, playSound);
@@ -167,6 +168,7 @@ int main(int argc, char **argv) {
             // std::cout << volume << std::endl;
         } else if (state == GAME_PLAY) {
             controller.broadcastNewMenu(0);
+            ui.render(grid);
             if(!hasScore) {
                 std::pair<int, int> pos = getRandomCoordinate();
                 std::cout << "X: " << pos.first << " Y: " << pos.second << std::endl;
