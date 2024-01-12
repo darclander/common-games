@@ -1,6 +1,6 @@
 #include "Snake.hpp"
 
-Snake::Snake(SDL_Renderer *renderer, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize) {
+Snake::Snake(SDL_Renderer *renderer, int xPos, int yPos, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize) {
 
     this->m_renderer = renderer;
     // this->m_snakeWidth = snakeWidth;
@@ -19,9 +19,13 @@ Snake::Snake(SDL_Renderer *renderer, Grid *grid, int snakeWidth, int snakeHeight
     m_textureSnakeHead = SDL_CreateTextureFromSurface(m_renderer, snakeHead);
 
     SDL_FreeSurface(snakeHead);
-
+    Gridpoint *gp = m_grid->getPoint(xPos, yPos);
+    if(gp == nullptr) std::cerr << "Failed finding gridpoint";
+    int x = gp->getGridPointX();
+    int y = gp->getGridPointY();   
+    if(gp == nullptr) std::cout << "WHAT";
     for(int i = 0; i < snakeSize; i++) {
-        snakeBlocks.push_back(Snakeblock(m_renderer, i*m_snakeWidth, 1, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees));
+        snakeBlocks.push_back(Snakeblock(m_renderer, x, y, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees));
     }
 
 }
