@@ -93,37 +93,8 @@ bool Menu::updateTextValue(Text &txt, const std::string newText, MenuItem &mi) {
 
 // template int Menu::addItem(std::string name, int type, float *reference_value);
 
-int Menu::addItem(std::string name, int type, int &reference_value) {
-
-    // MenuItem mi(reference_value);
-    // mi.type = type;
-    // mi.onoff = true;
-    // mi.nextState = -5;
-    // mi.color = menuc::WHITE;
-    // mi.textString = name;
-    // mi.menuWidth = m_width;
-    // mi.menuHeight = m_height;
-    // mi.menuXpos = m_xPos;
-    // mi.menuYpos = m_yPos;
-    // mi.m_renderer = m_renderer;
-
-
-    // if(type == MENU_ON_OFF) {
-    //     name = name + "on";
-    // }
-
-    // Text textInfo = createText(name, m_xPos, m_yPos + m_items.size() * 50, menuc::WHITE);
-
-    // textInfo.updateX(m_xPos + (m_width - textInfo.width) / 2);
-    // if(m_items.size() == 0) {
-    //     updateText(textInfo, menuc::RED);
-    //     mi.color = menuc::RED;
-    // }
-
-    // mi.menuText = textInfo;
-    // m_items.push_back(mi);
-
-    // return m_items.size(); 
+int Menu::addItem() {
+    return m_items.size();
 }
 
 
@@ -135,7 +106,8 @@ int Menu::addItemState(const std::string &name, int nextState) {
     // m_items.push_back(std::move(mi));
 
     std::unique_ptr<MenuState> mi = std::make_unique<MenuState>(m_renderer, name, nextState, m_xPos, m_yPos + m_items.size() * 50, m_font, *this);
-    m_items.push_back(std::move(mi));
+    // m_items.push_back(std::move(mi));
+    addItemT(std::move(mi));
     // Text textInfo = createText(name, m_xPos, m_yPos + m_items.size() * 50, menuc::WHITE);
     // textInfo.updateX(m_xPos + (m_width - textInfo.width) / 2);
 
@@ -163,7 +135,8 @@ int Menu::addItemState(const std::string &name, int nextState) {
 
 int Menu::addItemBar(std::string name, std::function<void()> refFuncL, std::function<void()> refFuncR) {
     std::unique_ptr<MenuBar> mi = std::make_unique<MenuBar>(m_renderer, name, m_xPos, m_yPos + m_items.size() * 50, m_font, refFuncL, refFuncR, *this);
-    m_items.push_back(std::move(mi));
+    // m_items.push_back(std::move(mi));
+    addItemT(std::move(mi));
     return 0;
 }
 
