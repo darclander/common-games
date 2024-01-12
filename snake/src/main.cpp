@@ -113,13 +113,13 @@ int main(int argc, char **argv) {
                                                     WINDOW_MIDDLE_Y - (200 / 2), 
                                                     250, 
                                                     200, 
-                                                    ui.getFont(), state, START_MENU);
+                                                    ui.getFont(), state, START_MENU, START_MENU);
     
     Menu optionsMenu    = Menu(&controller, ui.getRenderer(), 1, WINDOW_MIDDLE_X - (250 / 2), 
                                                     WINDOW_MIDDLE_Y - (200 / 2), 
                                                     250, 
                                                     200, 
-                                                    ui.getFont(), state, START_MENU);
+                                                    ui.getFont(), state, START_MENU, OPTIONS);
     int option = 0;
     startMenu.addItemState("START GAME", GAME_PLAY);
     startMenu.addItemState("OPTIONS",    OPTIONS  );
@@ -159,15 +159,13 @@ int main(int argc, char **argv) {
         ui.update();
 
         if (state == START_MENU) {
-            controller.broadcastNewMenu(0);
             startMenu.render();
         } else if (state == OPTIONS) {
-            controller.broadcastNewMenu(1);
             optionsMenu.render();
             // sound.setVolume("song", volume);
             // std::cout << volume << std::endl;
         } else if (state == GAME_PLAY) {
-            controller.broadcastNewMenu(0);
+            controller.broadcastNewMenu(3);
             ui.render(grid);
             if(!hasScore) {
                 std::pair<int, int> pos = getRandomCoordinate();
