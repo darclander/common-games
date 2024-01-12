@@ -47,7 +47,7 @@ class Gridpoint {
 class Grid {
 
     public:
-        Grid(SDL_Renderer *renderer, int width, int height, int granularity);
+        Grid(SDL_Renderer *renderer, int width, int height, int granularityX, int granularityY);
         ~Grid();
 
         void render();
@@ -66,6 +66,8 @@ class Grid {
         int m_gridWidth;
         int m_gridHeight;
         int m_granularity;
+        int m_granularityX;
+        int m_granularityY;
         int m_gridPointWidth;
         int m_gridPointHeight;
 
