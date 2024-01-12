@@ -53,7 +53,8 @@ class MenuItem;
 class Menu : public Observer {
 
     public:
-        Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, int height, TTF_Font *font, int &state, int previousState);
+        Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos, int yPos, 
+                int width, int height, TTF_Font *font, int &state, int previousState, int menuOwnState);
         ~Menu();
 
         
@@ -93,6 +94,7 @@ class Menu : public Observer {
         Controller *m_controller;
 
         int *m_state;
+        int m_menuOwnState;
         int m_previousState;
         
         bool m_activeMenu;

@@ -1,6 +1,8 @@
 #include "Menu.hpp"
 
-Menu::Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, int height, TTF_Font *font, int &state, int previousState) {
+Menu::Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos, int yPos, 
+            int width, int height, TTF_Font *font, int &state, int previousState, int menuOwnState) {
+
     m_renderer = renderer;
 
     m_xPos          = xPos;
@@ -15,6 +17,7 @@ Menu::Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos,
     m_menuIndex     = 0; // Starting at first value of a menu.
 
     m_state         = &state;
+    m_menuOwnState  = menuOwnState;
     m_previousState = previousState;
 
     m_font = font;
@@ -147,97 +150,111 @@ void Menu::updateMenu() {
 }
 
 void Menu::onEvent(const SDL_Event& event) {
-
+    
+    // Replace with game menu.
     if(event.type == SDL_USEREVENT) {
-        if(event.user.code == m_menuid) {
-            m_activeMenu = true;
-        } else {
-            m_activeMenu = false;
-        }
-    }
-
-    if (m_activeMenu) {
-        if (event.type == SDL_KEYDOWN) {
+        if(event.user.code == 3) {
             const Uint8 *key_state = SDL_GetKeyboardState(NULL);
-            if(m_items.size() > 0) {
-                if(key_state[SDL_SCANCODE_DOWN]) {
-                    m_items[m_menuIndex]->reset();
-                    if(m_menuIndex < m_items.size() - 1) m_menuIndex++;
-                    m_items[m_menuIndex]->update();
-                } else if (key_state[SDL_SCANCODE_UP]) {
-                    m_items[m_menuIndex]->reset();
-                    if(m_menuIndex > 0) m_menuIndex--;
-                    m_items[m_menuIndex]->update();
-                }
-                // if(key_state[SDL_SCANCODE_DOWN]) {
-                //     updateText(m_items[m_menuIndex]->getColor(), menuc::WHITE);
-                //     if(m_menuIndex < m_items.size()-1) m_menuIndex++;
-                //     updateText(m_items[m_menuIndex].menuText, menuc::RED);
-                // } else if (key_state[SDL_SCANCODE_UP]) {
-                //     updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
-                //     if(m_menuIndex > 0) m_menuIndex--;
-                //     updateText(m_items[m_menuIndex].menuText, menuc::RED);
-                // }
-            
-                else if(key_state[SDL_SCANCODE_RIGHT]) {
-                    m_items[m_menuIndex]->trigger(KEY_RIGHT);
-                } 
-
-                else if(key_state[SDL_SCANCODE_LEFT]) {
-                    m_items[m_menuIndex]->trigger(KEY_LEFT);
-                }
-
-                else if(key_state[SDL_SCANCODE_RETURN]) {
-                    m_items[m_menuIndex]->trigger(-1);
-                }
-            }
-
-            // if(key_state[SDL_SCANCODE_RIGHT] && m_items[m_menuIndex].type == MENU_BAR) {
-            //     (m_items[m_menuIndex].referenceValue) += 128 / 10;
-            //     m_controller->broadcastEvent(5); // Sound change
-            // }
-
-            // if(key_state[SDL_SCANCODE_LEFT] && m_items[m_menuIndex].type == MENU_BAR) {
-            //     (m_items[m_menuIndex].referenceValue) -= 128 / 10;
-            //     m_controller->broadcastEvent(5);
-            // }
-        
-            // if (key_state[SDL_SCANCODE_ESCAPE]) {
-            //     std::cout << "ESCAPE" << std::endl;
-            //     if(m_items.size() > 0) updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
-            //     m_menuIndex = -2;
-            //     m_updateMenu = true;
-            // }
-
-            if (key_state[SDL_SCANCODE_ESCAPE]) {
-                std::cout << "PREVIOUS:" << m_previousState << std::endl;
-                *m_state = m_previousState;
-            }
-
-            if (key_state[SDL_SCANCODE_RETURN]) {
-                if(m_items.size() > 0) {
-                // m_updateMenu = true;
-                // m_items[m_menuIndex].menuText
-                    // if(m_items[m_menuIndex].type == MENU_STATE) {
-                    //     updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
-                    //     *m_state = m_items[m_menuIndex].nextState;
-                    // } else if (m_items[m_menuIndex].type == MENU_ON_OFF) {
-                    //     if (m_items[m_menuIndex].onoff) {
-                    //         updateTextValue(m_items[m_menuIndex].menuText, "off", m_items[m_menuIndex]);
-                    //         m_items[m_menuIndex].onoff = false;
-                    //         m_items[m_menuIndex].referenceValue = 0;
-                    //     } else {
-                    //         updateTextValue(m_items[m_menuIndex].menuText, "on", m_items[m_menuIndex]);
-                    //         m_items[m_menuIndex].onoff = true;
-                    //         m_items[m_menuIndex].referenceValue = 1;
-                    //     }
-                    //     m_controller->broadcastEvent(5);
-                    // }
-                }
+            if(key_state[SDL_SCANCODE_ESCAPE]) {
+                *m_state = 0x0;
             }
         }
     }
 
+    if(*m_state == m_menuOwnState) {
+        if(event.type == SDL_USEREVENT) {
+            if(event.user.code == m_menuid) {
+                m_activeMenu = true;
+            } else {
+                m_activeMenu = false;
+            }
+        }
+
+        if (event.type == SDL_KEYDOWN) {
+          const Uint8 *key_state = SDL_GetKeyboardState(NULL);
+          if (m_items.size() > 0) {
+            if (key_state[SDL_SCANCODE_DOWN]) {
+              m_items[m_menuIndex]->reset();
+              if (m_menuIndex < m_items.size() - 1)
+                m_menuIndex++;
+              m_items[m_menuIndex]->update();
+            } else if (key_state[SDL_SCANCODE_UP]) {
+              m_items[m_menuIndex]->reset();
+              if (m_menuIndex > 0)
+                m_menuIndex--;
+              m_items[m_menuIndex]->update();
+            }
+            // if(key_state[SDL_SCANCODE_DOWN]) {
+            //     updateText(m_items[m_menuIndex]->getColor(), menuc::WHITE);
+            //     if(m_menuIndex < m_items.size()-1) m_menuIndex++;
+            //     updateText(m_items[m_menuIndex].menuText, menuc::RED);
+            // } else if (key_state[SDL_SCANCODE_UP]) {
+            //     updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+            //     if(m_menuIndex > 0) m_menuIndex--;
+            //     updateText(m_items[m_menuIndex].menuText, menuc::RED);
+            // }
+
+            else if (key_state[SDL_SCANCODE_RIGHT]) {
+              m_items[m_menuIndex]->trigger(KEY_RIGHT);
+            }
+
+            else if (key_state[SDL_SCANCODE_LEFT]) {
+              m_items[m_menuIndex]->trigger(KEY_LEFT);
+            }
+
+            else if (key_state[SDL_SCANCODE_RETURN]) {
+              m_items[m_menuIndex]->trigger(-1);
+            }
+          }
+
+          // if(key_state[SDL_SCANCODE_RIGHT] && m_items[m_menuIndex].type ==
+          // MENU_BAR) {
+          //     (m_items[m_menuIndex].referenceValue) += 128 / 10;
+          //     m_controller->broadcastEvent(5); // Sound change
+          // }
+
+          // if(key_state[SDL_SCANCODE_LEFT] && m_items[m_menuIndex].type ==
+          // MENU_BAR) {
+          //     (m_items[m_menuIndex].referenceValue) -= 128 / 10;
+          //     m_controller->broadcastEvent(5);
+          // }
+
+          // if (key_state[SDL_SCANCODE_ESCAPE]) {
+          //     std::cout << "ESCAPE" << std::endl;
+          //     if(m_items.size() > 0)
+          //     updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+          //     m_menuIndex = -2;
+          //     m_updateMenu = true;
+          // }
+
+          if (key_state[SDL_SCANCODE_ESCAPE]) {
+            std::cout << "PREVIOUS:" << m_previousState << std::endl;
+            *m_state = m_previousState;
+          }
+
+          if (key_state[SDL_SCANCODE_RETURN]) {
+            if (m_items.size() > 0) {
+              // m_updateMenu = true;
+              // m_items[m_menuIndex].menuText
+              // if(m_items[m_menuIndex].type == MENU_STATE) {
+              //     updateText(m_items[m_menuIndex].menuText, menuc::WHITE);
+              //     *m_state = m_items[m_menuIndex].nextState;
+              // } else if (m_items[m_menuIndex].type == MENU_ON_OFF) {
+              //     if (m_items[m_menuIndex].onoff) {
+              //         updateTextValue(m_items[m_menuIndex].menuText, "off",
+              //         m_items[m_menuIndex]); m_items[m_menuIndex].onoff =
+              //         false; m_items[m_menuIndex].referenceValue = 0;
+              //     } else {
+              //         updateTextValue(m_items[m_menuIndex].menuText, "on",
+              //         m_items[m_menuIndex]); m_items[m_menuIndex].onoff =
+              //         true; m_items[m_menuIndex].referenceValue = 1;
+              //     }
+              //     m_controller->broadcastEvent(5);
+              // }
+            }
+          }
+        }
+    }
 }
 
 
