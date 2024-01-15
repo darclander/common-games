@@ -19,6 +19,8 @@ class Score {
         int m_width;
         int m_height;
 
+        int m_score;
+
         SDL_Texture *m_textureScore;
         SDL_Renderer *m_renderer;
 

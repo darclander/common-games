@@ -10,6 +10,7 @@
 #include <functional>
 
 #include "Controller.hpp"
+#include "Gui.hpp"
 
 #define MENU_STATE      0x0
 #define MENU_OPTION     0x1
@@ -29,23 +30,6 @@ namespace menuc {
     const SDL_Color BLUE    = {0,   0,   255, 255};
     const SDL_Color WHITE   = {255, 255, 255, 255};
 }
-
-struct Text {
-    int width;
-    int height;
-    int xPos;
-    int yPos;
-    std::string name;
-    SDL_Texture *texture;
-
-    void updateX(int newX) {
-        xPos = newX;
-    }
-
-    void updateY(int newY) {
-        yPos = newY;
-    }
-};
 
 
 class MenuItem;
