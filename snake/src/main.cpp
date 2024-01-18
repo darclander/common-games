@@ -150,9 +150,7 @@ int main(int argc, char **argv) {
 
         controller.update();
 
-
         auto t1 = Clock::now();
-
         startingTick = SDL_GetTicks();
 
         ui.clearRenderer();
@@ -192,7 +190,7 @@ int main(int argc, char **argv) {
         ui.render();
 
         auto t3 = Clock::now();
-        
+               
         // See method-description
         deltaTime = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t1).count())/ 1000000.f;
         // fpsCap(startingTick);
