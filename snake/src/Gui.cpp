@@ -37,8 +37,6 @@ GUI::GUI(const char *title, int windowWidth, int windowHeight, bool fullscreen) 
         std::cerr << "Failed to load font! SDL_ttf Error: " << TTF_GetError() << std::endl;
     }
 
-    
-    
     // Menu startMenu = Menu(m_renderer, m_font);
     // startMenu.addItem("Hello");
     // // startMenu.addItem("Test");
