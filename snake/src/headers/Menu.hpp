@@ -294,7 +294,7 @@ class MenuBar : public MenuItem {
         }
 
         void progressDecrease() {
-            if(m_progress > 0)m_progress -= m_step;
+            if(m_progress > 0) m_progress -= m_step;
         }
 
         int m_progress;
