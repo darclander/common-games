@@ -91,8 +91,8 @@ void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
 
 int main(int argc, char **argv) {
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
-    Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20);
-    Snake snake = Snake(ui.getRenderer(), &grid, 40, 40, 30);
+    Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20, 15);
+    Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 4);
     Controller controller = Controller();
     int volume = 64;
     int playSound = 1;
@@ -113,13 +113,13 @@ int main(int argc, char **argv) {
                                                     WINDOW_MIDDLE_Y - (200 / 2), 
                                                     250, 
                                                     200, 
-                                                    ui.getFont(), state, START_MENU);
+                                                    ui.getFont(), state, START_MENU, START_MENU);
     
     Menu optionsMenu    = Menu(&controller, ui.getRenderer(), 1, WINDOW_MIDDLE_X - (250 / 2), 
                                                     WINDOW_MIDDLE_Y - (200 / 2), 
                                                     250, 
                                                     200, 
-                                                    ui.getFont(), state, START_MENU);
+                                                    ui.getFont(), state, START_MENU, OPTIONS);
     int option = 0;
     startMenu.addItemState("START GAME", GAME_PLAY);
     startMenu.addItemState("OPTIONS",    OPTIONS  );
@@ -127,7 +127,8 @@ int main(int argc, char **argv) {
 
     std::function<void()> funcL = bindMemberFunction(sound, &SoundManager::decreaseVolume);
     std::function<void()> funcR = bindMemberFunction(sound, &SoundManager::increaseVolume);
-    startMenu.addItemBar("test", funcL, funcR);
+    optionsMenu.addItemBar("sound", funcL, funcR);
+    optionsMenu.addItemState("asd", 1);
 
     // int soundVolume;
     // optionsMenu.addItem("sound: ", MENU_ON_OFF, playSound);
@@ -149,24 +150,21 @@ int main(int argc, char **argv) {
 
         controller.update();
 
-
         auto t1 = Clock::now();
-
         startingTick = SDL_GetTicks();
 
         ui.clearRenderer();
         ui.update();
 
         if (state == START_MENU) {
-            controller.broadcastNewMenu(0);
             startMenu.render();
         } else if (state == OPTIONS) {
-            controller.broadcastNewMenu(1);
             optionsMenu.render();
             // sound.setVolume("song", volume);
             // std::cout << volume << std::endl;
         } else if (state == GAME_PLAY) {
-            controller.broadcastNewMenu(0);
+            controller.broadcastNewMenu(3);
+            ui.render(grid);
             if(!hasScore) {
                 std::pair<int, int> pos = getRandomCoordinate();
                 std::cout << "X: " << pos.first << " Y: " << pos.second << std::endl;
@@ -192,7 +190,7 @@ int main(int argc, char **argv) {
         ui.render();
 
         auto t3 = Clock::now();
-        
+               
         // See method-description
         deltaTime = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t1).count())/ 1000000.f;
         // fpsCap(startingTick);

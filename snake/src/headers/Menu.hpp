@@ -53,16 +53,24 @@ class MenuItem;
 class Menu : public Observer {
 
     public:
-        Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos, int yPos, int width, int height, TTF_Font *font, int &state, int previousState);
+        Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos, int yPos, 
+                int width, int height, TTF_Font *font, int &state, int previousState, int menuOwnState);
         ~Menu();
 
         
 
-        int addItem(const std::string name, int type, int &referenceValue);
+        int addItem(); // Can be removed?
+
+        template <typename T>
+        void addItemT(std::unique_ptr<T> mi) {
+            if(m_items.size() < 1) mi->update();
+            m_items.push_back(std::move(mi));
+        }
 
         int addItemState(const std::string &name, int nextState);
 
         int addItemBar(std::string name, std::function<void()> refFuncL, std::function<void()> refFuncR);
+
 
 
         void render();
@@ -86,6 +94,7 @@ class Menu : public Observer {
         Controller *m_controller;
 
         int *m_state;
+        int m_menuOwnState;
         int m_previousState;
         
         bool m_activeMenu;
@@ -101,7 +110,7 @@ class Menu : public Observer {
         bool updateText(Text &t, SDL_Color textColor);
         bool updateTextValue(Text &t, const std::string newText, MenuItem &mi);
 
-        std::vector<std::unique_ptr<MenuItem>> m_items;
+        std::vector<std::shared_ptr<MenuItem>> m_items;
 
         TTF_Font *m_font;
         SDL_Renderer *m_renderer;
@@ -223,13 +232,11 @@ class MenuState : public MenuItem {
             m_nextState = nextState;
         }
 
-        
-
-        void update() {
+        void update() override {
             updateTextColor(m_menuText, menuc::RED);
         }
 
-        void reset() {
+        void reset() override {
             updateTextColor(m_menuText, menuc::WHITE);
         }
 
@@ -257,14 +264,25 @@ class MenuBar : public MenuItem {
         : MenuItem(renderer, name, xPos, yPos, font, mi) {
             m_referenceFunctionLeft     = refFuncL;
             m_referenceFunctionRight    = refFuncR;
-            m_max       = 10;
-            m_min       = 0;
-            m_barWidth  = m_mi.getMenuWidth() - (m_mi.getMenuWidth() / 5);
-            m_barHeight = m_menuText.height;
-            m_step      = (m_mi.getMenuWidth() - (m_mi.getMenuWidth() / 5)) / (m_max - m_min);
-            m_progress  = m_step * ((m_max - m_min) / 2);
+            m_max           = 10;
+            m_min           = 0;
+            m_barWidth      = m_mi.getMenuWidth() - (m_mi.getMenuWidth() / 5);
+            m_barHeight     = m_menuText.height / 2;
+            m_step          = (m_mi.getMenuWidth() - (m_mi.getMenuWidth() / 5)) / (m_max - m_min);
+            m_progress      = m_step * ((m_max - m_min) / 2);
+            m_highlighted   = false;
             std::cout << m_barWidth << std::endl;
             std::cout << m_step << std::endl;
+
+            m_rectA = {m_mi.getMenuXpos() + (m_mi.getMenuWidth() / 10), 
+                                m_menuText.yPos + m_barHeight*2, m_barWidth, m_barHeight};
+
+            m_rectB = {m_mi.getMenuXpos() + (m_mi.getMenuWidth() / 10), 
+                                m_menuText.yPos + m_barHeight*2, m_progress, m_barHeight};
+
+            m_rectC = {m_mi.getMenuXpos() + (m_mi.getMenuWidth() / 10) - 2, 
+                                m_menuText.yPos + m_barHeight*2 - 2, m_barWidth + 4, m_barHeight + 4};
+
         }
 
         void trigger(int key) override {
@@ -275,15 +293,39 @@ class MenuBar : public MenuItem {
                 m_referenceFunctionLeft();
                 progressDecrease();
             }
+            
+            // Update progress
+            m_rectB = {m_mi.getMenuXpos() + (m_mi.getMenuWidth() / 10), 
+                                m_menuText.yPos + m_barHeight*2, m_progress, m_barHeight};
+        }
+
+        void update() {
+            updateTextColor(m_menuText, menuc::RED);
+            m_highlighted = true;
+        }
+
+        void reset() {
+            updateTextColor(m_menuText, menuc::WHITE);
+            m_highlighted = false;
         }
 
         void render() override {
+            SDL_Rect renderQuad = {m_menuText.xPos, m_menuText.yPos, m_menuText.width, m_menuText.height};
+            SDL_RenderCopy(m_renderer, m_menuText.texture, nullptr, &renderQuad);
+
+            // If highlighted
+            if(m_highlighted) {
+                SDL_SetRenderDrawColor(m_renderer, 128, 128, 128, 255);
+                SDL_RenderFillRect(m_renderer, &m_rectC);
+            }
+
+            // White background for bar
             SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
-            SDL_Rect rectA = {m_mi.getMenuXpos() + (m_mi.getMenuWidth() / 10), m_menuText.yPos, m_barWidth, m_barHeight};
-            SDL_RenderFillRect(m_renderer, &rectA);
+            SDL_RenderFillRect(m_renderer, &m_rectA);
+            
+            // Progress of bar
             SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
-            SDL_Rect rectB = {m_mi.getMenuXpos() + (m_mi.getMenuWidth() / 10), m_menuText.yPos, m_progress, m_barHeight};
-            SDL_RenderFillRect(m_renderer, &rectB);
+            SDL_RenderFillRect(m_renderer, &m_rectB);
         }
 
 
@@ -301,9 +343,14 @@ class MenuBar : public MenuItem {
         int m_max;
         int m_min;
         int m_step;
+        bool m_highlighted;
 
         int m_barWidth;
         int m_barHeight;
+
+        SDL_Rect m_rectA; // Background for bar
+        SDL_Rect m_rectB; // Bar progress
+        SDL_Rect m_rectC; // Highlighted bar
 
         std::function<void()> m_referenceFunctionLeft;
         std::function<void()> m_referenceFunctionRight;

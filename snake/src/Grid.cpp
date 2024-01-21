@@ -1,20 +1,20 @@
 #include "Grid.hpp"
 
-Grid::Grid(SDL_Renderer *renderer, int width, int height, int granularity) {
-    this->m_gridWidth = width;
-    this->m_gridHeight = height;
-    this->m_granularity = granularity;
-    this->m_renderer = renderer;
+Grid::Grid(SDL_Renderer *renderer, int width, int height, int granularityX, int granularityY) {
+    m_gridWidth = width;
+    m_gridHeight = height;
+    // m_granularity = granularity;
+    m_granularityX = granularityX;
+    m_granularityY = granularityY;
+    m_renderer = renderer;
 
-    int rows = 100;
-    int cols = 75;
+    m_gridPointWidth = m_gridWidth / m_granularityX; // width / granularity;
+    m_gridPointHeight = m_gridHeight / m_granularityY; // height / 15;
 
-    m_gridPointWidth = width / rows; // width / granularity;
-    m_gridPointHeight = height / cols; // height / 15;
+    int rows = m_granularityX;
+    int cols = m_granularityY;
 
     // Wrong order here?
-
-
     for(int i = 0; i < rows; i++) {
         for(int j = 0; j < cols; j++) {
             m_gridpoints.push_back(Gridpoint(m_renderer, i * m_gridPointWidth, j * m_gridPointHeight, m_gridPointWidth, m_gridPointHeight));
@@ -83,8 +83,8 @@ void Gridpoint::render() {
 bool Gridpoint::contains(int x, int y) {
     // std::cout << "X: " << x << std::endl;
     // std::cout << "m_gridPointX" << m_gridPointX << std::endl;
-    bool withinX = (x > m_gridPointX && x < m_gridPointX + m_gridWidth);
-    bool withinY = (y > m_gridPointY && y < m_gridPointY + m_gridHeight);
+    bool withinX = (x >= m_gridPointX && x <= (m_gridPointX + m_gridWidth));
+    bool withinY = (y >= m_gridPointY && y <= (m_gridPointY + m_gridHeight));
     return withinX && withinY;
 }
 

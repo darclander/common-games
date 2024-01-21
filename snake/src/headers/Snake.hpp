@@ -24,7 +24,7 @@ class Snakeblock {
         Snakeblock(SDL_Renderer *renderer, int snakeBlockXpos, int snakeBlockYpos, int snakeBlockWidth, int snakeBlockHeight, SDL_Texture *textureSnakeHead, int degrees);
         ~Snakeblock();
 
-        void render();
+        void render(); 
         void renderHead();
 
         int getPosX();
@@ -49,7 +49,7 @@ class Snakeblock {
 class Snake : public Observer {
 
     public:
-        Snake(SDL_Renderer *renderer, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize);
+        Snake(SDL_Renderer *renderer, int xPos, int yPos, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize);
         ~Snake();
 
         void render();
