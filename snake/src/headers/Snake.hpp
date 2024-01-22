@@ -58,10 +58,6 @@ class Snake : public Observer {
         void onEvent(const SDL_Event& event) override;
 
     private:
-        SDL_Renderer *m_renderer;
-        SDL_Texture *m_textureSnakeHead;
-
-
         int m_snakeSize;
         int m_snakeWidth;
         int m_snakeHeight;
@@ -74,6 +70,9 @@ class Snake : public Observer {
         direction m_newSnakeDirection;
 
         Grid *m_grid;
+
+        SDL_Renderer *m_renderer;
+        SDL_Texture *m_textureSnakeHead;
 
         std::vector<Snakeblock> snakeBlocks;
 
