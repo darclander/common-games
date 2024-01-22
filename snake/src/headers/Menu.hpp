@@ -287,10 +287,8 @@ class MenuBar : public MenuItem {
 
         void trigger(int key) override {
             if (key == KEY_RIGHT){
-                m_referenceFunctionRight();
                 progressIncrease();
             } else if (key == KEY_LEFT) {
-                m_referenceFunctionLeft();
                 progressDecrease();
             }
             
@@ -332,11 +330,22 @@ class MenuBar : public MenuItem {
     private:
 
         void progressIncrease() {
-            if(m_progress < m_max * m_step) m_progress += m_step;
+            if(m_progress < m_max * m_step) {
+                m_progress += m_step;
+                m_referenceFunctionRight();
+            }
         }
 
         void progressDecrease() {
-            if(m_progress > 0) m_progress -= m_step;
+            if(m_progress > 0) {
+                m_progress -= m_step;
+                m_referenceFunctionLeft();
+            }
+        }
+
+        bool within(int progress) {
+            if(m_progress < m_max || m_progress > m_min) return true;
+            return false;
         }
 
         int m_progress;
