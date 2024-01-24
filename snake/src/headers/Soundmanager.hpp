@@ -39,4 +39,3 @@ private:
     Mix_Chunk* loadChunk(const char* filePath);
     void onEvent(const SDL_Event& event) override;
 };
-
