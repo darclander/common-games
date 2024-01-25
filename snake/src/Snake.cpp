@@ -84,7 +84,6 @@ void Snake::onEvent(const SDL_Event& event) {
     // }
 }
 
-
 void Snake::update(double deltaTime, float limit) {
 
     m_limit += deltaTime;   
@@ -121,9 +120,6 @@ void Snake::update(double deltaTime, float limit) {
     } else {
         return;
     }
-
-    
-
 }
 
 
