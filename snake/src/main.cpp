@@ -11,6 +11,7 @@
 #include "Score.hpp"
 #include "Controller.hpp"
 #include "Soundmanager.hpp"
+#include "Client.hpp"
 
 typedef std::chrono::high_resolution_clock Clock;
 
@@ -89,6 +90,16 @@ void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
     }
 }
 
+void receiveData(TcpClient &client) {
+    char responseBuffer[1024];
+    while (true) {
+        // Example: Receiving a response from the server
+        client.receive(responseBuffer, sizeof(responseBuffer));
+        // Process the received data as needed
+    }
+}
+
+
 int main(int argc, char **argv) {
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20, 15);
@@ -104,6 +115,17 @@ int main(int argc, char **argv) {
     double deltaTime = 0;
     uint32_t startingTick = 0;
 
+
+    TcpClient client;
+    if (client.connectToServer("", 12345)) {
+        const char* command = "GET_DATA";
+        if (client.send(command, strlen(command))) {
+            // Example: Receiving a response from the server
+        }
+
+        std::thread receiveThread(receiveData, std::ref(client));
+        receiveThread.detach();
+    }
 
     int state = START_MENU;
     // gameState state         = START_MENU;
@@ -196,6 +218,6 @@ int main(int argc, char **argv) {
         // fpsCap(startingTick);
     }
 
-
+    client.closeConnection();
     return 0;
 }

@@ -5,7 +5,7 @@ CC=g++
 
 OPTIMIZATION= #-O3
 
-CFLAGS= -I$(IDIR) -lmingw32 -lSDL2main -lSDL2 -lSDL2_Image -lSDL2_TTF -lSDL2_Mixer
+CFLAGS= -I$(IDIR) -lmingw32 -lSDL2main -lSDL2 -lSDL2_Image -lSDL2_TTF -lSDL2_Mixer -lws2_32
 
 
 IDIR = ./src/headers
