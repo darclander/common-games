@@ -1,8 +1,11 @@
 #include <iostream>
 #include <chrono>
 #include <random>
-#include <string>
 #include <thread>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <unordered_map>
 
 #include "Gui.hpp"
 #include "Snake.hpp"
@@ -75,29 +78,64 @@ std::function<void()> bindMemberFunction(ClassType& object, void (ClassType::*me
     return std::bind(memberFunction, std::ref(object));
 }
 
-void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
-    menu.render();
-    int menuChoice = 0;
-    menuChoice = menu.getMenuIndex();
-    std::cout << menuChoice << std::endl;
-    if(menuChoice > 0) {
-        gameState newState = static_cast<gameState>(menuChoice);
-        previousState = state;
-        state = newState;
-        std::cout << gameStateToString(previousState) << " -> " << gameStateToString(state) << std::endl;
-    } else if (menuChoice == -1) {
-        state = previousState;
+
+std::unordered_map<std::string, std::string> getConfiguration(const std::string& filename) {
+    std::unordered_map<std::string, std::string> key_value_pairs;
+
+    std::ifstream input_file(filename);
+
+    if (!input_file.is_open()) {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return key_value_pairs;
     }
+
+    // Read each line from the file
+    std::string line;
+    while (std::getline(input_file, line)) {
+        // Use stringstream to split the line into key and value
+        std::istringstream line_stream(line);
+        std::string key, value;
+
+        // Read key and value separated by ':'
+        if (std::getline(line_stream, key, ':') && std::getline(line_stream, value)) {
+            // Trim leading and trailing whitespaces
+            key.erase(0, key.find_first_not_of(" \t\r\n"));
+            key.erase(key.find_last_not_of(" \t\r\n") + 1);
+            value.erase(0, value.find_first_not_of(" \t\r\n"));
+            value.erase(value.find_last_not_of(" \t\r\n") + 1);
+
+            // Insert key-value pair into the map
+            key_value_pairs[key] = value;
+        }
+    }
+
+    input_file.close();
+
+    return key_value_pairs;
+}
+
+void getIpAdressAndPort(std::string &ip, int &port) {
+    std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
+
+    auto ip_it      = config.find("ip");
+    auto port_it    = config.find("port");
+    
+    if (ip_it   != config.end()) ip = ip_it->second;
+    if (port_it != config.end()) port = std::stoi(port_it->second);
 }
 
 void receiveData(TcpClient &client) {
     char responseBuffer[1024];
+    int resp;
     while (true) {
         // Example: Receiving a response from the server
-        client.receive(responseBuffer, sizeof(responseBuffer));
+        resp = client.receive(responseBuffer, sizeof(responseBuffer));
         // Process the received data as needed
+        if (resp == 0) return;
     }
 }
+
+
 
 
 int main(int argc, char **argv) {
@@ -112,12 +150,17 @@ int main(int argc, char **argv) {
     sound.setVolume("song", volume); // 50%
     sound.playSound("song", -1);
 
+
+    std::string ipAddress = "127.0.0.1";
+    int port = 0;
+
+    getIpAdressAndPort(ipAddress, port);
+
     double deltaTime = 0;
     uint32_t startingTick = 0;
 
-
     TcpClient client;
-    if (client.connectToServer("", 12345)) {
+    if (client.connectToServer(ipAddress.c_str(), port)) {
         const char* command = "GET_DATA";
         if (client.send(command, strlen(command))) {
             // Example: Receiving a response from the server

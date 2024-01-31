@@ -9,8 +9,8 @@
 
 int broadcast(std::string str, std::vector<int> &clients) {
         for(auto c : clients) {
-                const char* response = str.c_str();
-                send(c, response, strlen(response), 0);
+            const char* response = str.c_str();
+            send(c, response, strlen(response), 0);
         }
         return 0;
 }
