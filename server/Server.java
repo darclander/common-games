@@ -52,15 +52,36 @@ public class Server {
                 // Process the received data (you can replace this with your logic)
                 String receivedData = new String(buffer, 0, bytesRead);
                 System.out.println("Received from client " + clientSocket.getInetAddress() + ": " + receivedData);
+
+                if (receivedData.equals("BROADCAST_TEST")) {
+                    broadcast("Broadcast message from server");
+                }
+
+                if (receivedData.equals("NEW_PLAYER_JOINED")) {
+                    //
+                }
+
             }
         } catch (IOException e) {
-        if (e instanceof java.net.SocketException && e.getMessage().equals("Connection reset")) {
-            // Client disconnected abruptly
-            System.out.println("Client disconnected abruptly: " + clientSocket.getInetAddress());
-            clientList.remove(clientSocket);
-        } else {
-            e.printStackTrace();
+            if (e instanceof java.net.SocketException && e.getMessage().equals("Connection reset")) {
+                // Client disconnected abruptly
+                System.out.println("Client disconnected abruptly: " + clientSocket.getInetAddress());
+                clientList.remove(clientSocket);
+            } else {
+                e.printStackTrace();
+            }
         }
+    }
+
+    private static void broadcast(String message) {
+        for (Socket clientSocket : clientList) {
+            try {
+                OutputStream outputStream = clientSocket.getOutputStream();
+                outputStream.write(message.getBytes());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        System.out.println("Broadcasted: '" + message + "' to " + clientList.size() + " clients.");
     }
 }
