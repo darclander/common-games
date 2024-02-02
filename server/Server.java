@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -49,17 +50,34 @@ public class Server {
                     break;
                 }
 
-                // Process the received data (you can replace this with your logic)
+                // Process the received data and parse it into a command
                 String receivedData = new String(buffer, 0, bytesRead);
-                System.out.println("Received from client " + clientSocket.getInetAddress() + ": " + receivedData);
+                System.out.println("Client " + clientSocket.getInetAddress() + ": " + receivedData);
+                Command command = Command.parse(receivedData);
 
-                if (receivedData.equals("BROADCAST_TEST")) {
-                    broadcast("Broadcast message from server");
+                String cmd = command.getCommand();
+                List<String> params = command.getParameters();
+
+                switch (cmd) {
+
+                    case "BROADCAST_TEST": // Parameters: 0 = MESSAGE
+                    // Send a message to all connected clients
+                        System.out.println(params.get(0));
+                        broadcast(params.get(0));
+                        break;
+
+                    case "NEW_PLAYER_JOINED":
+                        // 
+                        break;
+
+                    case "PLAYER_MOVED":
+                        // 
+                        break;
+                        
+                    default:
+                        System.out.println("Unknown command: " + command.getCommand());
                 }
 
-                if (receivedData.equals("NEW_PLAYER_JOINED")) {
-                    //
-                }
 
             }
         } catch (IOException e) {
@@ -83,5 +101,34 @@ public class Server {
             }
         }
         System.out.println("Broadcasted: '" + message + "' to " + clientList.size() + " clients.");
+    }
+
+
+    public static class Command {
+        private String command;
+        private List<String> parameters;
+
+        private Command(String command, List<String> parameters) {
+            this.command = command;
+            this.parameters = parameters;
+        }
+
+        public String getCommand() {
+            return command;
+        }
+
+        public List<String> getParameters() {
+            return parameters;
+        }
+
+        public static Command parse(String receivedData) {
+            String[] parts = receivedData.split(";");
+            String command = parts[0];
+            List<String> parameters = new ArrayList<>();
+            if (parts.length > 1) {
+                parameters = Arrays.asList(Arrays.copyOfRange(parts, 1, parts.length));
+            }
+            return new Command(command, parameters);
+        }
     }
 }
