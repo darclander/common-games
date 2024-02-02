@@ -78,7 +78,6 @@ std::function<void()> bindMemberFunction(ClassType& object, void (ClassType::*me
     return std::bind(memberFunction, std::ref(object));
 }
 
-
 std::unordered_map<std::string, std::string> getConfiguration(const std::string& filename) {
     std::unordered_map<std::string, std::string> key_value_pairs;
 
@@ -92,6 +91,12 @@ std::unordered_map<std::string, std::string> getConfiguration(const std::string&
     // Read each line from the file
     std::string line;
     while (std::getline(input_file, line)) {
+        // Ignore everything after '#'
+        size_t commentPos = line.find('#');
+        if (commentPos != std::string::npos) {
+            line = line.substr(0, commentPos);
+        }
+
         // Use stringstream to split the line into key and value
         std::istringstream line_stream(line);
         std::string key, value;
@@ -124,6 +129,14 @@ void getIpAdressAndPort(std::string &ip, int &port) {
     if (port_it != config.end()) port = std::stoi(port_it->second);
 }
 
+void getName(std::string &name) {
+    std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
+
+    auto name_it = config.find("name");
+
+    if (name_it != config.end()) name = name_it->second;
+}
+
 void receiveData(TcpClient &client) {
     char responseBuffer[1024];
     int resp;
@@ -153,21 +166,24 @@ int main(int argc, char **argv) {
 
     std::string ipAddress = "127.0.0.1";
     int port = 0;
+    std::string nickname = "default";
 
     getIpAdressAndPort(ipAddress, port);
+    getName(nickname);
+    std::cout << nickname;
 
     double deltaTime = 0;
     uint32_t startingTick = 0;
 
     TcpClient client;
     if (client.connectToServer(ipAddress.c_str(), port)) {
-        const char* command = "GET_DATA";
-        if (client.send(command, strlen(command))) {
-            // Example: Receiving a response from the server
-        }
-
         std::thread receiveThread(receiveData, std::ref(client));
         receiveThread.detach();
+
+        std::string command = "GET_DATA";
+        if (client.send(command.c_str(), command.size())) {
+            // Example: Receiving a response from the server
+        }
     }
 
     int state = START_MENU;
