@@ -16,8 +16,7 @@ public class Server {
     private static ExecutorService executorService = Executors.newCachedThreadPool();
 
     public static void main(String[] args) {
-        try {
-            ServerSocket serverSocket = new ServerSocket(PORT);
+        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Server listening on port " + PORT);
 
             while (true) {
@@ -66,14 +65,19 @@ public class Server {
                         broadcast(params.get(0));
                         break;
 
-                    case "NEW_PLAYER_JOINED":
+                    case "NEW_PLAYER_JOINED": // Parameters: 0 = PLAYER_NAME
+                        broadcast("NEW_PLAYER_JOINED;" + params.get(0));
+                        break;
+
+                    case "PLAYER_MOVED": // Parameters: 0 = oldPos, 1 = newPos
                         // 
                         break;
 
-                    case "PLAYER_MOVED":
-                        // 
+
+                    case "TEST":
+                        System.out.println(clientList); 
                         break;
-                        
+
                     default:
                         System.out.println("Unknown command: " + command.getCommand());
                 }
