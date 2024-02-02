@@ -50,3 +50,4 @@ src/SDL2
 *.py
 debug/*
 config.txt
+*.class
