@@ -14,9 +14,12 @@ public class Server {
     private static final int PORT = 12345;
     private static List<Socket> clientList = new ArrayList<>();
     private static ExecutorService executorService = Executors.newCachedThreadPool();
+    private static List<Player> players = new ArrayList<>();
+    private static int playerIDCounter = 0;
 
     public static void main(String[] args) {
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+        try {
+            ServerSocket serverSocket = new ServerSocket(PORT);
             System.out.println("Server listening on port " + PORT);
 
             while (true) {
@@ -37,6 +40,7 @@ public class Server {
     private static void handleClient(Socket clientSocket) {
         try {
             InputStream inputStream = clientSocket.getInputStream();
+            OutputStream outputStream = clientSocket.getOutputStream();
             byte[] buffer = new byte[1024];
 
             while (true) {
@@ -69,6 +73,18 @@ public class Server {
                         broadcast("NEW_PLAYER_JOINED;" + params.get(0));
                         break;
 
+                    case "ADD_NEW_PLAYER": // Parameters: 0 = name, 1 = COLOR
+                        Player newPlayer = new Player(playerIDCounter++, params.get(0), params.get(1), 0, 0); // 0 = pid, 1 = name, 2 = color, 3 = xPosition, 4 = yPosition
+                        players.add(newPlayer);
+                        outputStream.write(("NEW_PLAYER_RESPONSE;" + newPlayer.getPid() + ";" + newPlayer.getXPosition() + ";" + newPlayer.getYPosition()).getBytes()); // 0 = pid, 1 = xPosition, 2 = yPosition
+
+
+
+
+                        broadcast("NEW_PLAYER;" + params.get(0) + ";" + params.get(1), clientSocket);
+
+                        break;
+
                     case "PLAYER_MOVED": // Parameters: 0 = oldPos, 1 = newPos
                         // 
                         break;
@@ -95,8 +111,11 @@ public class Server {
         }
     }
 
-    private static void broadcast(String message) {
+    private static void broadcast(String message, Socket... excludeClients) {
         for (Socket clientSocket : clientList) {
+            if (Arrays.asList(excludeClients).contains(clientSocket)) {
+                continue;
+            }
             try {
                 OutputStream outputStream = clientSocket.getOutputStream();
                 outputStream.write(message.getBytes());
@@ -105,6 +124,43 @@ public class Server {
             }
         }
         System.out.println("Broadcasted: '" + message + "' to " + clientList.size() + " clients.");
+    }
+
+
+    public static class Player {
+        private int pid;
+        private String name;
+        private String color;
+        private int xPosition;
+        private int yPosition;
+
+        public Player(int pid, String name, String color, int xPosition, int yPosition) {
+            this.pid = pid;
+            this.name = name;
+            this.color = color;
+            this.xPosition = xPosition;
+            this.yPosition = yPosition;
+        }
+
+        public int getPid() {
+            return pid;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getColor() {
+            return color;
+        }
+
+        public int getXPosition() {
+            return xPosition;
+        }
+
+        public int getYPosition() {
+            return yPosition;
+        }
     }
 
 
