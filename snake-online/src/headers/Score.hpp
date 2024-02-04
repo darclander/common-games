@@ -4,9 +4,11 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+#include "Gui.hpp"
+
 class Score {
     public:
-        Score(SDL_Renderer *renderer, int width, int height);
+        Score(SDL_Renderer *renderer, GUI *gui, int width, int height);
         ~Score();
 
         void render();
@@ -21,5 +23,6 @@ class Score {
 
         SDL_Texture *m_textureScore;
         SDL_Renderer *m_renderer;
+        GUI *m_gui;
 
 };
