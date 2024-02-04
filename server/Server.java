@@ -17,6 +17,7 @@ public class Server {
     private static ExecutorService executorService = Executors.newCachedThreadPool();
     private static List<Player> players = new ArrayList<>();
     private static int playerIDCounter = 0;
+    private static PlayingField playingField = new PlayingField(19, 15);
 
     public static void main(String[] args) {
         try {
@@ -184,6 +185,23 @@ public class Server {
         }
     }
 
+    public static class PlayingField {
+        private int width;
+        private int height;
+
+        public PlayingField(int width, int height) {
+            this.width = width;
+            this.height = height;
+        }
+
+        public int getWidth() {
+            return width;
+        }
+
+        public int getHeight() {
+            return height;
+        }
+    }
 
     public static class Command {
         private String command;
