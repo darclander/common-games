@@ -4,9 +4,11 @@
 #include <SDL2/SDL.h>
 #include <sstream>
 #include <vector>
-#include "Grid.hpp"
-#include "Snake.hpp"
 
+#include "Grid.hpp"
+#include "Gui.hpp"
+#include "Snake.hpp"
+#include "Score.hpp"
 
 std::unordered_map<std::string, std::string> parseInput(const std::string& input) {
     std::unordered_map<std::string, std::string> keyValueMap;
@@ -87,7 +89,7 @@ std::vector<std::string> splitString(const std::string& input, char delimiter) {
 
 class TcpClient {
     public:
-        TcpClient(SDL_Renderer *renderer, Grid *grid, std::unordered_map<int, std::shared_ptr<Snake>> *players) : clientSocket(-1) {
+        TcpClient(SDL_Renderer *renderer, GUI *gui, Grid *grid, std::unordered_map<int, std::shared_ptr<Snake>> *players, std::vector<std::shared_ptr<Score>> *scores) : clientSocket(-1) {
             if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
                 std::cerr << "Failed to initialize Winsock\n";
             }
@@ -98,9 +100,11 @@ class TcpClient {
                 WSACleanup();
             }
 
-            m_renderer = renderer;
-            m_grid = grid;
-            m_players = players;
+            m_renderer  = renderer;
+            m_grid      = grid;
+            m_players   = players;
+            m_scores    = scores;
+            m_gui       = gui;
             // m_players->push_back(Snake());
         }
 
@@ -111,7 +115,7 @@ class TcpClient {
 
         void receiveData() {
             char responseBuffer[1024];
-            int resp;
+            int resp = 1;
             std::string input;
             while (true) {
                 // Example: Receiving a response from the server
@@ -125,7 +129,7 @@ class TcpClient {
                 std::vector<std::string> parsedInput = splitString(input, ';');
                 for (auto x : parsedInput) std::cout << x << std::endl;
                 if((parsedInput[0] == "PLAYER_INFO")) {
-                    int index = std::stoi(parsedInput[1]);
+                    int pid = std::stoi(parsedInput[1]);
                     int xPos = std::stoi(parsedInput[2]);
                     int yPos = std::stoi(parsedInput[3]);
                     std::cout << "Creating snake at: " << xPos << ", " << yPos << std::endl;
@@ -134,18 +138,18 @@ class TcpClient {
                     std::shared_ptr<Snake> snake = std::make_shared<Snake>(m_renderer, xPos, yPos, m_grid, 40, 40, 3, menuc::RED);
                         
 
-                    if (m_players->count(index) == 0) {
-                            (*m_players)[index] = std::move(snake);
+                    if (m_players->count(pid) == 0) {
+                            (*m_players)[pid] = std::move(snake);
                     } else {
-                        std::cerr << "Index " << index << " is already occupied." << std::endl;
+                        std::cerr << "Index " << pid << " is already occupied." << std::endl;
                     }
                 } else if(parsedInput[0] == "PLAYER_NEW_POS") {
                     std::cout << "Received new pos";
-                    int index = std::stoi(parsedInput[1]);
+                    int pid = std::stoi(parsedInput[1]);
                     int xPos = std::stoi(parsedInput[2]);
                     int yPos = std::stoi(parsedInput[3]);
 
-                    auto iterator = m_players->find(index);
+                    auto iterator = m_players->find(pid);
                     if (iterator != m_players->end()) {
                         auto &s = iterator->second;
                         if (s->getPosX() != xPos || s->getPosY() != yPos) {
@@ -155,7 +159,26 @@ class TcpClient {
                     } else {
 
                     }
-                } 
+                } else if (parsedInput[0] == "ADD_SCORE") {
+                    std::shared_ptr<Score> score = std::make_shared<Score>(m_renderer, m_gui, m_grid->getGridPointWidth(), m_grid->getGridPointWidth());
+                    int xPos = std::stoi(parsedInput[3]);
+                    int yPos = std::stoi(parsedInput[4]);
+                    std::cout << "xPos: " <<  xPos << std::endl;
+                    xPos = (xPos) * (m_grid->getGridPointWidth());
+                    yPos = (yPos) * (m_grid->getGridPointHeight());
+
+                    Gridpoint *gp = m_grid->getPoint(xPos, yPos);
+                    gp->setScore();
+                    score->move(gp->getGridPointX(), gp->getGridPointY());
+                    m_scores->push_back(score);
+                } else if (parsedInput[0] == "SCORE_COLLECTED") {
+                    int pid = std::stoi(parsedInput[1]);
+                    // auto it = std::find(m_scores->begin(), m_scores->end(), score);
+                    // if (it != m_scores->end()) {
+                    //     m_scores->erase(it);
+                    // }
+                    m_players[pid].second->grow();
+                }
                 
 
                 // // Process the received data as needed
@@ -198,6 +221,7 @@ class TcpClient {
         bool send(const char* data, size_t size) {
             if (clientSocket == -1) {
                 std::cerr << "Not connected to a server\n";
+                // m_isConnected = false;
                 return false;
             }
 
@@ -301,7 +325,10 @@ class TcpClient {
         WSADATA wsaData;
 
         std::unordered_map<int, std::shared_ptr<Snake>> *m_players;
+        std::vector<std::shared_ptr<Score>> *m_scores;
+        
         Grid *m_grid;
+        GUI *m_gui;
         SDL_Renderer *m_renderer;
         bool m_isConnected = true;
 };

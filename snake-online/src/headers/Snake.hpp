@@ -61,6 +61,8 @@ class Snake : public Observer {
 
         void updatePos(int xPos, int yPos);
 
+        void grow();
+
         int getPosX() {
             return snakeBlocks[0].getPosX();
         }

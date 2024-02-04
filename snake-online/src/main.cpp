@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <chrono>
 #include <random>
 #include <thread>
@@ -120,10 +121,11 @@ void receiveData(TcpClient &client) {
 
 int main(int argc, char **argv) {
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+    ui.loadTexture("berry", "./textures/berry.png");
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 40, 30);
     Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 3, menuc::RED);
     Controller controller = Controller();
-    
+
     int volume = 64;
     int playSound = 1;
     SoundManager sound = SoundManager(volume, playSound);
@@ -132,6 +134,7 @@ int main(int argc, char **argv) {
     sound.playSound("song", -1);
 
     std::unordered_map<int, std::shared_ptr<Snake>> players{};
+    std::vector<std::shared_ptr<Score>> scores{};
     
     int pid = 0;
     std::string ipAddress = "127.0.0.1";
@@ -144,20 +147,23 @@ int main(int argc, char **argv) {
     double deltaTime = 0;
     uint32_t startingTick = 0;
 
-    TcpClient client = TcpClient(ui.getRenderer(), &grid, &players);
+    TcpClient client = TcpClient(ui.getRenderer(), &ui, &grid, &players, &scores);
 
     if (client.connectToServer(ipAddress.c_str(), port)) {
 
         // Initial communication between server and client
-        std::string command = "ADD_NEW_PLAYER;" + nickname + ";green";
+        std::string command = "ADD_NEW_PLAYER;" + nickname + ";green"; 
         std::string input = "";
         if (client.send(command.c_str(), command.size())) {
             client.receive(input);
             std::vector<std::string> parsedInput = splitString(input, ';');
             for (auto x : parsedInput) std::cout << x << std::endl;
-            int pid = stoi(parsedInput[1]);
-            int xPos = stoi(parsedInput[2]);
-            int yPos = stoi(parsedInput[3]);
+            int pid         = stoi(parsedInput[1]);
+            int xPos        = stoi(parsedInput[2]);
+            int yPos        = stoi(parsedInput[3]);
+            // int gridWidth   = stoi(parsedInput[4]);
+            // int gridHeight  = stoi(parsedInput[5]);
+            // grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, gridWidth, gridHeight);
             snake = Snake(ui.getRenderer(), xPos, yPos, &grid, 40, 40, 3, menuc::RED);
         }
 
@@ -204,7 +210,7 @@ int main(int argc, char **argv) {
     bool hasScore = false;
     Gridpoint *scorePoint;
 
-    Score score = Score(ui.getRenderer(), grid.getGridPointWidth(), grid.getGridPointHeight());
+    // Score score = Score(ui.getRenderer(), &ui, grid.getGridPointWidth(), grid.getGridPointHeight());
 
     bool running = true;
     while(ui.getWindowClose() && running) {
@@ -225,26 +231,32 @@ int main(int argc, char **argv) {
             // std::cout << volume << std::endl;
         } else if (state == GAME_PLAY) {
             controller.broadcastNewMenu(3);
-            // ui.render(grid);
+            ui.render(grid);
 
             for (const auto& pair : players) {
                 pair.second->render();
             }
 
-            if(!hasScore) {
-                std::pair<int, int> pos = getRandomCoordinate();
-                std::cout << "X: " << pos.first << " Y: " << pos.second << std::endl;
-                scorePoint = grid.getPoint(pos.first, pos.second);
-                if(scorePoint != nullptr && scorePoint->isEmpty()) {
-                    scorePoint->setScore();
-                    score.move(scorePoint->getGridPointX(), scorePoint->getGridPointY());
-                    hasScore = true;
-                }
-            } else {
-                score.render();
-                if(scorePoint != nullptr) hasScore = scorePoint->hasScore();
-                else hasScore = false;
+            for (const auto &score : scores) {
+                score->render();
             }
+
+
+
+            // if(!hasScore) {
+            //     std::pair<int, int> pos = getRandomCoordinate();
+            //     std::cout << "X: " << pos.first << " Y: " << pos.second << std::endl;
+            //     scorePoint = grid.getPoint(pos.first, pos.second);
+            //     if(scorePoint != nullptr && scorePoint->isEmpty()) {
+            //         scorePoint->setScore();
+            //         score.move(scorePoint->getGridPointX(), scorePoint->getGridPointY());
+            //         hasScore = true;
+            //     }
+            // } else {
+            //     score.render();
+            //     if(scorePoint != nullptr) hasScore = scorePoint->hasScore();
+            //     else hasScore = false;
+            // }
             
             ui.render(snake); // Perhaps a better solution?
 

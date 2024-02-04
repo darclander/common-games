@@ -111,6 +111,7 @@ void Snake::update(double deltaTime, float limit) {
         }
 
         if(newPoint->hasScore()) {
+            std::cout << "TRUEEE";
             snakeBlocks.push_back(Snakeblock(m_renderer, (snakeBlocks.size()-1)*m_snakeWidth, 1, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees, m_color));
             newPoint->removeScore();
         }
@@ -124,6 +125,10 @@ void Snake::update(double deltaTime, float limit) {
     } else {
         return;
     }
+}
+
+void Snake::grow() {
+    snakeBlocks.push_back(Snakeblock(m_renderer, (snakeBlocks.size()-1)*m_snakeWidth, 1, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees, m_color));
 }
 
 void Snake::updatePos(int xPos, int yPos) {

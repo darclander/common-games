@@ -22,6 +22,7 @@ Score::Score(SDL_Renderer *renderer, GUI *gui, int width, int height) {
     m_height = height;
     m_gui = gui;
     m_textureScore = m_gui->getTexture("berry");
+    std::cout << m_textureScore << std::endl;
 
 }
 
@@ -37,5 +38,5 @@ void Score::render() {
 }
 
 Score::~Score() {
-    SDL_DestroyTexture(m_textureScore);
+    // SDL_DestroyTexture(m_textureScore);
 }

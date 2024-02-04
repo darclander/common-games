@@ -75,6 +75,10 @@ void Gridpoint::render() {
     } else {
         SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
     }
+
+    if(m_gridPointHasScore) {
+        SDL_SetRenderDrawColor(m_renderer, 255, 255, 0, 255);
+    }
     
 
     SDL_RenderDrawRect(m_renderer, &gpL);
