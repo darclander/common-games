@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 // Server class
 public class Server {
@@ -17,12 +20,15 @@ public class Server {
     private static ExecutorService executorService = Executors.newCachedThreadPool();
     private static List<Player> players = new ArrayList<>();
     private static int playerIDCounter = 0;
-    private static PlayingField playingField = new PlayingField(19, 15);
+    private static PlayingField playingField = new PlayingField(20, 20);
 
     public static void main(String[] args) {
         try {
             ServerSocket serverSocket = new ServerSocket(PORT);
             System.out.println("Server listening on port " + PORT);
+
+            // Start the game loop
+            executorService.execute(() -> handleGame());
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
@@ -39,20 +45,56 @@ public class Server {
         }
     }
 
-    private static void send(String message, OutputStream outputStream) {
-        try {
-            System.out.println(("Sending: ") + message);
-            outputStream.write(message.getBytes());
-        } catch (IOException e) {
-                e.printStackTrace();
-        }
+    private static void handleGame(){
 
+        try {
+            String msg;
+            
+            long elapsedTime;
+            long startTime;
+            long ADD_SCORE_COUNTER = 0;
+            long ADD_SCORE_INTERVAL = 1 * 1000;
+            long counter2 = 0;
+            while (true) {
+                startTime = System.currentTimeMillis();
+                
+                // SCORE COLLECTED
+                // SCORE_COLLECTED;pid;type;magnitude;xPos;yPos
+                // msg = appendDelimitor("SCORE_COLLECTED", new Random().nextInt(playingField.getWidth()), new Random().nextInt(playingField.getWidth()));
+                // broadcast(msg); // SCORE_COLLECTED;pid;type;magnitude;xPos;yPos
+
+                if(ADD_SCORE_COUNTER > ADD_SCORE_INTERVAL) {  // ADD_SCORE;type;amount;xPos;yPos
+                    ADD_SCORE_COUNTER = 0;
+                    int xPos = new Random().nextInt(playingField.getWidth());
+                    int yPos = new Random().nextInt(playingField.getWidth());
+                    msg = appendDelimitor("ADD_SCORE", "berry", 1, xPos, yPos);
+                    broadcast(msg); // ADD_SCORE;pid;xPos;yPos
+                    playingField.getField()[yPos][xPos].setType("berry");
+                }
+
+                if(counter2 > 30 * 1000) {
+                    counter2 = 0;
+                    // addPowerUp();
+                }
+
+                
+                Thread.sleep(250);
+                elapsedTime = (System.currentTimeMillis() - startTime);
+                
+                ADD_SCORE_COUNTER += elapsedTime;
+                counter2 += elapsedTime;
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static void handleClient(Socket clientSocket) {
         try {
             InputStream inputStream = clientSocket.getInputStream();
             OutputStream outputStream = clientSocket.getOutputStream();
+            String msg;
             byte[] buffer = new byte[1024];
 
             while (true) {
@@ -75,43 +117,39 @@ public class Server {
 
                 switch (cmd) {
 
-                    case "BROADCAST_TEST": // Parameters: 0 = MESSAGE
-                    // Send a message to all connected clients
-                        System.out.println(params.get(0));
-                        broadcast(params.get(0));
-                        break;
-
-                    case "NEW_PLAYER_JOINED": // Parameters: 0 = PLAYER_NAME
-                        broadcast("NEW_PLAYER_JOINED;" + params.get(0));
+                    case "NEW_PLAYER_JOINED": // NEW_PLAYER_JOINED;name
+                        msg = appendDelimitor("NEW_PLAYER_JOINED", params.get(0));
+                        broadcast(msg, clientSocket);
                         break;
                     
-                    case "PLAYER_UPDATE_POSITION": // Parameters: 0 = PID, 1 = xPos, 2 = yPos
-                        // PLAYER_NEW_POS;id;xPos;yPos;
-                        broadcast("PLAYER_NEW_POS;" + params.get(0) + ";" + params.get(1) + ";" + params.get(2), clientSocket);
+                    case "PLAYER_UPDATE_POSITION": // PLAYER_UPDATE_POSITION;pid;xPos;yPos
+                        msg = appendDelimitor("PLAYER_NEW_POS", params.get(0), params.get(1), params.get(2));
+                        broadcast(msg, clientSocket); // PLAYER_NEW_POS;pid;xPos;yPos
                         break;
 
-                    case "ADD_NEW_PLAYER": // Parameters: 0 = name, 1 = COLOR
+                    case "ADD_NEW_PLAYER": // ADD_NEW_PLAYER;name;color
                         Player newPlayer = new Player(playerIDCounter++, params.get(0), params.get(1), 0, 0); // 0 = pid, 1 = name, 2 = color, 3 = xPosition, 4 = yPosition
                         players.add(newPlayer);
-                        send(("NEW_PLAYER_RESPONSE;" + newPlayer.getPid() + ";" + newPlayer.getPid()*50 + ";" + newPlayer.getYPosition() + ";"), outputStream); // 0 = pid, 1 = xPosition, 2 = yPosition
-                        broadcast("NEW_PLAYER;" + newPlayer.getPid() + ";" + (newPlayer.getPid() + 1)*50 + ";" + (newPlayer.getPid() + 1) + ";", clientSocket);
 
+                        msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getPid()*50, newPlayer.getYPosition());
+                        send(msg, outputStream); // NEW_PLAYER_RESPONSE;pid;xPos;yPos;fieldWidth;fieldHeight
+
+                        msg = appendDelimitor("NEW_PLAYER;", newPlayer.getPid(), (newPlayer.getPid() + 1)*50, (newPlayer.getPid() + 1));
+                        broadcast(msg, clientSocket); // NEW_PLAYER;pid;xPos;yPos
                         
                         for (Player p : players) {
                             if(p == newPlayer) continue;
-                            send(("PLAYER_INFO;" + p.getPid() + ";" + (p.getPid() + 1)*50 + ";" + (p.getPid() + 1) + ";"), outputStream);
+                            msg = appendDelimitor("PLAYER_INFO", p.getPid(), (p.getPid() + 1)*50, (p.getPid() + 1));
+                            send(msg, outputStream); // PLAYER_INFO;pid;xPos;yPos
                         }
-                        
 
                         break;
 
-                    case "PLAYER_MOVED": // Parameters: 0 = oldPos, 1 = newPos
-                        // 
-                        break;
 
-
-                    case "TEST":
-                        System.out.println(clientList); 
+                    // TEST CALLS
+                    case "BROADCAST_TEST": // BROADCAST_TEST;message
+                        System.out.println(params.get(0));
+                        broadcast(params.get(0));
                         break;
 
                     default:
@@ -131,7 +169,27 @@ public class Server {
         }
     }
 
+    private static void send(String message, OutputStream outputStream) {
+        try {
+            System.out.println(("Sending: ") + message);
+            outputStream.write(message.getBytes());
+        } catch (IOException e) {
+                e.printStackTrace();
+        }
 
+    }
+
+    public static String appendDelimitor(Object... parameters) {
+        StringBuilder sb = new StringBuilder();
+        for (Object parameter : parameters) {
+            sb.append(parameter).append(";");
+        }
+        // Remove the last semicolon
+        if (sb.length() > 0) {
+            sb.setLength(sb.length() - 1);
+        }
+        return sb.toString();
+    }
 
     private static void broadcast(String message, Socket... excludeClients) {
         for (Socket clientSocket : clientList) {
@@ -145,7 +203,7 @@ public class Server {
                 e.printStackTrace();
             }
         }
-        System.out.println("Broadcasted: '" + message + "' to " + (clientList.size() - 1) + " clients.");
+        System.out.println("Broadcasted: '" + message + "' to " + clientList.size() + " clients.");
     }
 
 
@@ -186,12 +244,25 @@ public class Server {
     }
 
     public static class PlayingField {
+        
         private int width;
         private int height;
+        private Square[][] field;
 
         public PlayingField(int width, int height) {
             this.width = width;
             this.height = height;
+            this.field = new Square[height][width];
+
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    field[i][j] = new Square();
+                }
+            }
+        }
+
+        public Square[][] getField() {
+            return field;
         }
 
         public int getWidth() {
@@ -202,6 +273,23 @@ public class Server {
             return height;
         }
     }
+
+    public static class Square {
+        private String type;
+
+        public Square() {
+            this.type = "empty";
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+    }
+
 
     public static class Command {
         private String command;

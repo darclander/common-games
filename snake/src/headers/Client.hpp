@@ -87,7 +87,7 @@ std::vector<std::string> splitString(const std::string& input, char delimiter) {
 
 class TcpClient {
     public:
-        TcpClient(SDL_Renderer *renderer, Grid *grid, std::unordered_map<int, std::shared_ptr<Snake>> *players) : clientSocket(-1) {
+        TcpClient(SDL_Renderer *renderer, Grid *grid, std::unordered_map<int, std::shared_ptr<Snake>> *players, std::vector<Score> *scores) : clientSocket(-1) {
             if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
                 std::cerr << "Failed to initialize Winsock\n";
             }
@@ -98,9 +98,10 @@ class TcpClient {
                 WSACleanup();
             }
 
-            m_renderer = renderer;
-            m_grid = grid;
-            m_players = players;
+            m_renderer  = renderer;
+            m_grid      = grid;
+            m_players   = players;
+            m_scores    = scores;
             // m_players->push_back(Snake());
         }
 
@@ -129,7 +130,6 @@ class TcpClient {
                     std::cout << m_grid << std::endl;
                     std::shared_ptr<Snake> snake = std::make_shared<Snake>(m_renderer, xPos, yPos, m_grid, 40, 40, 3, menuc::RED);
                         
-
                     if (m_players->count(index) == 0) {
                             (*m_players)[index] = std::move(snake);
                     } else {
@@ -196,6 +196,7 @@ class TcpClient {
         bool receive(std::string& receivedData) {
             if (clientSocket == -1) {
                 std::cerr << "Not connected to a server\n";
+                m_isConnected = false;
                 return false;
             }
 
@@ -257,6 +258,8 @@ class TcpClient {
         WSADATA wsaData;
 
         std::unordered_map<int, std::shared_ptr<Snake>> *m_players;
+        std::vector<Score> *m_scores;
+
         Grid *m_grid;
         SDL_Renderer *m_renderer;
         bool m_isConnected = true;

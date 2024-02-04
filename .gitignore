@@ -51,3 +51,4 @@ src/SDL2
 debug/*
 config.txt
 *.class
+*config.txt*
