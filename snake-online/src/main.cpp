@@ -1,8 +1,11 @@
 #include <iostream>
 #include <chrono>
 #include <random>
-#include <string>
 #include <thread>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <unordered_map>
 
 #include "Gui.hpp"
 #include "Snake.hpp"
@@ -11,6 +14,7 @@
 #include "Score.hpp"
 #include "Controller.hpp"
 #include "Soundmanager.hpp"
+#include "Client.hpp"
 
 typedef std::chrono::high_resolution_clock Clock;
 
@@ -74,25 +78,50 @@ std::function<void()> bindMemberFunction(ClassType& object, void (ClassType::*me
     return std::bind(memberFunction, std::ref(object));
 }
 
-void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
-    menu.render();
-    int menuChoice = 0;
-    menuChoice = menu.getMenuIndex();
-    std::cout << menuChoice << std::endl;
-    if(menuChoice > 0) {
-        gameState newState = static_cast<gameState>(menuChoice);
-        previousState = state;
-        state = newState;
-        std::cout << gameStateToString(previousState) << " -> " << gameStateToString(state) << std::endl;
-    } else if (menuChoice == -1) {
-        state = previousState;
+void getIpAdressAndPort(std::string &ip, int &port) {
+    std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
+
+    auto ip_it      = config.find("ip");
+    auto port_it    = config.find("port");
+    
+    if (ip_it   != config.end()) ip = ip_it->second;
+    if (port_it != config.end()) port = std::stoi(port_it->second);
+}
+
+void getName(std::string &name) {
+    std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
+
+    auto name_it = config.find("name");
+
+    if (name_it != config.end()) name = name_it->second;
+}
+
+
+void receiveData(TcpClient &client) {
+    char responseBuffer[1024];
+    int resp;
+    std::string input;
+    while (true) {
+        // Example: Receiving a response from the server
+        
+        resp = client.receive(input);
+        // Process the received data as needed
+        std::unordered_map<std::string, std::string> recvData = parseInput(input);
+
+        for (auto &d : recvData) {
+            if(d.first == "NEW_PLAYER") {
+                // addNewPlayer();
+            }
+        }
+
+        if (resp == 0) return;
     }
 }
 
 int main(int argc, char **argv) {
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
-    Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20, 15);
-    Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 4);
+    Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 40, 30);
+    Snake snake; // = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 3, menuc::RED);
     Controller controller = Controller();
     int volume = 64;
     int playSound = 1;
@@ -101,9 +130,39 @@ int main(int argc, char **argv) {
     sound.setVolume("song", volume); // 50%
     sound.playSound("song", -1);
 
+    std::unordered_map<int, std::shared_ptr<Snake>> players{};
+    
+
+    std::string ipAddress = "127.0.0.1";
+    int port = 0;
+    std::string nickname = "default";
+
+    getIpAdressAndPort(ipAddress, port);
+    getName(nickname);
+
     double deltaTime = 0;
     uint32_t startingTick = 0;
 
+    TcpClient client = TcpClient(ui.getRenderer(), &grid, &players);
+
+    if (client.connectToServer(ipAddress.c_str(), port)) {
+
+        // Initial communication between server and client
+        std::string command = "ADD_NEW_PLAYER;" + nickname + ";green";
+        std::string input = "";
+        if (client.send(command.c_str(), command.size())) {
+            client.receive(input);
+            std::vector<std::string> parsedInput = splitString(input, ';');
+            for (auto x : parsedInput) std::cout << x << std::endl;
+            int xPos = stoi(parsedInput[2]);
+            int yPos = stoi(parsedInput[3]);
+            snake = Snake(ui.getRenderer(), xPos, yPos, &grid, 40, 40, 3, menuc::RED);
+        }
+
+        // Allow for client to communicate
+        std::thread receiveThread(&TcpClient::receiveData, std::ref(client));
+        receiveThread.detach();
+    }
 
     int state = START_MENU;
     // gameState state         = START_MENU;
@@ -155,7 +214,7 @@ int main(int argc, char **argv) {
 
         ui.clearRenderer();
         ui.update();
-
+        
         if (state == START_MENU) {
             startMenu.render();
         } else if (state == OPTIONS) {
@@ -164,7 +223,12 @@ int main(int argc, char **argv) {
             // std::cout << volume << std::endl;
         } else if (state == GAME_PLAY) {
             controller.broadcastNewMenu(3);
-            ui.render(grid);
+            // ui.render(grid);
+
+            for (const auto& pair : players) {
+                pair.second->render();
+            }
+
             if(!hasScore) {
                 std::pair<int, int> pos = getRandomCoordinate();
                 std::cout << "X: " << pos.first << " Y: " << pos.second << std::endl;
@@ -179,7 +243,7 @@ int main(int argc, char **argv) {
                 if(scorePoint != nullptr) hasScore = scorePoint->hasScore();
                 else hasScore = false;
             }
-
+            
             ui.render(snake); // Perhaps a better solution?
 
             snake.update(deltaTime, 100.f);
@@ -194,8 +258,14 @@ int main(int argc, char **argv) {
         // See method-description
         deltaTime = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t1).count())/ 1000000.f;
         // fpsCap(startingTick);
+        
+        std::string command = "NEW_POS;" + std::to_string(snake.getPosX()) + ";" + std::to_string(snake.getPosY());
+
+
+        // if(client.isConnected()) client.send(command.c_str(), command.size());
+
     }
 
-
+    client.closeConnection();
     return 0;
 }
