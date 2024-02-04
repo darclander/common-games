@@ -121,8 +121,9 @@ void receiveData(TcpClient &client) {
 int main(int argc, char **argv) {
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 40, 30);
-    Snake snake; // = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 3, menuc::RED);
+    Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 3, menuc::RED);
     Controller controller = Controller();
+    
     int volume = 64;
     int playSound = 1;
     SoundManager sound = SoundManager(volume, playSound);
