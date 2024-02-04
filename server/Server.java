@@ -82,19 +82,24 @@ public class Server {
                     case "NEW_PLAYER_JOINED": // Parameters: 0 = PLAYER_NAME
                         broadcast("NEW_PLAYER_JOINED;" + params.get(0));
                         break;
+                    
+                    case "PLAYER_UPDATE_POSITION": // Parameters: 0 = PID, 1 = xPos, 2 = yPos
+                        // PLAYER_NEW_POS;id;xPos;yPos;
+                        broadcast("PLAYER_NEW_POS;" + params.get(0) + ";" + params.get(1) + ";" + params.get(2), clientSocket);
+                        break;
 
                     case "ADD_NEW_PLAYER": // Parameters: 0 = name, 1 = COLOR
                         Player newPlayer = new Player(playerIDCounter++, params.get(0), params.get(1), 0, 0); // 0 = pid, 1 = name, 2 = color, 3 = xPosition, 4 = yPosition
                         players.add(newPlayer);
                         send(("NEW_PLAYER_RESPONSE;" + newPlayer.getPid() + ";" + newPlayer.getPid()*50 + ";" + newPlayer.getYPosition() + ";"), outputStream); // 0 = pid, 1 = xPosition, 2 = yPosition
-                        broadcast("NEW_PLAYER;" + params.get(0) + ";" + params.get(1), clientSocket);
+                        broadcast("NEW_PLAYER;" + newPlayer.getPid() + ";" + (newPlayer.getPid() + 1)*50 + ";" + (newPlayer.getPid() + 1) + ";", clientSocket);
 
-                        if(players.size() > 1) {
-                            for (Player p : players) {
-                                if(p == newPlayer) continue;
-                                send(("PLAYER_INFO;" + p.getPid() + ";" + (p.getPid() + 1)*50 + ";" + (p.getPid() + 1) + ";"), outputStream);
-                            }
+                        
+                        for (Player p : players) {
+                            if(p == newPlayer) continue;
+                            send(("PLAYER_INFO;" + p.getPid() + ";" + (p.getPid() + 1)*50 + ";" + (p.getPid() + 1) + ";"), outputStream);
                         }
+                        
 
                         break;
 

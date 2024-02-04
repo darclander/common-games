@@ -116,17 +116,21 @@ class TcpClient {
             while (true) {
                 // Example: Receiving a response from the server
                 
-                resp = receive(input);
-                
+
+                // resp = receive(input);
+                input = receiveChar(1024);
+                if(input == "false") return;
+                std::cout << "Received new message!" << std::endl;
+
                 std::vector<std::string> parsedInput = splitString(input, ';');
                 for (auto x : parsedInput) std::cout << x << std::endl;
-                if(parsedInput[0] == "PLAYER_INFO") {
+                if((parsedInput[0] == "PLAYER_INFO")) {
                     int index = std::stoi(parsedInput[1]);
                     int xPos = std::stoi(parsedInput[2]);
                     int yPos = std::stoi(parsedInput[3]);
                     std::cout << "Creating snake at: " << xPos << ", " << yPos << std::endl;
-                    std::cout << "HERE" << std::endl;
-                    std::cout << m_grid << std::endl;
+                    // std::cout << "HERE" << std::endl;
+                    // std::cout << m_grid << std::endl;
                     std::shared_ptr<Snake> snake = std::make_shared<Snake>(m_renderer, xPos, yPos, m_grid, 40, 40, 3, menuc::RED);
                         
 
@@ -135,8 +139,23 @@ class TcpClient {
                     } else {
                         std::cerr << "Index " << index << " is already occupied." << std::endl;
                     }
-                    
-                }
+                } else if(parsedInput[0] == "PLAYER_NEW_POS") {
+                    std::cout << "Received new pos";
+                    int index = std::stoi(parsedInput[1]);
+                    int xPos = std::stoi(parsedInput[2]);
+                    int yPos = std::stoi(parsedInput[3]);
+
+                    auto iterator = m_players->find(index);
+                    if (iterator != m_players->end()) {
+                        auto &s = iterator->second;
+                        if (s->getPosX() != xPos || s->getPosY() != yPos) {
+                            iterator->second->updatePos(xPos, yPos);
+                            iterator->second->getPositions();
+                        }
+                    } else {
+
+                    }
+                } 
                 
 
                 // // Process the received data as needed
@@ -147,7 +166,7 @@ class TcpClient {
                 //         // addNewPlayer();
                 //     }
                 // }
-
+                input = "";
                 if (resp == 0) {
                     m_isConnected = false;
                     return;
@@ -215,8 +234,33 @@ class TcpClient {
 
             buffer[bytesRead] = '\0'; // Null-terminate the received data
             receivedData = buffer;    // Assign the buffer to the std::string
-            std::cout << "Received data from server: " << receivedData << "\n";
+            // std::cout << "Received data from server: " << receivedData << "\n";
             return true;
+        }
+
+
+        std::string receiveChar(size_t bufferSize) {
+            
+            if (clientSocket == -1) {
+                std::cerr << "Not connected to a server\n";
+                return "false";
+            }
+
+            char buffer[bufferSize];
+            ssize_t bytesRead = ::recv(clientSocket, buffer, bufferSize - 1, 0);
+            if (bytesRead == -1) {
+                std::cerr << "Error receiving data\n";
+                closeConnection();
+                return "false";
+            } else if (bytesRead == 0) {
+                std::cout << "Server disconnected\n";
+                closeConnection();
+                return "false";
+            }
+
+            buffer[bytesRead] = '\0'; // Null-terminate the received data
+            // std::cout << "Received data from server: " << buffer << "\n";
+            return std::string(buffer);
         }
 
         void closeConnection() {

@@ -32,7 +32,6 @@ Snake::Snake(SDL_Renderer *renderer, int xPos, int yPos, Grid *grid, int snakeWi
     for(int i = 0; i < snakeSize; i++) {
         snakeBlocks.push_back(Snakeblock(m_renderer, x, y, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees, m_color));
     }
-
 }
 
 Snake::~Snake() {
@@ -127,6 +126,38 @@ void Snake::update(double deltaTime, float limit) {
     }
 }
 
+void Snake::updatePos(int xPos, int yPos) {
+    
+    int newPosX = xPos;
+    int newPosY = yPos;   
+    Gridpoint *newPoint = m_grid->getPoint(newPosX + m_snakeWidth / 2, newPosY + m_snakeHeight / 2);
+
+    int oldPosX = snakeBlocks.back().getPosX();
+    int oldPosY = snakeBlocks.back().getPosY();
+    Gridpoint *oldPoint = m_grid->getPoint(oldPosX + m_snakeWidth / 2, oldPosY + m_snakeHeight / 2);
+
+    if(oldPoint != nullptr) oldPoint->setEmpty();
+    if(newPoint != nullptr) {
+        if(!newPoint->isEmpty()) {
+            std::cout << "GAME OVER!" << std::endl;
+        }
+
+        if(newPoint->hasScore()) {
+            snakeBlocks.push_back(Snakeblock(m_renderer, (snakeBlocks.size()-1)*m_snakeWidth, 1, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees, m_color));
+            newPoint->removeScore();
+        }
+        
+        newPoint->setNotEmpty();
+
+        snakeBlocks.pop_back();
+        newPosX = newPoint->getGridPointX() + 2;
+        newPosY = newPoint->getGridPointY() + 2;
+        Snakeblock newSnakeBlock = Snakeblock(m_renderer, newPosX, newPosY, m_snakeWidth - 2, m_snakeHeight - 2, m_textureSnakeHead, m_degrees, m_color);
+        snakeBlocks.insert(snakeBlocks.begin(), newSnakeBlock);
+    } else {
+        return;
+    }
+}
 
 Snakeblock::Snakeblock(SDL_Renderer *renderer, int snakeBlockXpos, int snakeBlockYpos, int snakeBlockWidth, int snakeBlockHeight, SDL_Texture *textureSnakeHead, int degrees, SDL_Color color) {
 

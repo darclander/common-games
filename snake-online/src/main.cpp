@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
 
     std::unordered_map<int, std::shared_ptr<Snake>> players{};
     
-
+    int pid = 0;
     std::string ipAddress = "127.0.0.1";
     int port = 0;
     std::string nickname = "default";
@@ -154,6 +154,7 @@ int main(int argc, char **argv) {
             client.receive(input);
             std::vector<std::string> parsedInput = splitString(input, ';');
             for (auto x : parsedInput) std::cout << x << std::endl;
+            int pid = stoi(parsedInput[1]);
             int xPos = stoi(parsedInput[2]);
             int yPos = stoi(parsedInput[3]);
             snake = Snake(ui.getRenderer(), xPos, yPos, &grid, 40, 40, 3, menuc::RED);
@@ -259,10 +260,8 @@ int main(int argc, char **argv) {
         deltaTime = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t1).count())/ 1000000.f;
         // fpsCap(startingTick);
         
-        std::string command = "NEW_POS;" + std::to_string(snake.getPosX()) + ";" + std::to_string(snake.getPosY());
-
-
-        // if(client.isConnected()) client.send(command.c_str(), command.size());
+        std::string command = "PLAYER_UPDATE_POSITION;" + std::to_string(pid) + ";" + std::to_string(snake.getPosX()) + ";" + std::to_string(snake.getPosY());
+        if(client.isConnected()) client.send(command.c_str(), command.size()); 
 
     }
 

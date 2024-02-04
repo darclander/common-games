@@ -59,12 +59,24 @@ class Snake : public Observer {
         void render();
         void update(double deltaTime, float limit);
 
+        void updatePos(int xPos, int yPos);
+
         int getPosX() {
             return snakeBlocks[0].getPosX();
         }
 
         int getPosY() {
             return snakeBlocks[0].getPosY();
+        }
+
+        int getSize() {
+            return snakeBlocks.size();
+        }
+
+        void getPositions() {
+            for (auto &sb : snakeBlocks) {
+                std::cout << sb.getPosX() << ", " << sb.getPosY() << std::endl; 
+            }
         }
 
 
