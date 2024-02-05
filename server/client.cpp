@@ -55,7 +55,6 @@ void getIpAdressAndPort(std::string &ip, int &port) {
     if (port_it != config.end()) port = std::stoi(port_it->second);
 }
 
-
 int main() {
     // Initialize Winsock
     WSADATA wsaData;
