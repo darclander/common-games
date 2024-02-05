@@ -87,6 +87,46 @@ void GUI::render() {
     SDL_RenderPresent(m_renderer);
 }
 
+void GUI::renderText(Text &txt) {
+    SDL_Rect renderQuad = {txt.xPos, txt.yPos, txt.width, txt.height};
+    SDL_RenderCopy(m_renderer, txt.texture, nullptr, &renderQuad);
+}
+
+void GUI::renderText(std::string &text, int xPos, int yPos) {
+    SDL_Surface *textSurface =
+        TTF_RenderText_Solid(m_font, text.c_str(), colors::WHITE);
+
+    if (textSurface == nullptr) {
+        // Handle error (you can replace this with your error handling code)
+        SDL_Log("Failed to render text surface: %s", TTF_GetError());
+        return;
+    }
+
+    // Create a texture from the surface
+    SDL_Texture *textTexture =
+        SDL_CreateTextureFromSurface(m_renderer, textSurface);
+
+    if (textTexture == nullptr) {
+        // Handle error (you can replace this with your error handling code)
+        SDL_Log("Failed to create text texture: %s", SDL_GetError());
+        SDL_FreeSurface(textSurface);
+        return;
+    }
+
+    // Set the position for rendering the text
+    SDL_Rect destRect = {xPos, yPos, textSurface->w, textSurface->h};
+
+    // Render the text texture
+    SDL_RenderCopy(m_renderer, textTexture, nullptr, &destRect);
+
+    // Clean up resources
+    SDL_DestroyTexture(textTexture);
+    SDL_FreeSurface(textSurface);
+}
+
+void GUI::renderNumber(int number, int xPos, int yPos) {
+
+}
 
 void GUI::clearRenderer() {
     SDL_RenderClear(m_renderer);
@@ -102,6 +142,68 @@ SDL_Renderer *GUI::getRenderer() {
 
 TTF_Font *GUI::getFont() {
     return m_font;
+}
+
+Text GUI::createText(const std::string &name, int xPos, int yPos, SDL_Color textColor) {
+    
+    SDL_Surface *textSurface = TTF_RenderText_Solid(m_font, name.c_str(), textColor);
+
+    if (!textSurface) {
+        std::cerr << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << std::endl;
+    }
+
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(m_renderer, textSurface);
+    if (!textTexture) {
+        std::cerr << "Unable to create texture from rendered text! SDL_Error: " << SDL_GetError() << std::endl;
+        SDL_FreeSurface(textSurface);
+    }
+
+    Text textInfo;
+    textInfo.width      = textSurface->w;
+    textInfo.height     = textSurface->h;
+    textInfo.color      = textColor;
+    textInfo.texture    = textTexture;
+    textInfo.xPos       = xPos;
+    textInfo.yPos       = yPos;
+    textInfo.name       = name;
+
+    SDL_FreeSurface(textSurface);
+    return textInfo;
+}
+
+bool GUI::updateText(Text &txt, SDL_Color textColor) {
+    SDL_Surface *textSurface = TTF_RenderText_Solid(m_font, txt.name.c_str(), textColor);
+    if (!textSurface) {
+        std::cerr << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << std::endl;
+    }
+
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(m_renderer, textSurface);
+    if (!textTexture) {
+        std::cerr << "Unable to create texture from rendered text! SDL_Error: " << SDL_GetError() << std::endl;
+        SDL_FreeSurface(textSurface);
+    }
+    SDL_FreeSurface(textSurface);
+
+    txt.texture = textTexture;
+    return true;
+}
+
+bool GUI::updateTextValue(Text &txt, const std::string newText) {
+    std::string newValue = newText;
+    SDL_Surface *textSurface = TTF_RenderText_Solid(m_font, newValue.c_str(), txt.color);
+    if (!textSurface) {
+        std::cerr << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << std::endl;
+    }
+
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(m_renderer, textSurface);
+    if (!textTexture) {
+        std::cerr << "Unable to create texture from rendered text! SDL_Error: " << SDL_GetError() << std::endl;
+        SDL_FreeSurface(textSurface);
+    }
+    SDL_FreeSurface(textSurface);
+
+    txt.texture = textTexture;
+    return true;
 }
 
 GUI::~GUI() {

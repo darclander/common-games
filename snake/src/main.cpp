@@ -146,8 +146,11 @@ int main(int argc, char **argv) {
     Score score = Score(ui.getRenderer(), grid.getGridPointWidth(), grid.getGridPointHeight());
 
     bool running = true;
+    std::string scoreString = "score: ";
+    int scoreValue = 0;
+    Text t2 = ui.createText(scoreString, 100, 100, colors::WHITE);
     while(ui.getWindowClose() && running) {
-
+        
         controller.update();
 
         auto t1 = Clock::now();
@@ -155,7 +158,7 @@ int main(int argc, char **argv) {
 
         ui.clearRenderer();
         ui.update();
-
+        ui.renderText(t2);
         if (state == START_MENU) {
             startMenu.render();
         } else if (state == OPTIONS) {
@@ -163,9 +166,12 @@ int main(int argc, char **argv) {
             // sound.setVolume("song", volume);
             // std::cout << volume << std::endl;
         } else if (state == GAME_PLAY) {
+            ui.renderText(t2);
             controller.broadcastNewMenu(3);
             ui.render(grid);
             if(!hasScore) {
+                ui.updateTextValue(t2, scoreString + std::to_string(scoreValue));
+                std::cout << scoreValue;
                 std::pair<int, int> pos = getRandomCoordinate();
                 std::cout << "X: " << pos.first << " Y: " << pos.second << std::endl;
                 scorePoint = grid.getPoint(pos.first, pos.second);
@@ -176,8 +182,15 @@ int main(int argc, char **argv) {
                 }
             } else {
                 score.render();
-                if(scorePoint != nullptr) hasScore = scorePoint->hasScore();
-                else hasScore = false;
+                if(scorePoint != nullptr) {
+                    if(!scorePoint->isEmpty()) {
+                        scorePoint->removeScore();
+                        scoreValue++;
+                    }
+                    hasScore = scorePoint->hasScore();
+                } else {
+                    hasScore = false;
+                } 
             }
 
             ui.render(snake); // Perhaps a better solution?

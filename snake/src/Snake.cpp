@@ -108,7 +108,7 @@ void Snake::update(double deltaTime, float limit) {
 
         if(newPoint->hasScore()) {
             snakeBlocks.push_back(Snakeblock(m_renderer, (snakeBlocks.size()-1)*m_snakeWidth, 1, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees));
-            newPoint->removeScore();
+            // newPoint->removeScore();
         }
         newPoint->setNotEmpty();
 
