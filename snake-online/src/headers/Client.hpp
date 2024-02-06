@@ -89,7 +89,7 @@ std::vector<std::string> splitString(const std::string& input, char delimiter) {
 
 class TcpClient {
     public:
-        TcpClient(SDL_Renderer *renderer, GUI *gui, Grid *grid, std::unordered_map<int, std::shared_ptr<Snake>> *players, std::vector<std::shared_ptr<Score>> *scores) : clientSocket(-1) {
+        TcpClient(SDL_Renderer *renderer, GUI *gui, Grid *grid, std::unordered_map<int, std::shared_ptr<Snake>> *players, std::unordered_map<std::string, std::shared_ptr<Score>>  *scores) : clientSocket(-1) {
             if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
                 std::cerr << "Failed to initialize Winsock\n";
             }
@@ -173,13 +173,29 @@ class TcpClient {
                     Gridpoint *gp = m_grid->getPoint(xPos, yPos);
                     gp->setScore();
                     score->move(gp->getGridPointX(), gp->getGridPointY());
-                    m_scores->push_back(score);
+                    std::string key = std::to_string(gp->getGridPointX()) + "," + std::to_string(gp->getGridPointY());
+                    (*m_scores)[key] = std::move(score);
+                    // m_scores->push_back(score);
                 } else if (parsedInput[0] == "SCORE_COLLECTED") {
                     int pid = std::stoi(parsedInput[1]);
-                    // auto it = std::find(m_scores->begin(), m_scores->end(), score);
-                    // if (it != m_scores->end()) {
-                    //     m_scores->erase(it);
-                    // }
+                    int xPos = std::stoi(parsedInput[4]);
+                    int yPos = std::stoi(parsedInput[5]);
+                    
+                    Gridpoint *gp = m_grid->getPoint(xPos, yPos);
+
+                    gp->removeScore();
+                    
+                    std::string key = std::to_string(gp->getGridPointX()) + "," + std::to_string(gp->getGridPointY());
+                    auto it = m_scores->find(key);
+                    if (it != m_scores->end()) {
+                        // Erase the score from the map
+                        std::cout << "Removed score: " << xPos << "," << yPos << std::endl;
+                        m_scores->erase(it);
+                    } else {
+                        // Handle the case when the key is not found
+                        std::cout << "Key not found in the map." << std::endl;
+                    }
+
                     auto iterator = m_players->find(pid);
                     if (iterator != m_players->end()) {
                         iterator->second->grow();
@@ -333,7 +349,7 @@ class TcpClient {
         WSADATA wsaData;
 
         std::unordered_map<int, std::shared_ptr<Snake>> *m_players;
-        std::vector<std::shared_ptr<Score>> *m_scores;
+        std::unordered_map<std::string, std::shared_ptr<Score>>  *m_scores;
         
         Grid *m_grid;
         GUI *m_gui;

@@ -8,6 +8,7 @@
 #include <sstream>
 #include <unordered_map>
 
+
 #include "Gui.hpp"
 #include "Snake.hpp"
 #include "Grid.hpp"
@@ -134,7 +135,7 @@ int main(int argc, char **argv) {
     sound.playSound("song", -1);
 
     std::unordered_map<int, std::shared_ptr<Snake>> players{};
-    std::vector<std::shared_ptr<Score>> scores{};
+    std::unordered_map<std::string, std::shared_ptr<Score>> scores{};
     
     int pid = -1;
     std::string ipAddress = "127.0.0.1";
@@ -244,7 +245,7 @@ int main(int argc, char **argv) {
             }
 
             for (const auto &score : scores) {
-                score->render();
+                score.second->render();
             }
 
 
@@ -264,7 +265,7 @@ int main(int argc, char **argv) {
             //     else hasScore = false;
             // }
             
-            ui.render(*player); // Perhaps a better solution?
+            // ui.render(*player); // Perhaps a better solution?
 
             // snake.update(deltaTime, 100.f);
             player->update(deltaTime, 100.f);
@@ -280,7 +281,13 @@ int main(int argc, char **argv) {
         deltaTime = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t1).count())/ 1000000.f;
         // fpsCap(startingTick);
         
-        std::string command = "PLAYER_UPDATE_POSITION;" + std::to_string(pid) + ";" + std::to_string(player->getPosX()) + ";" + std::to_string(player->getPosY());
+        int gridXPos = 0;
+        int gridYPos = 0;
+        Gridpoint *gp = grid.getPoint(player->getPosX(), player->getPosY());
+        gridXPos = (gp->getGridPointX() / 20);
+        gridYPos = (gp->getGridPointY() / 20);
+        std::string command = "PLAYER_UPDATE_POSITION;" + std::to_string(pid) + ";" + std::to_string(gridXPos) + ";" + std::to_string(gridYPos);
+        
         if(client.isConnected()) client.send(command.c_str(), command.size()); 
 
     }

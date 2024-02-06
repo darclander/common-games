@@ -11,6 +11,10 @@ class Gridpoint {
         Gridpoint(SDL_Renderer *renderer, int xPos, int yPos, int width, int height);
         ~Gridpoint();
 
+        bool operator==(const Gridpoint& other) const {
+            return (m_gridPointX == other.m_gridPointX) && (m_gridPointX == other.m_gridPointX);
+        }
+
         void render();
 
         bool contains(int x, int y);

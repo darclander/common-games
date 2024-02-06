@@ -14,6 +14,14 @@ class Score {
         void render();
         void move(int xPos, int yPos);
 
+        int getX() {
+            return m_xPos;
+        }
+
+        int getY() {
+            return m_yPos;
+        }
+
     private:
 
         int m_xPos;

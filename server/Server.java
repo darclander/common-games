@@ -103,7 +103,7 @@ public class Server {
 
                 // Process the received data and parse it into a command
                 String receivedData = new String(buffer, 0, bytesRead);
-                System.out.println("Client " + clientSocket.getInetAddress() + ": " + receivedData);
+                // System.out.println("Client " + clientSocket.getInetAddress() + ": " + receivedData);
                 Command command = Command.parse(receivedData);
 
                 String cmd = command.getCommand();
@@ -120,14 +120,15 @@ public class Server {
                         String moveResponse  = playingField.checkPosition(Integer.parseInt(params.get(0)), Integer.parseInt(params.get(1)), Integer.parseInt(params.get(2)));
 
 
-                        if (moveResponse == "berry"){
+                        if (moveResponse == "berry"){// SCORE_COLLECTED;pid;type;amount;xPos;yPos
                             msg = appendDelimitor("SCORE_COLLECTED", params.get(0), "berry", 1, Integer.parseInt(params.get(1)), Integer.parseInt(params.get(2))); // SCORE_COLLECTED;pid;type;amount;xPos;yPos
                             broadcast(msg);
-                        } else if (moveResponse == "outOfBounds") {
-                            msg = appendDelimitor("MOVE_OUT_OF_BOUNDS", params.get(0), params.get(1), params.get(2)); // MOVE_OUT_OF_BOUNDS;pid;xPos;yPos     -- Parameters might be uncessary
-                            send(msg, outputStream);
-                            break;
-                        }
+                        } 
+                        // else if (moveResponse == "outOfBounds") {
+                        //     msg = appendDelimitor("MOVE_OUT_OF_BOUNDS", params.get(0), params.get(1), params.get(2)); // MOVE_OUT_OF_BOUNDS;pid;xPos;yPos     -- Parameters might be uncessary
+                        //     // send(msg, outputStream);
+                        //     break;
+                        // }
 
                         msg = appendDelimitor("PLAYER_NEW_POS", params.get(0), params.get(1), params.get(2));
                         broadcast(msg, clientSocket); // PLAYER_NEW_POS;pid;xPos;yPos
