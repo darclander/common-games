@@ -271,8 +271,8 @@ class MenuBar : public MenuItem {
             m_step          = (m_mi.getMenuWidth() - (m_mi.getMenuWidth() / 5)) / (m_max - m_min);
             m_progress      = m_step * ((m_max - m_min) / 2);
             m_highlighted   = false;
-            std::cout << m_barWidth << std::endl;
-            std::cout << m_step << std::endl;
+            // std::cout << m_barWidth << std::endl;
+            // std::cout << m_step << std::endl;
 
             m_rectA = {m_mi.getMenuXpos() + (m_mi.getMenuWidth() / 10), 
                                 m_menuText.yPos + m_barHeight*2, m_barWidth, m_barHeight};
