@@ -121,7 +121,7 @@ public class Server {
 
 
                         if (moveResponse == "berry"){
-                            msg = appendDelimitor("ADD_SCORE", params.get(0), "berry", 1, Integer.parseInt(params.get(1)), Integer.parseInt(params.get(2))); // ADD_SCORE;pid;type;amount;xPos;yPos
+                            msg = appendDelimitor("SCORE_COLLECTED", params.get(0), "berry", 1, Integer.parseInt(params.get(1)), Integer.parseInt(params.get(2))); // SCORE_COLLECTED;pid;type;amount;xPos;yPos
                             broadcast(msg);
                         } else if (moveResponse == "outOfBounds") {
                             msg = appendDelimitor("MOVE_OUT_OF_BOUNDS", params.get(0), params.get(1), params.get(2)); // MOVE_OUT_OF_BOUNDS;pid;xPos;yPos     -- Parameters might be uncessary
