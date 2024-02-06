@@ -117,7 +117,7 @@ public class Server {
                         break;
                     
                     case "PLAYER_UPDATE_POSITION": // PLAYER_UPDATE_POSITION;pid;xPos;yPos
-                        String moveResponse  = checkPosition(Integer.parseInt(params.get(0)), Integer.parseInt(params.get(1)), Integer.parseInt(params.get(2)));
+                        String moveResponse  = playingField.checkPosition(Integer.parseInt(params.get(0)), Integer.parseInt(params.get(1)), Integer.parseInt(params.get(2)));
 
 
                         if (moveResponse == "berry"){
@@ -214,20 +214,6 @@ public class Server {
             }
         }
         System.out.println("Broadcasted: '" + message + "' to " + clientList.size() + " clients.");
-    }
-
-
-    private static String checkPosition(int playerID, int x, int y) {
-        if(x < 0 || x >= playingField.getWidth() || y < 0 || y >= playingField.getHeight()) {
-            return "outOfBounds";
-        }
-
-        if(playingField.getField()[y][x].getType().equals("berry")) {
-            playingField.getField()[y][x].setType("empty");
-            return "berry";
-        }
-
-        return null;
     }
 
 
@@ -328,6 +314,19 @@ public class Server {
             field[yPos][xPos].setType(type);
             String msg = appendDelimitor("ADD_SCORE", type, magnitude, xPos, yPos);
             broadcast(msg);
+        }
+
+        public String checkPosition(int playerID, int x, int y) {
+            if(x < 0 || x >= width || y < 0 || y >= height) {
+                return "outOfBounds";
+            }
+    
+            if(field[y][x].getType().equals("berry")) {
+                field[y][x].setType("empty");
+                return "berry";
+            }
+    
+            return null;
         }
     }
 
