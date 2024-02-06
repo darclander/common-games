@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
     std::unordered_map<int, std::shared_ptr<Snake>> players{};
     std::vector<std::shared_ptr<Score>> scores{};
     
-    int pid = 0;
+    int pid = -1;
     std::string ipAddress = "127.0.0.1";
     int port = 0;
     std::string nickname = "default";
@@ -158,9 +158,10 @@ int main(int argc, char **argv) {
             client.receive(input);
             std::vector<std::string> parsedInput = splitString(input, ';');
             for (auto x : parsedInput) std::cout << x << std::endl;
-            int pid         = stoi(parsedInput[1]);
+            pid             = stoi(parsedInput[1]);
             int xPos        = stoi(parsedInput[2]);
             int yPos        = stoi(parsedInput[3]);
+            client.setPid(pid);
             // int gridWidth   = stoi(parsedInput[4]);
             // int gridHeight  = stoi(parsedInput[5]);
             // grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, gridWidth, gridHeight);
@@ -171,6 +172,11 @@ int main(int argc, char **argv) {
         std::thread receiveThread(&TcpClient::receiveData, std::ref(client));
         receiveThread.detach();
     }
+
+    std::shared_ptr<Snake> player1 = std::make_shared<Snake>(snake);
+    players[pid] = player1;
+
+    Snake *player = players[pid].get();
 
     int state = START_MENU;
     // gameState state         = START_MENU;
@@ -204,7 +210,7 @@ int main(int argc, char **argv) {
     controller.attachObserver(&startMenu);
     controller.attachObserver(&optionsMenu);
     controller.attachObserver(&ui);
-    controller.attachObserver(&snake);
+    controller.attachObserver(player);
     controller.attachObserver(&sound);
 
     bool hasScore = false;
@@ -258,9 +264,10 @@ int main(int argc, char **argv) {
             //     else hasScore = false;
             // }
             
-            ui.render(snake); // Perhaps a better solution?
+            ui.render(*player); // Perhaps a better solution?
 
-            snake.update(deltaTime, 100.f);
+            // snake.update(deltaTime, 100.f);
+            player->update(deltaTime, 100.f);
         } else if (state == GAME_QUIT) {
             running = false;
         }
@@ -273,7 +280,7 @@ int main(int argc, char **argv) {
         deltaTime = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t1).count())/ 1000000.f;
         // fpsCap(startingTick);
         
-        std::string command = "PLAYER_UPDATE_POSITION;" + std::to_string(pid) + ";" + std::to_string(snake.getPosX()) + ";" + std::to_string(snake.getPosY());
+        std::string command = "PLAYER_UPDATE_POSITION;" + std::to_string(pid) + ";" + std::to_string(player->getPosX()) + ";" + std::to_string(player->getPosY());
         if(client.isConnected()) client.send(command.c_str(), command.size()); 
 
     }

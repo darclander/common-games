@@ -112,6 +112,9 @@ class TcpClient {
             closeConnection();
         }
 
+        void setPid(int pid) {
+            m_pid = pid;
+        }
 
         void receiveData() {
             char responseBuffer[1024];
@@ -128,7 +131,7 @@ class TcpClient {
 
                 std::vector<std::string> parsedInput = splitString(input, ';');
                 for (auto x : parsedInput) std::cout << x << std::endl;
-                if((parsedInput[0] == "PLAYER_INFO")) {
+                if((parsedInput[0] == "PLAYER_INFO") || (parsedInput[0] == "NEW_PLAYER")) {
                     int pid = std::stoi(parsedInput[1]);
                     int xPos = std::stoi(parsedInput[2]);
                     int yPos = std::stoi(parsedInput[3]);
@@ -144,7 +147,7 @@ class TcpClient {
                         std::cerr << "Index " << pid << " is already occupied." << std::endl;
                     }
                 } else if(parsedInput[0] == "PLAYER_NEW_POS") {
-                    std::cout << "Received new pos";
+                    std::cout << "Received new pos" << std::endl;
                     int pid = std::stoi(parsedInput[1]);
                     int xPos = std::stoi(parsedInput[2]);
                     int yPos = std::stoi(parsedInput[3]);
@@ -163,7 +166,7 @@ class TcpClient {
                     std::shared_ptr<Score> score = std::make_shared<Score>(m_renderer, m_gui, m_grid->getGridPointWidth(), m_grid->getGridPointWidth());
                     int xPos = std::stoi(parsedInput[3]);
                     int yPos = std::stoi(parsedInput[4]);
-                    std::cout << "xPos: " <<  xPos << std::endl;
+                    // std::cout << "xPos: " <<  xPos << std::endl;
                     xPos = (xPos) * (m_grid->getGridPointWidth());
                     yPos = (yPos) * (m_grid->getGridPointHeight());
 
@@ -177,7 +180,11 @@ class TcpClient {
                     // if (it != m_scores->end()) {
                     //     m_scores->erase(it);
                     // }
-                    m_players[pid].second->grow();
+                    auto iterator = m_players->find(pid);
+                    if (iterator != m_players->end()) {
+                        iterator->second->grow();
+                    }
+                    
                 }
                 
 
@@ -221,7 +228,7 @@ class TcpClient {
         bool send(const char* data, size_t size) {
             if (clientSocket == -1) {
                 std::cerr << "Not connected to a server\n";
-                // m_isConnected = false;
+                m_isConnected = false;
                 return false;
             }
 
@@ -267,6 +274,7 @@ class TcpClient {
             
             if (clientSocket == -1) {
                 std::cerr << "Not connected to a server\n";
+                m_isConnected = false;
                 return "false";
             }
 
@@ -329,6 +337,7 @@ class TcpClient {
         
         Grid *m_grid;
         GUI *m_gui;
+        int m_pid;
         SDL_Renderer *m_renderer;
         bool m_isConnected = true;
 };
