@@ -129,7 +129,6 @@ public class Server {
                             break;
                         }
 
-
                         msg = appendDelimitor("PLAYER_NEW_POS", params.get(0), params.get(1), params.get(2));
                         broadcast(msg, clientSocket); // PLAYER_NEW_POS;pid;xPos;yPos
                         break;
@@ -138,7 +137,8 @@ public class Server {
                         Player newPlayer = new Player(playerIDCounter++, params.get(0), params.get(1), 0, 0); // 0 = pid, 1 = name, 2 = color, 3 = xPosition, 4 = yPosition
                         players.add(newPlayer);
 
-                        msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getPid()*50, newPlayer.getYPosition());
+
+                        msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getPid()*50, newPlayer.getYPos());
                         send(msg, outputStream); // NEW_PLAYER_RESPONSE;pid;xPos;yPos;fieldWidth;fieldHeight
 
                         msg = appendDelimitor("NEW_PLAYER;", newPlayer.getPid(), (newPlayer.getPid() + 1)*50, (newPlayer.getPid() + 1));
@@ -235,35 +235,53 @@ public class Server {
         private int pid;
         private String name;
         private String color;
-        private int xPosition;
-        private int yPosition;
+        private int headXPos;
+        private int headYPos;
+        private int length;
+        private List<BodySegment> body;
 
-        public Player(int pid, String name, String color, int xPosition, int yPosition) {
+        public Player(int pid, String name, String color, int headXPos, int headYPos) {
             this.pid = pid;
             this.name = name;
             this.color = color;
-            this.xPosition = xPosition;
-            this.yPosition = yPosition;
+            this.headXPos = headXPos;
+            this.headYPos = headYPos;
+            this.length = 1; // NOT IMPLEMENTED
+            this.body = new ArrayList<>(); // NOT IMPLEMENTED
+            this.body.add(new BodySegment(headXPos, headYPos)); // NOT IMPLEMENTED
         }
 
-        public int getPid() {
-            return pid;
+        public int getPid() { return pid; }
+
+        public String getName() { return name; }
+
+        public String getColor() { return color; }
+
+        public int getxPos() { return headXPos; }
+
+        public int getYPos() { return headYPos; }
+
+        public int getLength() { return length; }
+
+        public List<BodySegment> getBody() { return body; }
+    }
+
+
+    public static class BodySegment {
+        private int xPos;
+        private int yPos;
+
+        public BodySegment(int xPos, int yPos) {
+            this.xPos = xPos;
+            this.yPos = yPos;
         }
 
-        public String getName() {
-            return name;
+        public int getxPos() {
+            return xPos;
         }
 
-        public String getColor() {
-            return color;
-        }
-
-        public int getXPosition() {
-            return xPosition;
-        }
-
-        public int getYPosition() {
-            return yPosition;
+        public int getyPos() {
+            return yPos;
         }
     }
 
