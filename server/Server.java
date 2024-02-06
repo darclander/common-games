@@ -60,13 +60,9 @@ public class Server {
                 startTime = System.currentTimeMillis();
                 
 
-                if(ADD_SCORE_COUNTER > ADD_SCORE_INTERVAL) {  // ADD_SCORE;type;amount;xPos;yPos
+                if(ADD_SCORE_COUNTER > ADD_SCORE_INTERVAL) {
+                    playingField.spawnScore("berry", 1); // ADD_SCORE;type;magnitude;xPos;yPos
                     ADD_SCORE_COUNTER = 0;
-                    int xPos = new Random().nextInt(playingField.getWidth());
-                    int yPos = new Random().nextInt(playingField.getWidth());
-                    msg = appendDelimitor("ADD_SCORE", "berry", 1, xPos, yPos);
-                    broadcast(msg); // ADD_SCORE;pid;xPos;yPos
-                    playingField.getField()[yPos][xPos].setType("berry");
                 }
 
                 if(counter2 > 30 * 1000) {
@@ -300,6 +296,20 @@ public class Server {
 
         public int getHeight() {
             return height;
+        }
+
+        // Spawns a score item on a random unoccupied square
+        public void spawnScore(String type, int magnitude) { 
+            int xPos;
+            int yPos;
+            do {
+                xPos = new Random().nextInt(width);
+                yPos = new Random().nextInt(height);
+            } while ( !field[yPos][xPos].getType().equals("empty") );
+
+            field[yPos][xPos].setType(type);
+            String msg = appendDelimitor("ADD_SCORE", type, magnitude, xPos, yPos);
+            broadcast(msg);
         }
     }
 
