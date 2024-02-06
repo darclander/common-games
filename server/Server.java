@@ -45,6 +45,7 @@ public class Server {
         }
     }
 
+    
     private static void handleGame(){
 
         try {
@@ -58,10 +59,6 @@ public class Server {
             while (true) {
                 startTime = System.currentTimeMillis();
                 
-                // SCORE COLLECTED
-                // SCORE_COLLECTED;pid;type;magnitude;xPos;yPos
-                // msg = appendDelimitor("SCORE_COLLECTED", new Random().nextInt(playingField.getWidth()), new Random().nextInt(playingField.getWidth()));
-                // broadcast(msg); // SCORE_COLLECTED;pid;type;magnitude;xPos;yPos
 
                 if(ADD_SCORE_COUNTER > ADD_SCORE_INTERVAL) {  // ADD_SCORE;type;amount;xPos;yPos
                     ADD_SCORE_COUNTER = 0;
@@ -90,6 +87,7 @@ public class Server {
         }
     }
 
+    
     private static void handleClient(Socket clientSocket) {
         try {
             InputStream inputStream = clientSocket.getInputStream();
@@ -123,6 +121,19 @@ public class Server {
                         break;
                     
                     case "PLAYER_UPDATE_POSITION": // PLAYER_UPDATE_POSITION;pid;xPos;yPos
+                        String moveResponse  = checkPosition(Integer.parseInt(params.get(0)), Integer.parseInt(params.get(1)), Integer.parseInt(params.get(2)));
+
+
+                        if (moveResponse == "berry"){
+                            msg = appendDelimitor("ADD_SCORE", params.get(0), "berry", 1, Integer.parseInt(params.get(1)), Integer.parseInt(params.get(2))); // ADD_SCORE;pid;type;amount;xPos;yPos
+                            broadcast(msg);
+                        } else if (moveResponse == "outOfBounds") {
+                            msg = appendDelimitor("MOVE_OUT_OF_BOUNDS", params.get(0), params.get(1), params.get(2)); // MOVE_OUT_OF_BOUNDS;pid;xPos;yPos     -- Parameters might be uncessary
+                            send(msg, outputStream);
+                            break;
+                        }
+
+
                         msg = appendDelimitor("PLAYER_NEW_POS", params.get(0), params.get(1), params.get(2));
                         broadcast(msg, clientSocket); // PLAYER_NEW_POS;pid;xPos;yPos
                         break;
@@ -169,6 +180,7 @@ public class Server {
         }
     }
 
+
     private static void send(String message, OutputStream outputStream) {
         try {
             System.out.println(("Sending: ") + message);
@@ -179,7 +191,8 @@ public class Server {
 
     }
 
-    public static String appendDelimitor(Object... parameters) {
+
+    private static String appendDelimitor(Object... parameters) {
         StringBuilder sb = new StringBuilder();
         for (Object parameter : parameters) {
             sb.append(parameter).append(";");
@@ -190,6 +203,7 @@ public class Server {
         }
         return sb.toString();
     }
+
 
     private static void broadcast(String message, Socket... excludeClients) {
         for (Socket clientSocket : clientList) {
@@ -204,6 +218,20 @@ public class Server {
             }
         }
         System.out.println("Broadcasted: '" + message + "' to " + clientList.size() + " clients.");
+    }
+
+
+    private static String checkPosition(int playerID, int x, int y) {
+        if(x < 0 || x >= playingField.getWidth() || y < 0 || y >= playingField.getHeight()) {
+            return "outOfBounds";
+        }
+
+        if(playingField.getField()[y][x].getType().equals("berry")) {
+            playingField.getField()[y][x].setType("empty");
+            return "berry";
+        }
+
+        return null;
     }
 
 
@@ -243,6 +271,7 @@ public class Server {
         }
     }
 
+
     public static class PlayingField {
         
         private int width;
@@ -273,6 +302,7 @@ public class Server {
             return height;
         }
     }
+
 
     public static class Square {
         private String type;
