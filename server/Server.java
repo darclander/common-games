@@ -141,7 +141,7 @@ public class Server {
                         msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getPid()*50, newPlayer.getYPos());
                         send(msg, outputStream); // NEW_PLAYER_RESPONSE;pid;xPos;yPos;fieldWidth;fieldHeight
 
-                        msg = appendDelimitor("NEW_PLAYER;", newPlayer.getPid(), (newPlayer.getPid() + 1)*50, (newPlayer.getPid() + 1));
+                        msg = appendDelimitor("NEW_PLAYER", newPlayer.getPid(), (newPlayer.getPid() + 1)*50, (newPlayer.getPid() + 1));
                         broadcast(msg, clientSocket); // NEW_PLAYER;pid;xPos;yPos
                         
                         for (Player p : players) {
