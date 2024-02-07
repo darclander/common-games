@@ -96,6 +96,17 @@ void GUI::onEvent(const SDL_Event& event) {
     }
 }
 
+SDL_Color GUI::getColor(std::string colorName) {
+    if(colorName == "green") {
+        return color::GREEN;
+    } else if (colorName == "white") {
+        return color::WHITE;
+    } else if (colorName == "red" ) {
+        return color::RED;
+    }
+}
+
+
 void GUI::update() {
 
     // while(SDL_PollEvent(&m_event)) {

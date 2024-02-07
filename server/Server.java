@@ -20,7 +20,7 @@ public class Server {
     private static ExecutorService executorService = Executors.newCachedThreadPool();
     private static List<Player> players = new ArrayList<>();
     private static int playerIDCounter = 0;
-    private static PlayingField playingField = new PlayingField(20, 20);
+    private static PlayingField playingField = new PlayingField(40, 30);
 
     public static void main(String[] args) {
         try {
@@ -54,7 +54,7 @@ public class Server {
             long elapsedTime;
             long startTime;
             long ADD_SCORE_COUNTER = 0;
-            long ADD_SCORE_INTERVAL = 1 * 1000;
+            long ADD_SCORE_INTERVAL = 5 * 1000;
             long counter2 = 0;
             while (true) {
                 startTime = System.currentTimeMillis();
@@ -135,20 +135,20 @@ public class Server {
                         break;
 
                     case "ADD_NEW_PLAYER": // ADD_NEW_PLAYER;name;color
-                        Player newPlayer = new Player(playerIDCounter++, params.get(0), params.get(1), 0, 0); // 0 = pid, 1 = name, 2 = color, 3 = xPosition, 4 = yPosition
+                        Player newPlayer = new Player(clientSocket, playerIDCounter++, params.get(0), params.get(1), 0, 0); // 0 = pid, 1 = name, 2 = color, 3 = xPosition, 4 = yPosition
                         players.add(newPlayer);
 
 
-                        msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getPid()*50, newPlayer.getYPos());
+                        msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getPid()*50, newPlayer.getYPos(), playingField.getWidth(), playingField.getHeight());
                         send(msg, outputStream); // NEW_PLAYER_RESPONSE;pid;xPos;yPos;fieldWidth;fieldHeight
 
-                        msg = appendDelimitor("NEW_PLAYER", newPlayer.getPid(), (newPlayer.getPid() + 1)*50, (newPlayer.getPid() + 1));
-                        broadcast(msg, clientSocket); // NEW_PLAYER;pid;xPos;yPos
+                        msg = appendDelimitor("NEW_PLAYER", newPlayer.getPid(), newPlayer.getName(), newPlayer.getColor(), (newPlayer.getPid() + 1)*50, (newPlayer.getPid() + 1));
+                        broadcast(msg, clientSocket); // NEW_PLAYER;pid;name;color;xPos;yPos
                         
                         for (Player p : players) {
                             if(p == newPlayer) continue;
-                            msg = appendDelimitor("PLAYER_INFO", p.getPid(), (p.getPid() + 1)*50, (p.getPid() + 1));
-                            send(msg, outputStream); // PLAYER_INFO;pid;xPos;yPos
+                            msg = appendDelimitor("PLAYER_INFO", p.getPid(), p.getName(), p.getColor(), (p.getPid() + 1)*50, (p.getPid() + 1));         // Merge with NEW_PLAYER????
+                            send(msg, outputStream); // PLAYER_INFO;pid;name;color;xPos;yPos
                         }
 
                         break;
@@ -158,6 +158,10 @@ public class Server {
                     case "BROADCAST_TEST": // BROADCAST_TEST;message
                         System.out.println(params.get(0));
                         broadcast(params.get(0));
+                        break;
+
+                    case "BERRY_TEST": // BERRY_TEST
+                        playingField.spawnScore("berry", 1, Integer.parseInt(params.get(0)), Integer.parseInt(params.get(1)));
                         break;
 
                     default:
@@ -170,6 +174,12 @@ public class Server {
             if (e instanceof java.net.SocketException && e.getMessage().equals("Connection reset")) {
                 // Client disconnected abruptly
                 System.out.println("Client disconnected abruptly: " + clientSocket.getInetAddress());
+                for (Player p : players) {
+                    if (p.getPlayerSocket() == clientSocket) {
+                        players.remove(p);
+                        break;
+                    }
+                }
                 clientList.remove(clientSocket);
             } else {
                 e.printStackTrace();
@@ -214,11 +224,15 @@ public class Server {
                 e.printStackTrace();
             }
         }
-        System.out.println("Broadcasted: '" + message + "' to " + clientList.size() + " clients.");
+        if(clientList.size() > 1) {
+            System.out.println("Broadcasted: '" + message + "' to " + clientList.size() + " clients.");
+        }
+        
     }
 
 
     public static class Player {
+        private Socket playerSocket;
         private int pid;
         private String name;
         private String color;
@@ -227,7 +241,8 @@ public class Server {
         private int length;
         private List<BodySegment> body;
 
-        public Player(int pid, String name, String color, int headXPos, int headYPos) {
+        public Player(Socket playerSocket, int pid, String name, String color, int headXPos, int headYPos) {
+            this.playerSocket = playerSocket;
             this.pid = pid;
             this.name = name;
             this.color = color;
@@ -237,6 +252,8 @@ public class Server {
             this.body = new ArrayList<>(); // NOT IMPLEMENTED
             this.body.add(new BodySegment(headXPos, headYPos)); // NOT IMPLEMENTED
         }
+
+        public Socket getPlayerSocket() { return playerSocket; }
 
         public int getPid() { return pid; }
 
@@ -316,6 +333,15 @@ public class Server {
             String msg = appendDelimitor("ADD_SCORE", type, magnitude, xPos, yPos);
             broadcast(msg);
         }
+
+        // @Overload    Spawns a score item on a specific square
+        public void spawnScore(String type, int magnitude, int xPos, int yPos) { 
+            field[yPos][xPos].setType(type);
+            String msg = appendDelimitor("ADD_SCORE", type, magnitude, xPos, yPos);
+            broadcast(msg);
+        }
+
+
 
         public String checkPosition(int playerID, int x, int y) {
             if(x < 0 || x >= width || y < 0 || y >= height) {

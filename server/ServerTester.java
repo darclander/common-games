@@ -37,7 +37,7 @@ public class ServerTester {
                 }
             });
 
-            receiveThread.start();
+            // receiveThread.start();
             sendThread.start();
 
         } catch (IOException e) {

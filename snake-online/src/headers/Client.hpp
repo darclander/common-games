@@ -131,14 +131,18 @@ class TcpClient {
 
                 std::vector<std::string> parsedInput = splitString(input, ';');
                 for (auto x : parsedInput) std::cout << x << std::endl;
-                if((parsedInput[0] == "PLAYER_INFO") || (parsedInput[0] == "NEW_PLAYER")) {
-                    int pid = std::stoi(parsedInput[1]);
-                    int xPos = std::stoi(parsedInput[2]);
-                    int yPos = std::stoi(parsedInput[3]);
+
+                // NEW_PLAYER;pid;name;color;xPos;yPos
+                if ((parsedInput[0] == "PLAYER_INFO") || (parsedInput[0] == "NEW_PLAYER")) {
+                    int pid             = std::stoi(parsedInput[1]);
+                    std::string name    = parsedInput[2];
+                    SDL_Color c         = m_gui->getColor(parsedInput[3]);
+                    int xPos            = std::stoi(parsedInput[4]);
+                    int yPos            = std::stoi(parsedInput[5]);
                     std::cout << "Creating snake at: " << xPos << ", " << yPos << std::endl;
                     // std::cout << "HERE" << std::endl;
                     // std::cout << m_grid << std::endl;
-                    std::shared_ptr<Snake> snake = std::make_shared<Snake>(m_renderer, xPos, yPos, m_grid, 40, 40, 3, menuc::RED);
+                    std::shared_ptr<Snake> snake = std::make_shared<Snake>(m_renderer, xPos, yPos, m_grid, 40, 40, 3, c);
                         
 
                     if (m_players->count(pid) == 0) {
@@ -146,17 +150,22 @@ class TcpClient {
                     } else {
                         std::cerr << "Index " << pid << " is already occupied." << std::endl;
                     }
-                } else if(parsedInput[0] == "PLAYER_NEW_POS") {
+                } else if (parsedInput[0] == "PLAYER_NEW_POS") {
                     std::cout << "Received new pos" << std::endl;
                     int pid = std::stoi(parsedInput[1]);
                     int xPos = std::stoi(parsedInput[2]);
                     int yPos = std::stoi(parsedInput[3]);
 
+                    int xPosGrid = ((xPos) * (m_grid->getGridPointWidth()));
+                    int yPosGrid = ((yPos) * (m_grid->getGridPointHeight()));
+
                     auto iterator = m_players->find(pid);
                     if (iterator != m_players->end()) {
                         auto &s = iterator->second;
-                        if (s->getPosX() != xPos || s->getPosY() != yPos) {
-                            iterator->second->updatePos(xPos, yPos);
+                        if ((s->getPosX()-2) != xPosGrid || (s->getPosY()-2) != yPosGrid) {
+                            std::cout << "S pos: " << s->getPosX() << std::endl;
+                            std::cout << "xposgrid: " << xPosGrid << std::endl;
+                            iterator->second->updatePos(xPosGrid, yPosGrid);
                             iterator->second->getPositions();
                         }
                     } else {
@@ -167,22 +176,29 @@ class TcpClient {
                     int xPos = std::stoi(parsedInput[3]);
                     int yPos = std::stoi(parsedInput[4]);
                     // std::cout << "xPos: " <<  xPos << std::endl;
-                    xPos = (xPos) * (m_grid->getGridPointWidth());
-                    yPos = (yPos) * (m_grid->getGridPointHeight());
+                    xPos = ((xPos) * (m_grid->getGridPointWidth())) + 1;
+                    yPos = ((yPos) * (m_grid->getGridPointHeight())) + 1;
 
                     Gridpoint *gp = m_grid->getPoint(xPos, yPos);
-                    gp->setScore();
-                    score->move(gp->getGridPointX(), gp->getGridPointY());
-                    std::string key = std::to_string(gp->getGridPointX()) + "," + std::to_string(gp->getGridPointY());
-                    std::cout << "key: " << key << std::endl;
-                    (*m_scores)[key] = std::move(score);
+                    if(!(gp == nullptr)) {
+                        gp->setScore();
+                        score->move(gp->getGridPointX(), gp->getGridPointY());
+                        std::string key = std::to_string(gp->getGridPointX()) + "," + std::to_string(gp->getGridPointY());
+                        std::cout << "key: " << key << std::endl;
+                        (*m_scores)[key] = std::move(score);
+                    }
+
+
                     // m_scores->push_back(score);
                 } else if (parsedInput[0] == "SCORE_COLLECTED") {
                     int pid = std::stoi(parsedInput[1]);
                     int xPos = std::stoi(parsedInput[4]);
                     int yPos = std::stoi(parsedInput[5]);
+
+                    xPos = ((xPos) * (m_grid->getGridPointWidth())) + 1;
+                    yPos = ((yPos) * (m_grid->getGridPointHeight())) + 1;
                     
-                    Gridpoint *gp = m_grid->getPoint(xPos * m_grid->getGridPointWidth(), yPos * m_grid->getGridPointHeight());
+                    Gridpoint *gp = m_grid->getPoint(xPos, yPos);
 
                     gp->removeScore();
 

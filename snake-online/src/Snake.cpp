@@ -135,7 +135,8 @@ void Snake::grow() {
 void Snake::updatePos(int xPos, int yPos) {
     
     int newPosX = xPos;
-    int newPosY = yPos;   
+    int newPosY = yPos;
+  
     Gridpoint *newPoint = m_grid->getPoint(newPosX + m_snakeWidth / 2, newPosY + m_snakeHeight / 2);
 
     int oldPosX = snakeBlocks.back().getPosX();
@@ -148,10 +149,10 @@ void Snake::updatePos(int xPos, int yPos) {
             std::cout << "GAME OVER!" << std::endl;
         }
 
-        if(newPoint->hasScore()) {
-            snakeBlocks.push_back(Snakeblock(m_renderer, (snakeBlocks.size()-1)*m_snakeWidth, 1, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees, m_color));
-            newPoint->removeScore();
-        }
+        // if(newPoint->hasScore()) {
+        //     snakeBlocks.push_back(Snakeblock(m_renderer, (snakeBlocks.size()-1)*m_snakeWidth, 1, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees, m_color));
+        //     newPoint->removeScore();
+        // }
         
         newPoint->setNotEmpty();
 

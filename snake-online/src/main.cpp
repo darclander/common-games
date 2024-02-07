@@ -23,6 +23,8 @@ typedef std::chrono::high_resolution_clock Clock;
 #define FPS 5
 #define frameDelay = 1000 / FPS
 
+#define SEND_LIMIT 100
+
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
@@ -98,6 +100,17 @@ void getName(std::string &name) {
     if (name_it != config.end()) name = name_it->second;
 }
 
+void getColor(GUI &ui, SDL_Color &color, std::string &colorString) {
+    std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
+
+    auto color_it = config.find("color");
+
+    if (color_it != config.end()) {
+        color = ui.getColor(color_it->second);
+        colorString = color_it->second;
+    } 
+}
+
 
 void receiveData(TcpClient &client) {
     char responseBuffer[1024];
@@ -123,8 +136,7 @@ void receiveData(TcpClient &client) {
 int main(int argc, char **argv) {
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     ui.loadTexture("berry", "./textures/berry.png");
-    Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 40, 30);
-    Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 3, menuc::RED);
+    
     Controller controller = Controller();
 
     int volume = 64;
@@ -141,19 +153,27 @@ int main(int argc, char **argv) {
     std::string ipAddress = "127.0.0.1";
     int port = 0;
     std::string nickname = "default";
+    SDL_Color color = color::GREEN;
+    std::string colorString = "green";
+    float sendTimer = 0;
 
     getIpAdressAndPort(ipAddress, port);
     getName(nickname);
+    getColor(ui, color, colorString);
 
     double deltaTime = 0;
     uint32_t startingTick = 0;
+
+    Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 40, 30);
+    Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 3, color);
 
     TcpClient client = TcpClient(ui.getRenderer(), &ui, &grid, &players, &scores);
 
     if (client.connectToServer(ipAddress.c_str(), port)) {
 
         // Initial communication between server and client
-        std::string command = "ADD_NEW_PLAYER;" + nickname + ";green"; 
+        std::string command = "ADD_NEW_PLAYER;" + nickname + ";" + colorString; 
+        std::cout << command << std::endl;
         std::string input = "";
         if (client.send(command.c_str(), command.size())) {
             client.receive(input);
@@ -168,7 +188,7 @@ int main(int argc, char **argv) {
             // int gridWidth   = stoi(parsedInput[4]);
             // int gridHeight  = stoi(parsedInput[5]);
             grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, gw, gh);
-            snake = Snake(ui.getRenderer(), xPos, yPos, &grid, 40, 40, 3, menuc::RED);
+            snake = Snake(ui.getRenderer(), xPos, yPos, &grid, 40, 40, 3, color);
         }
 
         // Allow for client to communicate
@@ -280,17 +300,18 @@ int main(int argc, char **argv) {
         auto t3 = Clock::now();
                
         // See method-description
-        deltaTime = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t1).count())/ 1000000.f;
+        deltaTime = (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t1).count()) / 1000000.f;
+
         // fpsCap(startingTick);
         
         int gridXPos = 0;
         int gridYPos = 0;
         Gridpoint *gp = grid.getPoint(player->getPosX(), player->getPosY());
-        gridXPos = (gp->getGridPointX() / grid.getGridPointWidth()) + 1;
-        gridYPos = (gp->getGridPointY() / grid.getGridPointHeight()) + 1;
+        gridXPos = (gp->getGridPointX() / grid.getGridPointWidth());
+        gridYPos = (gp->getGridPointY() / grid.getGridPointHeight());
         std::string command = "PLAYER_UPDATE_POSITION;" + std::to_string(pid) + ";" + std::to_string(gridXPos) + ";" + std::to_string(gridYPos) + ";";
-        std::cout << command << std::endl;
         if(client.isConnected()) client.send(command.c_str(), command.size()); 
+
 
     }
 

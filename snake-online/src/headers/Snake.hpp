@@ -75,6 +75,10 @@ class Snake : public Observer {
             return snakeBlocks.size();
         }
 
+        bool isHead(int xPos, int yPos) {
+            return (snakeBlocks[0].getPosX() == xPos) && (snakeBlocks[0].getPosY() == yPos);
+        }
+
         void getPositions() {
             for (auto &sb : snakeBlocks) {
                 std::cout << sb.getPosX() << ", " << sb.getPosY() << std::endl; 
