@@ -174,6 +174,7 @@ class TcpClient {
                     gp->setScore();
                     score->move(gp->getGridPointX(), gp->getGridPointY());
                     std::string key = std::to_string(gp->getGridPointX()) + "," + std::to_string(gp->getGridPointY());
+                    std::cout << "key: " << key << std::endl;
                     (*m_scores)[key] = std::move(score);
                     // m_scores->push_back(score);
                 } else if (parsedInput[0] == "SCORE_COLLECTED") {
@@ -181,11 +182,12 @@ class TcpClient {
                     int xPos = std::stoi(parsedInput[4]);
                     int yPos = std::stoi(parsedInput[5]);
                     
-                    Gridpoint *gp = m_grid->getPoint(xPos, yPos);
+                    Gridpoint *gp = m_grid->getPoint(xPos * m_grid->getGridPointWidth(), yPos * m_grid->getGridPointHeight());
 
                     gp->removeScore();
-                    
+                    std::cout << "xPos" << gp->getGridPointX() << std::endl;
                     std::string key = std::to_string(gp->getGridPointX()) + "," + std::to_string(gp->getGridPointY());
+                    std::cout << "key: " << key << std::endl;
                     auto it = m_scores->find(key);
                     if (it != m_scores->end()) {
                         // Erase the score from the map
