@@ -162,10 +162,12 @@ int main(int argc, char **argv) {
             pid             = stoi(parsedInput[1]);
             int xPos        = stoi(parsedInput[2]);
             int yPos        = stoi(parsedInput[3]);
+            int gw          = stoi(parsedInput[4]);
+            int gh          = stoi(parsedInput[5]);
             client.setPid(pid);
             // int gridWidth   = stoi(parsedInput[4]);
             // int gridHeight  = stoi(parsedInput[5]);
-            // grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, gridWidth, gridHeight);
+            grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, gw, gh);
             snake = Snake(ui.getRenderer(), xPos, yPos, &grid, 40, 40, 3, menuc::RED);
         }
 
@@ -284,10 +286,10 @@ int main(int argc, char **argv) {
         int gridXPos = 0;
         int gridYPos = 0;
         Gridpoint *gp = grid.getPoint(player->getPosX(), player->getPosY());
-        gridXPos = (gp->getGridPointX() / 20);
-        gridYPos = (gp->getGridPointY() / 20);
-        std::string command = "PLAYER_UPDATE_POSITION;" + std::to_string(pid) + ";" + std::to_string(gridXPos) + ";" + std::to_string(gridYPos);
-        
+        gridXPos = (gp->getGridPointX() / grid.getGridPointWidth()) + 1;
+        gridYPos = (gp->getGridPointY() / grid.getGridPointHeight()) + 1;
+        std::string command = "PLAYER_UPDATE_POSITION;" + std::to_string(pid) + ";" + std::to_string(gridXPos) + ";" + std::to_string(gridYPos) + ";";
+        std::cout << command << std::endl;
         if(client.isConnected()) client.send(command.c_str(), command.size()); 
 
     }

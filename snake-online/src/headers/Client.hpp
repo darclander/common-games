@@ -185,7 +185,7 @@ class TcpClient {
                     Gridpoint *gp = m_grid->getPoint(xPos * m_grid->getGridPointWidth(), yPos * m_grid->getGridPointHeight());
 
                     gp->removeScore();
-                    std::cout << "xPos" << gp->getGridPointX() << std::endl;
+
                     std::string key = std::to_string(gp->getGridPointX()) + "," + std::to_string(gp->getGridPointY());
                     std::cout << "key: " << key << std::endl;
                     auto it = m_scores->find(key);
