@@ -25,6 +25,7 @@ typedef std::chrono::high_resolution_clock Clock;
 
 #define SEND_LIMIT 100
 
+#define WINDOW_FULLSCREEN 0
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
@@ -134,7 +135,7 @@ void receiveData(TcpClient &client) {
 }
 
 int main(int argc, char **argv) {
-    GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+    GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_FULLSCREEN);
     ui.loadTexture("berry", "./textures/berry.png");
     
     Controller controller = Controller();

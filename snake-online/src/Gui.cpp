@@ -21,7 +21,7 @@ GUI::GUI(const char *title, int windowWidth, int windowHeight, bool fullscreen) 
                                     SDL_WINDOWPOS_CENTERED,
                                     this->m_windowWidth,
                                     this->m_windowHeight,
-                                    SDL_WINDOW_RESIZABLE
+                                    flags | SDL_WINDOW_RESIZABLE  
         );
 
         m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_PRESENTVSYNC);
