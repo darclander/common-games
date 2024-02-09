@@ -8,7 +8,6 @@
 #include <sstream>
 #include <unordered_map>
 
-
 #include "Gui.hpp"
 #include "Snake.hpp"
 #include "Grid.hpp"
@@ -17,6 +16,9 @@
 #include "Controller.hpp"
 #include "Soundmanager.hpp"
 #include "Client.hpp"
+
+#include <windows.h>
+#include <winbase.h>
 
 typedef std::chrono::high_resolution_clock Clock;
 
@@ -135,6 +137,9 @@ void receiveData(TcpClient &client) {
 }
 
 int main(int argc, char **argv) {
+
+    SetDllDirectoryA("./dlls");
+
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_FULLSCREEN);
     ui.loadTexture("berry", "./textures/berry.png");
     
@@ -261,7 +266,7 @@ int main(int argc, char **argv) {
             // std::cout << volume << std::endl;
         } else if (state == GAME_PLAY) {
             controller.broadcastNewMenu(3);
-            ui.render(grid);
+            // ui.render(grid);
 
             for (const auto& pair : players) {
                 pair.second->render();
