@@ -91,6 +91,8 @@ void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
 
 int main(int argc, char **argv) {
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+    ui.loadTexture("berry", "./textures/berry.png");
+
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20, 15);
     Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 4);
     Controller controller = Controller();
@@ -143,7 +145,7 @@ int main(int argc, char **argv) {
     bool hasScore = false;
     Gridpoint *scorePoint;
 
-    Score score = Score(ui.getRenderer(), grid.getGridPointWidth(), grid.getGridPointHeight());
+    Score score = Score(&ui, grid.getGridPointWidth(), grid.getGridPointHeight());
 
     bool running = true;
     while(ui.getWindowClose() && running) {
@@ -168,6 +170,7 @@ int main(int argc, char **argv) {
             if(!hasScore) {
                 std::pair<int, int> pos = getRandomCoordinate();
                 std::cout << "X: " << pos.first << " Y: " << pos.second << std::endl;
+                std::cout << snake.size() << std::endl;
                 scorePoint = grid.getPoint(pos.first, pos.second);
                 if(scorePoint != nullptr && scorePoint->isEmpty()) {
                     scorePoint->setScore();
