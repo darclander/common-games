@@ -53,6 +53,43 @@ GUI::GUI(const char *title, int windowWidth, int windowHeight, bool fullscreen) 
 
 }
 
+SDL_Texture *GUI::loadTexture(std::string name, const std::string &filePath) {
+    SDL_Surface* surface = IMG_Load(filePath.c_str());
+    if (!surface) {
+        std::cerr << "Failed to load image: " << IMG_GetError() << std::endl;
+    }
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(m_renderer, surface);
+    SDL_FreeSurface(surface);
+
+    if (!texture) {
+        std::cerr << "Failed to create texture: " << SDL_GetError() << std::endl;
+    }
+
+    m_textureMap[name] = texture;
+
+    return texture;  
+}
+
+SDL_Texture *GUI::getTexture(const std::string &key) {
+    // Retrieve the texture associated with the key
+    auto it = m_textureMap.find(key);
+    if (it != m_textureMap.end()) {
+        return it->second;
+    }
+
+    return nullptr;  // Texture not found
+}
+
+void GUI::unloadTexture(const std::string &key) {
+    // Unload the texture associated with the key
+    auto it = m_textureMap.find(key);
+    if (it != m_textureMap.end()) {
+        SDL_DestroyTexture(it->second);
+        m_textureMap.erase(it);
+    }
+}
+
 void GUI::onEvent(const SDL_Event& event) {
     if(event.type == SDL_QUIT) {
         m_windowClose = true;

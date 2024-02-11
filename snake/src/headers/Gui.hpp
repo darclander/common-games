@@ -14,6 +14,14 @@
 #include "Menu.hpp"
 #include "Controller.hpp"
 
+// For controlling all the colors. TODO: move this from menu.hpp
+namespace g_color {
+    const SDL_Color RED     = {255, 0,   0,   255};
+    const SDL_Color GREEN   = {0,   255, 0,   255};
+    const SDL_Color BLUE    = {0,   0,   255, 255};
+    const SDL_Color WHITE   = {255, 255, 255, 255};
+}
+
 class GUI : public Observer {
 
     public:
@@ -33,6 +41,10 @@ class GUI : public Observer {
 
         bool getWindowClose();
 
+        SDL_Texture *loadTexture(std::string name, const std::string &filePath);
+        SDL_Texture *getTexture(const std::string &key);
+        void unloadTexture(const std::string &key);
+
         SDL_Renderer *getRenderer();
         TTF_Font *getFont();
 
@@ -50,6 +62,7 @@ class GUI : public Observer {
 
         TTF_Font *m_font;
 
+        std::unordered_map<std::string, SDL_Texture*> m_textureMap;
         std::vector<std::unique_ptr<Menu>> menus;
 
 
