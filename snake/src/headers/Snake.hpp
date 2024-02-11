@@ -57,6 +57,10 @@ class Snake : public Observer {
 
         void onEvent(const SDL_Event& event) override;
 
+        int size() {
+            return snakeBlocks.size();
+        }
+
     private:
         int m_snakeSize;
         int m_snakeWidth;

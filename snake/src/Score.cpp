@@ -1,20 +1,22 @@
 #include "Score.hpp"
 
 
-Score::Score(SDL_Renderer *renderer, int width, int height) {
-    SDL_Surface* surface = IMG_Load("./textures/berry.png");
-    if (!surface) {
-        std::cerr << "Failed to load image: " << IMG_GetError() << std::endl;
-    }
+Score::Score(GUI *ui, int width, int height) {
+    // SDL_Surface* surface = IMG_Load("./textures/berry.png");
+    // if (!surface) {
+    //     std::cerr << "Failed to load image: " << IMG_GetError() << std::endl;
+    // }
 
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-    SDL_FreeSurface(surface);
+    // SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    // SDL_FreeSurface(surface);
 
-    if (!texture) {
-        std::cerr << "Failed to create texture: " << SDL_GetError() << std::endl;
-    }
-    m_textureScore = texture;
-    m_renderer = renderer;
+    // if (!texture) {
+    //     std::cerr << "Failed to create texture: " << SDL_GetError() << std::endl;
+    // }
+
+    m_gui = ui;
+    m_textureScore = m_gui->getTexture("berry");
+    m_renderer = m_gui->getRenderer();
     m_width = width;
     m_xPos = 99999;
     m_yPos = 99999;
