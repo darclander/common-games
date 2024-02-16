@@ -130,6 +130,7 @@ int main(int argc, char **argv) {
     std::function<void()> funcL = bindMemberFunction(sound, &SoundManager::decreaseVolume);
     std::function<void()> funcR = bindMemberFunction(sound, &SoundManager::increaseVolume);
     optionsMenu.addItemBar("sound", funcL, funcR);
+    optionsMenu.addItemToggle("sound: ", funcL);
     optionsMenu.addItemState("asd", 1);
 
     // int soundVolume;

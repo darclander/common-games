@@ -101,7 +101,11 @@ int Menu::addItem() {
 }
 
 
-
+int Menu::addItemToggle(std::string name, std::function<void()> refFuncToggle) {
+    std::unique_ptr<MenuToggle> mi = std::make_unique<MenuToggle>(m_renderer, name, m_xPos, m_yPos + m_items.size() * 50, m_font, refFuncToggle, *this);
+    addItemT(std::move(mi));
+    return 0;
+}
 
 int Menu::addItemState(const std::string &name, int nextState) {
 
