@@ -16,7 +16,6 @@
 #define MENU_BAR        0x2
 #define MENU_ON_OFF     0x3
 
-
 #define KEY_ENTER       -1
 #define KEY_LEFT        0x0
 #define KEY_RIGHT       0x1
@@ -70,6 +69,8 @@ class Menu : public Observer {
         int addItemState(const std::string &name, int nextState);
 
         int addItemBar(std::string name, std::function<void()> refFuncL, std::function<void()> refFuncR);
+
+        int addItemToggle(std::string name, std::function<void()> refFuncToggle);
 
 
 
@@ -189,6 +190,24 @@ class MenuItem {
             return true;
         }
 
+        bool updateTextValue(Text &txt, const std::string newText) {
+            std::string newValue = getTextString() + newText;
+            SDL_Surface *textSurface = TTF_RenderText_Solid(m_font, newValue.c_str(), getColor());
+            if (!textSurface) {
+                std::cerr << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << std::endl;
+            }
+
+            SDL_Texture* textTexture = SDL_CreateTextureFromSurface(m_renderer, textSurface);
+            if (!textTexture) {
+                std::cerr << "Unable to create texture from rendered text! SDL_Error: " << SDL_GetError() << std::endl;
+                SDL_FreeSurface(textSurface);
+            }
+            SDL_FreeSurface(textSurface);
+
+            txt.texture = textTexture;
+            return true;
+        }
+
     private:
         std::string m_textString;
 
@@ -253,6 +272,42 @@ class MenuState : public MenuItem {
 
     private:
         int m_nextState;
+        std::function<void()> m_referenceFunction;
+};
+
+class MenuToggle : public MenuItem {
+    public:
+        MenuToggle(SDL_Renderer *renderer, std::string name/*,std::function<void()> refFunc*/, 
+                    int xPos, int yPos, TTF_Font *font, std::function<void()> refFunc, Menu &mi) 
+        : MenuItem(renderer, name, xPos, yPos, font, mi) {
+            m_referenceFunction = refFunc;
+            m_on_off = true; // Always true for now?
+            // m_nextState = nextState;
+        }
+
+        void update() override {
+            updateTextColor(m_menuText, menuc::RED);
+        }
+
+        void reset() override {
+            updateTextColor(m_menuText, menuc::WHITE);
+        }
+
+        void trigger(int key) override {
+            if(key == KEY_ENTER) {
+                updateTextValue(m_menuText, m_menuText.name + "on");
+                m_referenceFunction();
+            }
+        }
+
+        void render() override {
+            SDL_Rect renderQuad = {m_menuText.xPos, m_menuText.yPos, m_menuText.width, m_menuText.height};
+            SDL_RenderCopy(m_renderer, m_menuText.texture, nullptr, &renderQuad);
+        }
+
+    private:
+        int m_nextState;
+        bool m_on_off;
         std::function<void()> m_referenceFunction;
 };
 

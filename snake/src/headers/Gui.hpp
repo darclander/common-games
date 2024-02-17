@@ -37,13 +37,14 @@ class GUI : public Observer {
         void render(T &object) {
             object.render();
         }
+
         void clearRenderer();
 
         bool getWindowClose();
 
         SDL_Texture *loadTexture(std::string name, const std::string &filePath);
         SDL_Texture *getTexture(const std::string &key);
-        void unloadTexture(const std::string &key);
+        void unloadTexture(const std::string &key); // Should be a bool to confirm?
 
         SDL_Renderer *getRenderer();
         TTF_Font *getFont();
