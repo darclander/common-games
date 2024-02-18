@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
     ui.loadTexture("berry", "./textures/berry.png");
 
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20, 15);
-    Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 4);
+    Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 5);
     Controller controller = Controller();
     int volume = 64;
     int playSound = 1;
@@ -148,9 +148,15 @@ int main(int argc, char **argv) {
 
     Score score = Score(&ui, grid.getGridPointWidth(), grid.getGridPointHeight());
 
-    // Text t = ui.createText("test", 500, 500, g_color::BLUE);
+    int s = 0;
+    ui.loadFont("regular_18", "./font.ttf", 18);
+    ui.loadFont("regular_108", "./font.ttf", 108);
+    Text t = ui.createText("Score: " + std::to_string(s), WINDOW_WIDTH - 175, 50, g_color::WHITE, "regular_18");
+    Text game_over = ui.createText("GAME OVER!", 0, 0, g_color::RED, "regular_108");
+    ui.updateTextPos(game_over, WINDOW_MIDDLE_X - game_over.width / 2, WINDOW_MIDDLE_Y - game_over.height / 2);
 
     bool running = true;
+    bool isAlive = true;
     while(ui.getWindowClose() && running) {
 
         controller.update();
@@ -160,7 +166,7 @@ int main(int argc, char **argv) {
 
         ui.clearRenderer();
         ui.update();
-        // ui.render(t);
+        
 
         if (state == START_MENU) {
             startMenu.render();
@@ -183,13 +189,28 @@ int main(int argc, char **argv) {
                 }
             } else {
                 score.render();
-                if(scorePoint != nullptr) hasScore = scorePoint->hasScore();
-                else hasScore = false;
+                if(scorePoint != nullptr) {
+                    hasScore = scorePoint->hasScore();
+                } else {
+                    hasScore = false;
+                }
+
+                // Bad solution TODO: remove
+                if(!hasScore) {
+                    s += 20;
+                    ui.updateTextValue(t, "Score: " + std::to_string(s));
+                }
             }
 
             ui.render(snake); // Perhaps a better solution?
+            ui.render(t);
 
-            snake.update(deltaTime, 125.f);
+            if(isAlive) {
+                isAlive = snake.update(deltaTime, 125.f);    
+            } else {
+                ui.render(game_over);
+            }
+            
         } else if (state == GAME_QUIT) {
             running = false;
         }
