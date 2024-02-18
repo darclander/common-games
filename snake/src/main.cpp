@@ -151,7 +151,7 @@ int main(int argc, char **argv) {
     int s = 0;
     ui.loadFont("regular_18", "./font.ttf", 18);
     ui.loadFont("regular_108", "./font.ttf", 108);
-    Text t = ui.createText("Score: " + std::to_string(s), WINDOW_WIDTH - 175, 50, g_color::WHITE, "regular_18");
+    Text t = ui.createText("Score: " + std::to_string(s), 75, 50, g_color::WHITE, "regular_18");
     Text game_over = ui.createText("GAME OVER!", 0, 0, g_color::RED, "regular_108");
     ui.updateTextPos(game_over, WINDOW_MIDDLE_X - game_over.width / 2, WINDOW_MIDDLE_Y - game_over.height / 2);
 
@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
             // std::cout << volume << std::endl;
         } else if (state == GAME_PLAY) {
             controller.broadcastNewMenu(3);
-            ui.render(grid);
+            // ui.render(grid);
             if(!hasScore) {
                 std::pair<int, int> pos = getRandomCoordinate();
                 std::cout << "X: " << pos.first << " Y: " << pos.second << std::endl;
