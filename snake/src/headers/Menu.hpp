@@ -10,6 +10,7 @@
 #include <functional>
 
 #include "Controller.hpp"
+#include "Gui.hpp"
 
 #define MENU_STATE      0x0
 #define MENU_OPTION     0x1
@@ -29,22 +30,7 @@ namespace menuc {
     const SDL_Color WHITE   = {255, 255, 255, 255};
 }
 
-struct Text {
-    int width;
-    int height;
-    int xPos;
-    int yPos;
-    std::string name;
-    SDL_Texture *texture;
 
-    void updateX(int newX) {
-        xPos = newX;
-    }
-
-    void updateY(int newY) {
-        yPos = newY;
-    }
-};
 
 
 class MenuItem;
@@ -52,7 +38,7 @@ class MenuItem;
 class Menu : public Observer {
 
     public:
-        Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos, int yPos, 
+        Menu(Controller *controller, GUI *gui, int menuid, int xPos, int yPos, 
                 int width, int height, TTF_Font *font, int &state, int previousState, int menuOwnState);
         ~Menu();
 
@@ -93,6 +79,7 @@ class Menu : public Observer {
         int m_menuid;
 
         Controller *m_controller;
+        GUI *m_gui; 
 
         int *m_state;
         int m_menuOwnState;
@@ -107,8 +94,7 @@ class Menu : public Observer {
 
         void updateMenu();
         void onEvent(const SDL_Event& event) override;
-        Text createText(const std::string &name, int xPos, int yPos, SDL_Color textColor);
-        bool updateText(Text &t, SDL_Color textColor);
+
         bool updateTextValue(Text &t, const std::string newText, MenuItem &mi);
 
         std::vector<std::shared_ptr<MenuItem>> m_items;

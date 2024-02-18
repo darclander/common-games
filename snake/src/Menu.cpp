@@ -1,9 +1,10 @@
 #include "Menu.hpp"
 
-Menu::Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos, int yPos, 
+Menu::Menu(Controller *controller, GUI *gui, int menuid, int xPos, int yPos, 
             int width, int height, TTF_Font *font, int &state, int previousState, int menuOwnState) {
 
-    m_renderer = renderer;
+    m_gui = gui;
+    m_renderer = m_gui->getRenderer();
 
     m_xPos          = xPos;
     m_yPos          = yPos;
@@ -28,49 +29,6 @@ Menu::Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos,
 
     m_controller = controller;
 
-}
-
-Text Menu::createText(const std::string &name, int xPos, int yPos, SDL_Color textColor) {
-    
-    SDL_Surface *textSurface = TTF_RenderText_Solid(m_font, name.c_str(), textColor);
-
-    if (!textSurface) {
-        std::cerr << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << std::endl;
-    }
-
-    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(m_renderer, textSurface);
-    if (!textTexture) {
-        std::cerr << "Unable to create texture from rendered text! SDL_Error: " << SDL_GetError() << std::endl;
-        SDL_FreeSurface(textSurface);
-    }
-
-    Text textInfo;
-    textInfo.width      = textSurface->w;
-    textInfo.height     = textSurface->h;
-    textInfo.texture    = textTexture;
-    textInfo.xPos       = xPos;
-    textInfo.yPos       = yPos;
-    textInfo.name       = name;
-
-    SDL_FreeSurface(textSurface);
-    return textInfo;
-}
-
-bool Menu::updateText(Text &txt, SDL_Color textColor) {
-    SDL_Surface *textSurface = TTF_RenderText_Solid(m_font, txt.name.c_str(), textColor);
-    if (!textSurface) {
-        std::cerr << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << std::endl;
-    }
-
-    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(m_renderer, textSurface);
-    if (!textTexture) {
-        std::cerr << "Unable to create texture from rendered text! SDL_Error: " << SDL_GetError() << std::endl;
-        SDL_FreeSurface(textSurface);
-    }
-    SDL_FreeSurface(textSurface);
-
-    txt.texture = textTexture;
-    return true;
 }
 
 bool Menu::updateTextValue(Text &txt, const std::string newText, MenuItem &mi) {

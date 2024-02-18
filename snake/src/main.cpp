@@ -111,13 +111,13 @@ int main(int argc, char **argv) {
     // gameState state         = START_MENU;
     // gameState previousState = START_MENU;
 
-    Menu startMenu      = Menu(&controller, ui.getRenderer(), 0, WINDOW_MIDDLE_X - (250 / 2), 
+    Menu startMenu      = Menu(&controller, &ui, 0, WINDOW_MIDDLE_X - (250 / 2), 
                                                     WINDOW_MIDDLE_Y - (200 / 2), 
                                                     250, 
                                                     200, 
                                                     ui.getFont(), state, START_MENU, START_MENU);
     
-    Menu optionsMenu    = Menu(&controller, ui.getRenderer(), 1, WINDOW_MIDDLE_X - (250 / 2), 
+    Menu optionsMenu    = Menu(&controller, &ui, 1, WINDOW_MIDDLE_X - (250 / 2), 
                                                     WINDOW_MIDDLE_Y - (200 / 2), 
                                                     250, 
                                                     200, 

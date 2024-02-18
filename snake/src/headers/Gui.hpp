@@ -10,8 +10,9 @@
 #include <vector>
 #include <memory>
 #include <thread>
+#include <unordered_map>
 
-#include "Menu.hpp"
+// #include "Menu.hpp"
 #include "Controller.hpp"
 
 // For controlling all the colors. TODO: move this from menu.hpp
@@ -21,6 +22,23 @@ namespace g_color {
     const SDL_Color BLUE    = {0,   0,   255, 255};
     const SDL_Color WHITE   = {255, 255, 255, 255};
 }
+
+struct Text {
+    int width;
+    int height;
+    int xPos;
+    int yPos;
+    std::string name;
+    SDL_Texture *texture;
+
+    void updateX(int newX) {
+        xPos = newX;
+    }
+
+    void updateY(int newY) {
+        yPos = newY;
+    }
+};
 
 class GUI : public Observer {
 
@@ -49,6 +67,9 @@ class GUI : public Observer {
         SDL_Renderer *getRenderer();
         TTF_Font *getFont();
 
+        Text createText(const std::string &name, int xPos, int yPos, SDL_Color textColor);
+        bool updateText(Text &t, SDL_Color textColor);
+
     private:
         int m_windowWidth; 
         int m_windowHeight;
@@ -64,7 +85,5 @@ class GUI : public Observer {
         TTF_Font *m_font;
 
         std::unordered_map<std::string, SDL_Texture*> m_textureMap;
-        std::vector<std::unique_ptr<Menu>> menus;
-
-
+        // std::vector<std::unique_ptr<Menu>> menus;
 };
