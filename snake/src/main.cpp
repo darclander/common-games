@@ -200,6 +200,5 @@ int main(int argc, char **argv) {
         // fpsCap(startingTick);
     }
 
-
     return 0;
 }
