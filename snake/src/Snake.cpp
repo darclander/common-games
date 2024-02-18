@@ -84,11 +84,11 @@ void Snake::onEvent(const SDL_Event& event) {
     // }
 }
 
-void Snake::update(double deltaTime, float limit) {
+bool Snake::update(double deltaTime, float limit) {
 
     m_limit += deltaTime;   
 
-    if(m_limit < limit) return;
+    if(m_limit < limit) return true;
     m_limit = 0;
     m_snakeDirection = m_newSnakeDirection;
     m_degrees = m_newDegrees;
@@ -104,6 +104,7 @@ void Snake::update(double deltaTime, float limit) {
     if(newPoint != nullptr) {
         if(!newPoint->isEmpty()) {
             std::cout << "GAME OVER!" << std::endl;
+            return false;
         }
 
         if(newPoint->hasScore()) {
@@ -118,9 +119,48 @@ void Snake::update(double deltaTime, float limit) {
         Snakeblock newSnakeBlock = Snakeblock(m_renderer, newPosX, newPosY, m_snakeWidth - 2, m_snakeHeight - 2, m_textureSnakeHead, m_degrees);
         snakeBlocks.insert(snakeBlocks.begin(), newSnakeBlock);
     } else {
-        return;
+        return true;
     }
+    return true;
 }
+
+// void Snake::update(double deltaTime, float limit) {
+
+//     m_limit += deltaTime;   
+
+//     if(m_limit < limit) return;
+//     m_limit = 0;
+//     m_snakeDirection = m_newSnakeDirection;
+//     m_degrees = m_newDegrees;
+//     int newPosX = (snakeBlocks[0].getPosX() + m_snakeDirection.x * m_snakeWidth);
+//     int newPosY = (snakeBlocks[0].getPosY() + m_snakeDirection.y * m_snakeHeight);    
+//     Gridpoint *newPoint = m_grid->getPoint(newPosX + m_snakeWidth / 2, newPosY + m_snakeHeight / 2);
+
+//     int oldPosX = snakeBlocks.back().getPosX();
+//     int oldPosY = snakeBlocks.back().getPosY();
+//     Gridpoint *oldPoint = m_grid->getPoint(oldPosX + m_snakeWidth / 2, oldPosY + m_snakeHeight / 2);
+
+//     if(oldPoint != nullptr) oldPoint->setEmpty();
+//     if(newPoint != nullptr) {
+//         if(!newPoint->isEmpty()) {
+//             std::cout << "GAME OVER!" << std::endl;
+//         }
+
+//         if(newPoint->hasScore()) {
+//             snakeBlocks.push_back(Snakeblock(m_renderer, (snakeBlocks.size()-1)*m_snakeWidth, 1, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees));
+//             newPoint->removeScore();
+//         }
+//         newPoint->setNotEmpty();
+
+//         snakeBlocks.pop_back();
+//         newPosX = newPoint->getGridPointX() + 2;
+//         newPosY = newPoint->getGridPointY() + 2;
+//         Snakeblock newSnakeBlock = Snakeblock(m_renderer, newPosX, newPosY, m_snakeWidth - 2, m_snakeHeight - 2, m_textureSnakeHead, m_degrees);
+//         snakeBlocks.insert(snakeBlocks.begin(), newSnakeBlock);
+//     } else {
+//         return;
+//     }
+// }
 
 
 Snakeblock::Snakeblock(SDL_Renderer *renderer, int snakeBlockXpos, int snakeBlockYpos, int snakeBlockWidth, int snakeBlockHeight, SDL_Texture *textureSnakeHead, int degrees) {

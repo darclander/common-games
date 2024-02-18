@@ -53,7 +53,8 @@ class Snake : public Observer {
         ~Snake();
 
         void render();
-        void update(double deltaTime, float limit);
+        bool update(double deltaTime, float limit);
+        // void update(double deltaTime, float limit);
 
         void onEvent(const SDL_Event& event) override;
 
