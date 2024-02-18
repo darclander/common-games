@@ -189,7 +189,7 @@ int main(int argc, char **argv) {
 
             ui.render(snake); // Perhaps a better solution?
 
-            snake.update(deltaTime, 100.f);
+            snake.update(deltaTime, 125.f);
         } else if (state == GAME_QUIT) {
             running = false;
         }
