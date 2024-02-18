@@ -29,8 +29,11 @@ struct Text {
     int xPos;
     int yPos;
     std::string name;
+    SDL_Color color;
     SDL_Texture *texture;
     SDL_Renderer *renderer;
+
+    TTF_Font *font;
 
     void updateX(int newX) {
         xPos = newX;
@@ -71,10 +74,16 @@ class GUI : public Observer {
         void unloadTexture(const std::string &key); // Should be a bool to confirm?
 
         SDL_Renderer *getRenderer();
+        
         TTF_Font *getFont();
+        
+        TTF_Font *getFont(std::string name);
+        bool loadFont(std::string name, std::string path, int f_size);
 
-        Text createText(const std::string &name, int xPos, int yPos, SDL_Color textColor);
-        bool updateText(Text &t, SDL_Color textColor);
+        Text createText(const std::string &name, int xPos, int yPos, SDL_Color textColor, std::string font);
+        bool updateTextColor(Text &t, SDL_Color textColor);
+        bool updateTextValue(Text &t, std::string newName);
+        bool updateTextPos(Text &t, int xPos, int yPos);
 
     private:
         int m_windowWidth; 
@@ -91,5 +100,6 @@ class GUI : public Observer {
         TTF_Font *m_font;
 
         std::unordered_map<std::string, SDL_Texture*> m_textureMap;
+        std::unordered_map<std::string, TTF_Font*> m_fonts;
         // std::vector<std::unique_ptr<Menu>> menus;
 };
