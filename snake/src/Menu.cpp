@@ -49,9 +49,6 @@ bool Menu::updateTextValue(Text &txt, const std::string newText, MenuItem &mi) {
     return true;
 }
 
-
-
-
 // template int Menu::addItem(std::string name, int type, float *reference_value);
 
 int Menu::addItem() {
