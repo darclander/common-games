@@ -138,6 +138,7 @@ Text GUI::createText(const std::string &name, int xPos, int yPos, SDL_Color text
     textInfo.xPos       = xPos;
     textInfo.yPos       = yPos;
     textInfo.name       = name;
+    textInfo.renderer   = m_renderer;
 
     SDL_FreeSurface(textSurface);
     return textInfo;

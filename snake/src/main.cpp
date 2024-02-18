@@ -148,6 +148,8 @@ int main(int argc, char **argv) {
 
     Score score = Score(&ui, grid.getGridPointWidth(), grid.getGridPointHeight());
 
+    // Text t = ui.createText("test", 500, 500, g_color::BLUE);
+
     bool running = true;
     while(ui.getWindowClose() && running) {
 
@@ -158,6 +160,7 @@ int main(int argc, char **argv) {
 
         ui.clearRenderer();
         ui.update();
+        // ui.render(t);
 
         if (state == START_MENU) {
             startMenu.render();

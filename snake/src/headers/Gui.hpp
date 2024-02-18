@@ -30,6 +30,7 @@ struct Text {
     int yPos;
     std::string name;
     SDL_Texture *texture;
+    SDL_Renderer *renderer;
 
     void updateX(int newX) {
         xPos = newX;
@@ -37,6 +38,11 @@ struct Text {
 
     void updateY(int newY) {
         yPos = newY;
+    }
+
+    void render() {
+        SDL_Rect renderQuad = {xPos, yPos, width, height};
+        SDL_RenderCopy(renderer, texture, nullptr, &renderQuad);
     }
 };
 
