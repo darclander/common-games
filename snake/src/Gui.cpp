@@ -196,7 +196,6 @@ void GUI::render() {
     SDL_RenderPresent(m_renderer);
 }
 
-
 void GUI::clearRenderer() {
     SDL_RenderClear(m_renderer);
 }
