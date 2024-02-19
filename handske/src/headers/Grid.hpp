@@ -5,10 +5,18 @@
 
 #include <SDL2/SDL.h>
 
+#include "Gui.hpp"
+
+namespace g_type {
+    const int wall    = 0x0;
+    const int tile    = 0x1;
+}
+
+
 class Gridpoint {
 
     public: 
-        Gridpoint(SDL_Renderer *renderer, int xPos, int yPos, int width, int height);
+        Gridpoint(GUI *gui, int xPos, int yPos, int width, int height, int type);
         ~Gridpoint();
 
         void render();
@@ -33,8 +41,11 @@ class Gridpoint {
         int getGridPointHeight();
 
     private:
-        SDL_Renderer *m_renderer;
+        GUI             *m_gui;
+        SDL_Renderer    *m_renderer;
+        SDL_Texture     *m_texture;
 
+        int m_type;
         int m_gridPointX;
         int m_gridPointY;
         int m_gridWidth;
@@ -47,7 +58,7 @@ class Gridpoint {
 class Grid {
 
     public:
-        Grid(SDL_Renderer *renderer, int width, int height, int granularityX, int granularityY);
+        Grid(GUI *gui, int width, int height, int granularityX, int granularityY);
         ~Grid();
 
         void render();
@@ -59,7 +70,8 @@ class Grid {
         bool isPointEmpty(Gridpoint point);
 
     private: 
-        SDL_Renderer *m_renderer;
+        GUI             *m_gui;
+        SDL_Renderer    *m_renderer;
 
         int m_gridWidth;
         int m_gridHeight;

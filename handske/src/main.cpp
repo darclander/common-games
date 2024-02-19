@@ -88,6 +88,8 @@ void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
 void loadTextures(GUI *gui) {
     // gui->loadTexture("berry", "./textures/berry.png");
     gui->loadTexture("player", "./gfx/player.png");
+    gui->loadTexture("wall", "./gfx/wall.png");
+    gui->loadTexture("tile", "./gfx/tile.png");
 
 }
 
@@ -96,7 +98,7 @@ int main(int argc, char **argv) {
     loadTextures(&ui);
 
 
-    Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20, 15);
+    Grid grid = Grid(&ui, WINDOW_WIDTH, WINDOW_HEIGHT, 20, 15);
     
     Controller controller = Controller();
     Player p = Player(&ui, "player");
@@ -165,7 +167,7 @@ int main(int argc, char **argv) {
 
         ui.clearRenderer();
         ui.update();
-        p.render();
+        
 
         if (state == START_MENU) {
             startMenu.render();
@@ -175,7 +177,7 @@ int main(int argc, char **argv) {
             // std::cout << volume << std::endl;
         } else if (state == GAME_PLAY) {
             controller.broadcastNewMenu(3);
-            // ui.render(grid);
+            ui.render(grid);
             
         } else if (state == GAME_QUIT) {
             running = false;
