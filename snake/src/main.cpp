@@ -89,9 +89,13 @@ void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
     }
 }
 
+void loadTextures(GUI *gui) {
+    gui->loadTexture("berry", "./textures/berry.png");
+}
+
 int main(int argc, char **argv) {
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
-    ui.loadTexture("berry", "./textures/berry.png");
+    loadTextures(&ui);
 
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20, 15);
     Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 5);
