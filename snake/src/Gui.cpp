@@ -147,7 +147,7 @@ Text GUI::createText(const std::string &name, int xPos, int yPos, SDL_Color text
 }
 
 bool GUI::updateTextColor(Text &txt, SDL_Color textColor) {
-    SDL_Surface *textSurface = TTF_RenderText_Solid(m_font, txt.name.c_str(), textColor);
+    SDL_Surface *textSurface = TTF_RenderText_Solid(txt.font, txt.name.c_str(), textColor);
     if (!textSurface) {
         std::cerr << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << std::endl;
     }
@@ -171,7 +171,7 @@ bool GUI::updateTextPos(Text &txt, int xPos, int yPos) {
 
 bool GUI::updateTextValue(Text &txt, std::string newValue) {
     txt.name = newValue;
-    SDL_Surface *textSurface = TTF_RenderText_Solid(m_font, txt.name.c_str(), txt.color);
+    SDL_Surface *textSurface = TTF_RenderText_Solid(txt.font, txt.name.c_str(), txt.color);
     if (!textSurface) {
         std::cerr << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << std::endl;
     }
