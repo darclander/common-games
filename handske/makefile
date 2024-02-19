@@ -9,11 +9,11 @@ CFLAGS= -I$(IDIR) -lmingw32 -lSDL2main -lSDL2 -lSDL2_Image -lSDL2_TTF -lSDL2_Mix
 
 
 IDIR = ./src/headers
-_DEPS = Gui.hpp Grid.hpp Menu.hpp Score.hpp Controller.hpp Soundmanager.hpp
+_DEPS = Gui.hpp Grid.hpp Menu.hpp Score.hpp Controller.hpp Soundmanager.hpp Player.hpp
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 ODIR = ./obj
-_OBJ =  Gui.o Grid.o main.o Menu.o Score.o Soundmanager.o
+_OBJ =  Gui.o Grid.o Player.o main.o Menu.o Score.o Soundmanager.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 all: handske

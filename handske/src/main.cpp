@@ -8,6 +8,7 @@
 #include "Grid.hpp"
 #include "Menu.hpp"
 #include "Score.hpp"
+#include "Player.hpp"
 #include "Controller.hpp"
 #include "Soundmanager.hpp"
 
@@ -86,6 +87,8 @@ void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
 
 void loadTextures(GUI *gui) {
     // gui->loadTexture("berry", "./textures/berry.png");
+    gui->loadTexture("player", "./gfx/player.png");
+
 }
 
 int main(int argc, char **argv) {
@@ -96,6 +99,7 @@ int main(int argc, char **argv) {
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20, 15);
     
     Controller controller = Controller();
+    Player p = Player(&ui, "player");
     
     int volume = 64;
     int playSound = 1;
@@ -153,7 +157,7 @@ int main(int argc, char **argv) {
     bool running = true;
     
     while(ui.getWindowClose() && running) {
-
+        
         controller.update();
 
         auto t1 = Clock::now();
@@ -161,7 +165,7 @@ int main(int argc, char **argv) {
 
         ui.clearRenderer();
         ui.update();
-        
+        p.render();
 
         if (state == START_MENU) {
             startMenu.render();
