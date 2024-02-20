@@ -99,6 +99,7 @@ int main(int argc, char **argv) {
 
 
     Grid grid = Grid(&ui, WINDOW_WIDTH, WINDOW_HEIGHT, 20, 15);
+    grid.loadMap("./test.txt");
     
     Controller controller = Controller();
     Player p = Player(&ui, "player");

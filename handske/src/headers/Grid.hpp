@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <fstream>
 
 #include <SDL2/SDL.h>
 
@@ -65,6 +66,8 @@ class Grid {
 
         int getGridPointWidth();
         int getGridPointHeight();
+
+        bool loadMap(const std::string &filePath);
 
         Gridpoint *getPoint(int x, int y);
         bool isPointEmpty(Gridpoint point);

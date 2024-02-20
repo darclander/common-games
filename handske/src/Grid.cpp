@@ -15,13 +15,44 @@ Grid::Grid(GUI *gui, int width, int height, int granularityX, int granularityY) 
     int rows = m_granularityX;
     int cols = m_granularityY;
 
-    // Wrong order here?
-    for(int i = 0; i < rows; i++) {
-        for(int j = 0; j < cols; j++) {
-            int type = j % 2;
-            m_gridpoints.push_back(Gridpoint(m_gui, i * m_gridPointWidth, j * m_gridPointHeight, m_gridPointWidth, m_gridPointHeight, type));
+    // // Wrong order here?
+    // for(int i = 0; i < rows; i++) {
+    //     for(int j = 0; j < cols; j++) {
+    //         int type = j % 2;
+    //         m_gridpoints.push_back(Gridpoint(m_gui, i * m_gridPointWidth, j * m_gridPointHeight, m_gridPointWidth, m_gridPointHeight, type));
+    //     }
+    // }    
+}
+
+bool Grid::loadMap(const std::string &filePath) {
+    std::ifstream inputFile(filePath);
+
+        if (!inputFile.is_open()) {
+            std::cerr << "Error opening file: " << filePath << std::endl;
+            return false;
         }
-    }    
+
+        char character;
+        int i = 0;
+        int j = 0;
+
+        while (inputFile.get(character)) {
+            if (character == 'V') {
+                // Action A
+                m_gridpoints.push_back(Gridpoint(m_gui, i * m_gridPointWidth, j * m_gridPointHeight, m_gridPointWidth, m_gridPointHeight, g_type::wall));
+            } else if (character == 'T') {
+                // Action B
+                m_gridpoints.push_back(Gridpoint(m_gui, i * m_gridPointWidth, j * m_gridPointHeight, m_gridPointWidth, m_gridPointHeight, g_type::tile));
+            } else if (character == '\n') {
+                // Increment counter for each new line
+                j++;
+                i = 0;
+            }
+            i++;
+        }
+
+        inputFile.close();
+        return true;
 }
 
 void Grid::render() {
