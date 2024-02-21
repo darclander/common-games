@@ -5,7 +5,7 @@ GUI::GUI(const char *title, int windowWidth, int windowHeight, bool fullscreen) 
     this->m_windowWidth = windowWidth;
     this->m_windowHeight = windowHeight;
     this->m_windowClose = false;
-    *m_camera = Camera();
+    m_camera = new Camera(); // TODO: Replace with unique ptr?
 
     if (fullscreen) {
         flags = SDL_WINDOW_FULLSCREEN;
@@ -254,6 +254,7 @@ TTF_Font *GUI::getFont() {
 }
 
 GUI::~GUI() {
+    delete m_camera;
     TTF_CloseFont(m_font);
     TTF_Quit();
     Mix_Quit();
