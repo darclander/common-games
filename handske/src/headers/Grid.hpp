@@ -25,6 +25,7 @@ class Gridpoint {
         bool contains(int x, int y);
 
         bool isEmpty();
+        bool isMovable();
 
         void setNotEmpty();
 
@@ -53,6 +54,7 @@ class Gridpoint {
         int m_gridHeight;
         bool m_gridPointIsEmpty = true;
         bool m_gridPointHasScore = false;
+        bool m_isMovable = true;
     
 };
 

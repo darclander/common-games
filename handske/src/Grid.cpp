@@ -39,10 +39,12 @@ bool Grid::loadMap(const std::string &filePath) {
         while (inputFile.get(character)) {
             if (character == 'V') {
                 // Action A
-                m_gridpoints.push_back(Gridpoint(m_gui, i * m_gridPointWidth, j * m_gridPointHeight, m_gridPointWidth, m_gridPointHeight, g_type::wall));
+                m_gridpoints.push_back(Gridpoint(m_gui, i * m_gridPointWidth, j * m_gridPointHeight, 
+                                                m_gridPointWidth, m_gridPointHeight, g_type::wall));
             } else if (character == 'T') {
                 // Action B
-                m_gridpoints.push_back(Gridpoint(m_gui, i * m_gridPointWidth, j * m_gridPointHeight, m_gridPointWidth, m_gridPointHeight, g_type::tile));
+                m_gridpoints.push_back(Gridpoint(m_gui, i * m_gridPointWidth, j * m_gridPointHeight, 
+                                                m_gridPointWidth, m_gridPointHeight, g_type::tile));
             } else if (character == '\n') {
                 // Increment counter for each new line
                 j++;
@@ -92,16 +94,17 @@ Gridpoint::Gridpoint(GUI *gui, int xPos, int yPos, int width, int height, int ty
         m_texture = m_gui->getTexture("tile");
     } else if (m_type == g_type::wall) {
         m_texture = m_gui->getTexture("wall");
+        m_isMovable = false; // Cannot walk into a wall.
     }
 
 }
 
 void Gridpoint::render() {
-    if(m_type >= 0) {
+    // if(m_type >= 0) {
         SDL_Rect destinationRect = {m_gridPointX, m_gridPointY,  // x, y
                                 m_gridWidth, m_gridHeight}; // width, height
         SDL_RenderCopy(m_renderer, m_texture, NULL, &destinationRect);
-    } else {
+    // } else {
 
     
     SDL_Rect gpL, gpR, gpB, gpT;
@@ -127,7 +130,7 @@ void Gridpoint::render() {
     
     SDL_RenderDrawRect(m_renderer, &gpR);
     SDL_RenderFillRect(m_renderer, &gpR);  
-    }  
+    // }  
 }
 
 bool Gridpoint::contains(int x, int y) {
@@ -160,6 +163,10 @@ void Gridpoint::setEmpty() {
 
 bool Gridpoint::isEmpty() {
     return m_gridPointIsEmpty;
+}
+
+bool Gridpoint::isMovable() {
+    return m_isMovable;
 }
 
 int Gridpoint::getGridPointX() {
