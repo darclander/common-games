@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
     grid.loadMap("./test.txt");
     
     Controller controller = Controller();
-    Player p = Player(&ui, "player");
+    Player p = Player(&ui, &grid, "player");
     
     int volume = 64;
     int playSound = 1;
@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
     controller.attachObserver(&startMenu);
     controller.attachObserver(&optionsMenu);
     controller.attachObserver(&ui);
-    // controller.attachObserver(&snake);
+    controller.attachObserver(&p);
     controller.attachObserver(&sound);
 
 
@@ -179,13 +179,14 @@ int main(int argc, char **argv) {
         } else if (state == GAME_PLAY) {
             controller.broadcastNewMenu(3);
             ui.render(grid);
+            p.update(deltaTime, 10.0f);
             
         } else if (state == GAME_QUIT) {
             running = false;
         }
-        
+        p.render();
         ui.render();
-
+         
         auto t3 = Clock::now();
                
         // See method-description
