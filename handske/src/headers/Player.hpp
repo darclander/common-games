@@ -22,6 +22,7 @@ class Player : public Observer {
         void onEvent(const SDL_Event& event) override;
 
     private:
+        int m_speed;
 
         int m_xPos;
         int m_yPos;
@@ -30,6 +31,7 @@ class Player : public Observer {
         int m_newPosY;
 
         float m_limit;
+        
 
         GUI *m_gui;
         Grid *m_grid;

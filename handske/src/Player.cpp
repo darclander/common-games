@@ -13,25 +13,27 @@ Player::Player(GUI *gui, Grid *grid, std::string textureName) {
     m_yPos          = 0;
     m_newPosX       = m_xPos;
     m_newPosY       = m_yPos;
+
+    m_speed         = 3;
 }
 
 void Player::onEvent(const SDL_Event& event) {
     const Uint8 *key_state = SDL_GetKeyboardState(NULL);
 
     if(key_state[SDL_SCANCODE_S] || key_state[SDL_SCANCODE_DOWN]) {
-        m_newPosY = m_yPos + 1;
+        m_newPosY = m_yPos + m_speed;
     }
 
     if(key_state[SDL_SCANCODE_W] || key_state[SDL_SCANCODE_UP]) {
-        m_newPosY = m_yPos - 1;
+        m_newPosY = m_yPos - m_speed;
     }
 
     if(key_state[SDL_SCANCODE_D] || key_state[SDL_SCANCODE_RIGHT]) {
-        m_newPosX = m_xPos + 1;
+        m_newPosX = m_xPos + m_speed;
     }
 
     if(key_state[SDL_SCANCODE_A] || key_state[SDL_SCANCODE_LEFT]) {
-        m_newPosX = m_xPos - 1;
+        m_newPosX = m_xPos - m_speed;
     }
 }
 
@@ -44,9 +46,16 @@ void Player::update(double deltaTime, float limit) {
     m_limit = 0;
     m_playerDestinationRect.x = m_xPos;
     m_playerDestinationRect.y = m_yPos;
+    Gridpoint *newGpX = m_grid->getPoint(m_newPosX, m_yPos);
+    Gridpoint *newGpY = m_grid->getPoint(m_xPos, m_newPosY);
+    if(newGpX != nullptr && newGpX->isMovable()) {
+        m_xPos = m_newPosX;
+    }
 
-    m_xPos = m_newPosX;
-    m_yPos = m_newPosY;
+    if(newGpY != nullptr && newGpY->isMovable()) {
+        m_yPos = m_newPosY;
+    }
+
 
 }
 
