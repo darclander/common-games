@@ -107,6 +107,12 @@ void Gridpoint::render() {
 
     int relativeX = m_gridPointX - m_camera->getXPos();
     int relativeY = m_gridPointY - m_camera->getYPos();
+
+    float dx = abs(relativeX - m_gui->getCenterX());
+    float dy = abs(relativeY - m_gui->getCenterY());
+
+    if(m_gui->getCulling(relativeX, relativeY)) return;
+
     SDL_Rect destinationRect = {relativeX, relativeY, // x, y
                                 m_gridWidth, m_gridHeight}; // width, height
     SDL_RenderCopy(m_renderer, m_texture, NULL, &destinationRect);

@@ -14,9 +14,11 @@ Player::Player(GUI *gui, Grid *grid, std::string textureName) {
     m_yPos          = m_xPosWorld;
     m_newPosX       = m_xPosWorld;
     m_newPosY       = m_yPosWorld;
+    m_width         = 50;
+    m_height        = 50;
 
     m_playerDestinationRect = {m_xPosWorld, m_yPosWorld, // x, y
-                                50, 50}; // width, height
+                                m_width, m_height}; // width, height
 
     m_speed         = 3;
 }
@@ -60,8 +62,8 @@ void Player::update(double deltaTime, float limit) {
         m_yPosWorld = m_newPosY;
     }
 
-    int cameraX = m_xPosWorld - m_gui->getCenterX(); /* Centralize around X axis. */
-    int cameraY = m_yPosWorld - m_gui->getCenterY(); /* Centralize around Y axis. */
+    int cameraX = m_xPosWorld + (m_width / 2) - m_gui->getCenterX(); /* Centralize around X axis. */
+    int cameraY = m_yPosWorld + (m_height / 2) - m_gui->getCenterY(); /* Centralize around Y axis. */
     m_camera->updatePos(cameraX, cameraY);
 
 }

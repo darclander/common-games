@@ -215,6 +215,12 @@ Camera *GUI::getCamera() {
     return m_camera;
 }
 
+
+bool GUI::getCulling(int x, int y) {
+    double d = std::sqrt(std::pow(x - getCenterX(), 2) + std::pow(y - getCenterY(), 2));
+    return d > VIEW_CULLING;
+}
+
 int GUI::getCenterX() {
     return m_windowWidth / 2;
 }

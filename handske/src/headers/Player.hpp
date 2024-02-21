@@ -36,6 +36,8 @@ class Player : public Observer {
 
         float m_limit;
         
+        int m_width;
+        int m_height;
 
         GUI     *m_gui;
         Camera  *m_camera;

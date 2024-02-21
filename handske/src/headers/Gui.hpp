@@ -10,11 +10,14 @@
 #include <vector>
 #include <memory>
 #include <thread>
+#include <cmath>
 #include <unordered_map>
 
 // #include "Menu.hpp"
 #include "Controller.hpp"
 #include "Camera.hpp"
+
+#define VIEW_CULLING 500 // Defines the distance from center to not render
 
 // For controlling all the colors. TODO: move this from menu.hpp
 namespace g_color {
@@ -60,8 +63,9 @@ class GUI : public Observer {
         void update();
 
         int getCenterX();
-
         int getCenterY();
+
+        bool getCulling(int x, int y);
 
         Camera *getCamera();
 
