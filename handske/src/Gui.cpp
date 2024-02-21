@@ -5,6 +5,7 @@ GUI::GUI(const char *title, int windowWidth, int windowHeight, bool fullscreen) 
     this->m_windowWidth = windowWidth;
     this->m_windowHeight = windowHeight;
     this->m_windowClose = false;
+    *m_camera = Camera();
 
     if (fullscreen) {
         flags = SDL_WINDOW_FULLSCREEN;
@@ -114,6 +115,8 @@ void GUI::update() {
     //     m->render();
         
     // }
+    std::cout << m_camera->getXPos() << std::endl;
+    std::cout << m_camera->getYPos() << std::endl;
 
 }
 
@@ -206,6 +209,18 @@ bool GUI::getWindowClose() {
 
 SDL_Renderer *GUI::getRenderer() {
     return m_renderer;
+}
+
+Camera *GUI::getCamera() {
+    return m_camera;
+}
+
+int GUI::getCenterX() {
+    return m_windowWidth / 2;
+}
+
+int GUI::getCenterY() {
+    return m_windowHeight / 2;
 }
 
 bool GUI::loadFont(std::string name, std::string path, int f_size) {

@@ -7,12 +7,16 @@ Player::Player(GUI *gui, Grid *grid, std::string textureName) {
     m_grid          = grid;
     m_playerTexture = m_gui->getTexture(textureName);
     m_renderer      = m_gui->getRenderer();
-    m_playerDestinationRect = {0, 0,  // x, y
+    m_camera        = m_gui->getCamera();
+    m_xPosWorld     = 0;
+    m_yPosWorld     = 0;
+    m_xPos          = m_xPosWorld;
+    m_yPos          = m_xPosWorld;
+    m_newPosX       = m_xPosWorld;
+    m_newPosY       = m_yPosWorld;
+
+    m_playerDestinationRect = {m_xPosWorld, m_yPosWorld, // x, y
                                 50, 50}; // width, height
-    m_xPos          = 0;
-    m_yPos          = 0;
-    m_newPosX       = m_xPos;
-    m_newPosY       = m_yPos;
 
     m_speed         = 3;
 }
@@ -21,19 +25,19 @@ void Player::onEvent(const SDL_Event& event) {
     const Uint8 *key_state = SDL_GetKeyboardState(NULL);
 
     if(key_state[SDL_SCANCODE_S] || key_state[SDL_SCANCODE_DOWN]) {
-        m_newPosY = m_yPos + m_speed;
+        m_newPosY = m_yPosWorld + m_speed;
     }
 
     if(key_state[SDL_SCANCODE_W] || key_state[SDL_SCANCODE_UP]) {
-        m_newPosY = m_yPos - m_speed;
+        m_newPosY = m_yPosWorld - m_speed;
     }
 
     if(key_state[SDL_SCANCODE_D] || key_state[SDL_SCANCODE_RIGHT]) {
-        m_newPosX = m_xPos + m_speed;
+        m_newPosX = m_xPosWorld + m_speed;
     }
 
     if(key_state[SDL_SCANCODE_A] || key_state[SDL_SCANCODE_LEFT]) {
-        m_newPosX = m_xPos - m_speed;
+        m_newPosX = m_xPosWorld - m_speed;
     }
 }
 
@@ -44,18 +48,21 @@ void Player::update(double deltaTime, float limit) {
 
     if(m_limit < limit) return;
     m_limit = 0;
-    m_playerDestinationRect.x = m_xPos;
-    m_playerDestinationRect.y = m_yPos;
-    Gridpoint *newGpX = m_grid->getPoint(m_newPosX, m_yPos);
-    Gridpoint *newGpY = m_grid->getPoint(m_xPos, m_newPosY);
+    m_playerDestinationRect.x = m_xPosWorld - m_camera->getXPos();
+    m_playerDestinationRect.y = m_yPosWorld - m_camera->getYPos();
+    Gridpoint *newGpX = m_grid->getPoint(m_newPosX, m_yPosWorld);
+    Gridpoint *newGpY = m_grid->getPoint(m_xPosWorld, m_newPosY);
     if(newGpX != nullptr && newGpX->isMovable()) {
-        m_xPos = m_newPosX;
+        m_xPosWorld = m_newPosX;
     }
 
     if(newGpY != nullptr && newGpY->isMovable()) {
-        m_yPos = m_newPosY;
+        m_yPosWorld = m_newPosY;
     }
 
+    int cameraX = m_xPosWorld - m_gui->getCenterX(); /* Centralize around X axis. */
+    int cameraY = m_yPosWorld - m_gui->getCenterY(); /* Centralize around Y axis. */
+    m_camera->updatePos(cameraX, cameraY);
 
 }
 

@@ -49,6 +49,7 @@ bool Grid::loadMap(const std::string &filePath) {
                 // Increment counter for each new line
                 j++;
                 i = 0;
+                continue;
             }
             i++;
         }
@@ -83,12 +84,13 @@ Grid::~Grid() {}
 
 Gridpoint::Gridpoint(GUI *gui, int xPos, int yPos, int width, int height, int type) {
     m_gui = gui;
-    this->m_renderer = m_gui->getRenderer();
-    this->m_gridPointX = xPos;
-    this->m_gridPointY = yPos;
-    this->m_gridWidth = width;
-    this->m_gridHeight = height;
-    this->m_type = type;
+    this->m_renderer    = m_gui->getRenderer();
+    this->m_camera      = m_gui->getCamera();
+    this->m_gridPointX  = xPos;
+    this->m_gridPointY  = yPos;
+    this->m_gridWidth   = width;
+    this->m_gridHeight  = height;
+    this->m_type        = type;
 
     if(m_type == g_type::tile) {
         m_texture = m_gui->getTexture("tile");
@@ -101,20 +103,24 @@ Gridpoint::Gridpoint(GUI *gui, int xPos, int yPos, int width, int height, int ty
 
 void Gridpoint::render() {
     // if(m_type >= 0) {
-        SDL_Rect destinationRect = {m_gridPointX, m_gridPointY,  // x, y
+
+
+    int relativeX = m_gridPointX - m_camera->getXPos();
+    int relativeY = m_gridPointY - m_camera->getYPos();
+    SDL_Rect destinationRect = {relativeX, relativeY, // x, y
                                 m_gridWidth, m_gridHeight}; // width, height
-        SDL_RenderCopy(m_renderer, m_texture, NULL, &destinationRect);
+    SDL_RenderCopy(m_renderer, m_texture, NULL, &destinationRect);
     // } else {
 
     
     SDL_Rect gpL, gpR, gpB, gpT;
-    gpL.x = m_gridPointX;
-    gpL.y = m_gridPointY;
+    gpL.x = relativeX;
+    gpL.y = relativeY;
     gpL.h = m_gridHeight;
     gpL.w = 1;
 
-    gpR.x = m_gridPointX;
-    gpR.y = m_gridPointY;
+    gpR.x = relativeX;
+    gpR.y = relativeY;
     gpR.h = 1;
     gpR.w = m_gridWidth;
 

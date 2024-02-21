@@ -14,6 +14,7 @@
 
 // #include "Menu.hpp"
 #include "Controller.hpp"
+#include "Camera.hpp"
 
 // For controlling all the colors. TODO: move this from menu.hpp
 namespace g_color {
@@ -58,6 +59,12 @@ class GUI : public Observer {
         void render();
         void update();
 
+        int getCenterX();
+
+        int getCenterY();
+
+        Camera *getCamera();
+
         void onEvent(const SDL_Event& event) override;
 
         template <typename T>
@@ -92,6 +99,8 @@ class GUI : public Observer {
         bool m_windowClose;
 
         // std::thread m_guiThread;
+
+        Camera *m_camera;
 
         SDL_Renderer *m_renderer;
         SDL_Window *m_window;
