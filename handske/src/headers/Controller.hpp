@@ -5,12 +5,10 @@
 #include <thread>
 #include <SDL2/SDL.h>
 
-
 class Observer {
     public:
         virtual void onEvent(const SDL_Event& event) = 0;
 };
-
 
 class Controller {
     public:
