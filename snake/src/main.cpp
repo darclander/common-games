@@ -170,7 +170,6 @@ int main(int argc, char **argv) {
 
         ui.clearRenderer();
         ui.update();
-        
 
         if (state == START_MENU) {
             startMenu.render();
