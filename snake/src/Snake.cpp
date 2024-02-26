@@ -36,7 +36,7 @@ Snake::~Snake() {
 
 void Snake::render() {
 
-    for(int i = 0; i < snakeBlocks.size(); i++) {
+    for(size_t i = 0; i < snakeBlocks.size(); i++) {
         if(i == 0) {
             snakeBlocks[i].renderHead();
         } else {

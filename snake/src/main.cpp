@@ -110,7 +110,6 @@ int main(int argc, char **argv) {
     double deltaTime = 0;
     uint32_t startingTick = 0;
 
-
     int state = START_MENU;
     // gameState state         = START_MENU;
     // gameState previousState = START_MENU;

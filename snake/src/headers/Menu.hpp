@@ -74,9 +74,10 @@ class Menu : public Observer {
         int m_height;
         int m_xPos;
         int m_yPos;
-        int m_menuIndex;
         int m_limit;
         int m_menuid;
+
+        size_t m_menuIndex;
 
         Controller *m_controller;
         GUI *m_gui; 
