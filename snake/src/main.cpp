@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
                     hasScore = false;
                 }
 
-                // Bad solution TODO: remove
+                // TODO: Bad solution, remove
                 if(!hasScore) {
                     s += 20;
                     ui.updateTextValue(t, "Score: " + std::to_string(s));
