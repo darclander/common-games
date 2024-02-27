@@ -20,7 +20,7 @@ public class Server {
     private static ExecutorService executorService = Executors.newCachedThreadPool();
     private static List<Player> players = new ArrayList<>();
     private static int playerIDCounter = 0;
-    private static PlayingField playingField = new PlayingField(20, 20);
+    private static PlayingField playingField = new PlayingField(40, 30);
 
     public static void main(String[] args) {
         try {
@@ -45,6 +45,7 @@ public class Server {
         }
     }
 
+    
     private static void handleGame(){
 
         try {
@@ -53,23 +54,15 @@ public class Server {
             long elapsedTime;
             long startTime;
             long ADD_SCORE_COUNTER = 0;
-            long ADD_SCORE_INTERVAL = 1 * 1000;
+            long ADD_SCORE_INTERVAL = 5 * 1000;
             long counter2 = 0;
             while (true) {
                 startTime = System.currentTimeMillis();
                 
-                // SCORE COLLECTED
-                // SCORE_COLLECTED;pid;type;magnitude;xPos;yPos
-                // msg = appendDelimitor("SCORE_COLLECTED", new Random().nextInt(playingField.getWidth()), new Random().nextInt(playingField.getWidth()));
-                // broadcast(msg); // SCORE_COLLECTED;pid;type;magnitude;xPos;yPos
 
-                if(ADD_SCORE_COUNTER > ADD_SCORE_INTERVAL) {  // ADD_SCORE;type;amount;xPos;yPos
+                if(ADD_SCORE_COUNTER > ADD_SCORE_INTERVAL) {
+                    playingField.spawnScore("berry", 1); // ADD_SCORE;type;magnitude;xPos;yPos
                     ADD_SCORE_COUNTER = 0;
-                    int xPos = new Random().nextInt(playingField.getWidth());
-                    int yPos = new Random().nextInt(playingField.getWidth());
-                    msg = appendDelimitor("ADD_SCORE", "berry", 1, xPos, yPos);
-                    broadcast(msg); // ADD_SCORE;pid;xPos;yPos
-                    playingField.getField()[yPos][xPos].setType("berry");
                 }
 
                 if(counter2 > 30 * 1000) {
@@ -90,6 +83,7 @@ public class Server {
         }
     }
 
+    
     private static void handleClient(Socket clientSocket) {
         try {
             InputStream inputStream = clientSocket.getInputStream();
@@ -109,7 +103,7 @@ public class Server {
 
                 // Process the received data and parse it into a command
                 String receivedData = new String(buffer, 0, bytesRead);
-                System.out.println("Client " + clientSocket.getInetAddress() + ": " + receivedData);
+                // System.out.println("Client " + clientSocket.getInetAddress() + ": " + receivedData);
                 Command command = Command.parse(receivedData);
 
                 String cmd = command.getCommand();
@@ -123,24 +117,38 @@ public class Server {
                         break;
                     
                     case "PLAYER_UPDATE_POSITION": // PLAYER_UPDATE_POSITION;pid;xPos;yPos
+                        String moveResponse  = playingField.checkPosition(Integer.parseInt(params.get(0)), Integer.parseInt(params.get(1)), Integer.parseInt(params.get(2)));
+
+
+                        if (moveResponse == "berry"){// SCORE_COLLECTED;pid;type;amount;xPos;yPos
+                            msg = appendDelimitor("SCORE_COLLECTED", params.get(0), "berry", 1, Integer.parseInt(params.get(1)), Integer.parseInt(params.get(2))); // SCORE_COLLECTED;pid;type;amount;xPos;yPos
+                            broadcast(msg);
+                        } 
+                        // else if (moveResponse == "outOfBounds") {
+                        //     msg = appendDelimitor("MOVE_OUT_OF_BOUNDS", params.get(0), params.get(1), params.get(2)); // MOVE_OUT_OF_BOUNDS;pid;xPos;yPos     -- Parameters might be uncessary
+                        //     // send(msg, outputStream);
+                        //     break;
+                        // }
+
                         msg = appendDelimitor("PLAYER_NEW_POS", params.get(0), params.get(1), params.get(2));
                         broadcast(msg, clientSocket); // PLAYER_NEW_POS;pid;xPos;yPos
                         break;
 
                     case "ADD_NEW_PLAYER": // ADD_NEW_PLAYER;name;color
-                        Player newPlayer = new Player(playerIDCounter++, params.get(0), params.get(1), 0, 0); // 0 = pid, 1 = name, 2 = color, 3 = xPosition, 4 = yPosition
+                        Player newPlayer = new Player(clientSocket, playerIDCounter++, params.get(0), params.get(1), 0, 0); // 0 = pid, 1 = name, 2 = color, 3 = xPosition, 4 = yPosition
                         players.add(newPlayer);
 
-                        msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getPid()*50, newPlayer.getYPosition());
+
+                        msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getPid()*50, newPlayer.getYPos(), playingField.getWidth(), playingField.getHeight());
                         send(msg, outputStream); // NEW_PLAYER_RESPONSE;pid;xPos;yPos;fieldWidth;fieldHeight
 
-                        msg = appendDelimitor("NEW_PLAYER;", newPlayer.getPid(), (newPlayer.getPid() + 1)*50, (newPlayer.getPid() + 1));
-                        broadcast(msg, clientSocket); // NEW_PLAYER;pid;xPos;yPos
+                        msg = appendDelimitor("NEW_PLAYER", newPlayer.getPid(), newPlayer.getName(), newPlayer.getColor(), (newPlayer.getPid() + 1)*50, (newPlayer.getPid() + 1));
+                        broadcast(msg, clientSocket); // NEW_PLAYER;pid;name;color;xPos;yPos
                         
                         for (Player p : players) {
                             if(p == newPlayer) continue;
-                            msg = appendDelimitor("PLAYER_INFO", p.getPid(), (p.getPid() + 1)*50, (p.getPid() + 1));
-                            send(msg, outputStream); // PLAYER_INFO;pid;xPos;yPos
+                            msg = appendDelimitor("PLAYER_INFO", p.getPid(), p.getName(), p.getColor(), (p.getPid() + 1)*50, (p.getPid() + 1));         // Merge with NEW_PLAYER????
+                            send(msg, outputStream); // PLAYER_INFO;pid;name;color;xPos;yPos
                         }
 
                         break;
@@ -150,6 +158,10 @@ public class Server {
                     case "BROADCAST_TEST": // BROADCAST_TEST;message
                         System.out.println(params.get(0));
                         broadcast(params.get(0));
+                        break;
+
+                    case "BERRY_TEST": // BERRY_TEST
+                        playingField.spawnScore("berry", 1, Integer.parseInt(params.get(0)), Integer.parseInt(params.get(1)));
                         break;
 
                     default:
@@ -162,12 +174,19 @@ public class Server {
             if (e instanceof java.net.SocketException && e.getMessage().equals("Connection reset")) {
                 // Client disconnected abruptly
                 System.out.println("Client disconnected abruptly: " + clientSocket.getInetAddress());
+                for (Player p : players) {
+                    if (p.getPlayerSocket() == clientSocket) {
+                        players.remove(p);
+                        break;
+                    }
+                }
                 clientList.remove(clientSocket);
             } else {
                 e.printStackTrace();
             }
         }
     }
+
 
     private static void send(String message, OutputStream outputStream) {
         try {
@@ -179,7 +198,8 @@ public class Server {
 
     }
 
-    public static String appendDelimitor(Object... parameters) {
+
+    private static String appendDelimitor(Object... parameters) {
         StringBuilder sb = new StringBuilder();
         for (Object parameter : parameters) {
             sb.append(parameter).append(";");
@@ -190,6 +210,7 @@ public class Server {
         }
         return sb.toString();
     }
+
 
     private static void broadcast(String message, Socket... excludeClients) {
         for (Socket clientSocket : clientList) {
@@ -203,45 +224,71 @@ public class Server {
                 e.printStackTrace();
             }
         }
-        System.out.println("Broadcasted: '" + message + "' to " + clientList.size() + " clients.");
+        if(clientList.size() > 1) {
+            System.out.println("Broadcasted: '" + message + "' to " + clientList.size() + " clients.");
+        }
+        
     }
 
 
     public static class Player {
+        private Socket playerSocket;
         private int pid;
         private String name;
         private String color;
-        private int xPosition;
-        private int yPosition;
+        private int headXPos;
+        private int headYPos;
+        private int length;
+        private List<BodySegment> body;
 
-        public Player(int pid, String name, String color, int xPosition, int yPosition) {
+        public Player(Socket playerSocket, int pid, String name, String color, int headXPos, int headYPos) {
+            this.playerSocket = playerSocket;
             this.pid = pid;
             this.name = name;
             this.color = color;
-            this.xPosition = xPosition;
-            this.yPosition = yPosition;
+            this.headXPos = headXPos;
+            this.headYPos = headYPos;
+            this.length = 1; // NOT IMPLEMENTED
+            this.body = new ArrayList<>(); // NOT IMPLEMENTED
+            this.body.add(new BodySegment(headXPos, headYPos)); // NOT IMPLEMENTED
         }
 
-        public int getPid() {
-            return pid;
+        public Socket getPlayerSocket() { return playerSocket; }
+
+        public int getPid() { return pid; }
+
+        public String getName() { return name; }
+
+        public String getColor() { return color; }
+
+        public int getxPos() { return headXPos; }
+
+        public int getYPos() { return headYPos; }
+
+        public int getLength() { return length; }
+
+        public List<BodySegment> getBody() { return body; }
+    }
+
+
+    public static class BodySegment {
+        private int xPos;
+        private int yPos;
+
+        public BodySegment(int xPos, int yPos) {
+            this.xPos = xPos;
+            this.yPos = yPos;
         }
 
-        public String getName() {
-            return name;
+        public int getxPos() {
+            return xPos;
         }
 
-        public String getColor() {
-            return color;
-        }
-
-        public int getXPosition() {
-            return xPosition;
-        }
-
-        public int getYPosition() {
-            return yPosition;
+        public int getyPos() {
+            return yPos;
         }
     }
+
 
     public static class PlayingField {
         
@@ -272,7 +319,44 @@ public class Server {
         public int getHeight() {
             return height;
         }
+
+        // Spawns a score item on a random unoccupied square
+        public void spawnScore(String type, int magnitude) { 
+            int xPos;
+            int yPos;
+            do {
+                xPos = new Random().nextInt(width);
+                yPos = new Random().nextInt(height);
+            } while ( !field[yPos][xPos].getType().equals("empty") );
+
+            field[yPos][xPos].setType(type);
+            String msg = appendDelimitor("ADD_SCORE", type, magnitude, xPos, yPos);
+            broadcast(msg);
+        }
+
+        // @Overload    Spawns a score item on a specific square
+        public void spawnScore(String type, int magnitude, int xPos, int yPos) { 
+            field[yPos][xPos].setType(type);
+            String msg = appendDelimitor("ADD_SCORE", type, magnitude, xPos, yPos);
+            broadcast(msg);
+        }
+
+
+
+        public String checkPosition(int playerID, int x, int y) {
+            if(x < 0 || x >= width || y < 0 || y >= height) {
+                return "outOfBounds";
+            }
+    
+            if(field[y][x].getType().equals("berry")) {
+                field[y][x].setType("empty");
+                return "berry";
+            }
+    
+            return null;
+        }
     }
+
 
     public static class Square {
         private String type;

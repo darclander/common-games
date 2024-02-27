@@ -14,6 +14,14 @@
 #include "Menu.hpp"
 #include "Controller.hpp"
 
+
+namespace color {
+    const SDL_Color RED     = {255, 0,   0,   255};
+    const SDL_Color GREEN   = {0,   255, 0,   255};
+    const SDL_Color BLUE    = {0,   0,   255, 255};
+    const SDL_Color WHITE   = {255, 255, 255, 255};
+}
+
 class GUI : public Observer {
 
     public:
@@ -33,6 +41,7 @@ class GUI : public Observer {
 
         bool getWindowClose();
 
+        SDL_Color getColor(std::string colorName);
         SDL_Texture *loadTexture(std::string name, const std::string &filePath);
         SDL_Texture *getTexture(const std::string &key);
         void unloadTexture(const std::string &key);
