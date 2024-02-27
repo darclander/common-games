@@ -2,7 +2,7 @@
 
 
 Score::Score(GUI *ui, int width, int height) {
-    // SDL_Surface* surface = IMG_Load("./textures/berry.png");
+    // SDL_Surface* surface = IMG_Load("./gfx/berry.png");
     // if (!surface) {
     //     std::cerr << "Failed to load image: " << IMG_GetError() << std::endl;
     // }
