@@ -37,15 +37,15 @@
 # Images
 
 *.jpg
+# *.png
 
 # Misc
 *.ttf
 src/SDL2
 *.exe
 *.zip
-*.png
+
 *.mp4
 
 # Python files
 *.py
-debug/*

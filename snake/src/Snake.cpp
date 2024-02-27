@@ -14,7 +14,7 @@ Snake::Snake(SDL_Renderer *renderer, int xPos, int yPos, Grid *grid, int snakeWi
     m_snakeWidth = m_grid->getGridPointWidth(); // Retrieve from grid
     m_snakeHeight = m_grid->getGridPointHeight(); // Retrieve from grid 
 
-    SDL_Surface *snakeHead = IMG_Load("./textures/head.png");
+    SDL_Surface *snakeHead = IMG_Load("./gfx/head.png");
 
     m_textureSnakeHead = SDL_CreateTextureFromSurface(m_renderer, snakeHead);
 
