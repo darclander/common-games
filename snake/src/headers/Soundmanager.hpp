@@ -26,6 +26,8 @@ public:
     void stopSoundAll();
     void playSoundAll();
 
+    void toggleSound();
+
 private:
     std::unordered_map<std::string, Mix_Chunk*> m_soundMap;
 
@@ -33,8 +35,11 @@ private:
     int *m_playSound;
     int m_loops;
 
+    bool m_soundOn = true;
+
     int m_volumeMax = 128;
-    int m_volumeMin = 0; 
+    int m_volumeMin = 0;
+    int m_step; 
 
     Mix_Chunk* loadChunk(const char* filePath);
     void onEvent(const SDL_Event& event) override;

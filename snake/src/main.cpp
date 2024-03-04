@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
     int volume = 64;
     int playSound = 1;
     SoundManager sound = SoundManager(volume, playSound);
-    sound.loadSound("./debug/sounds/s.wav", "song");
+    sound.loadSound("./sfx/s1.wav", "song");
     sound.setVolume("song", volume); // 50%
     sound.playSound("song", -1);
 
@@ -132,8 +132,9 @@ int main(int argc, char **argv) {
 
     std::function<void()> funcL = bindMemberFunction(sound, &SoundManager::decreaseVolume);
     std::function<void()> funcR = bindMemberFunction(sound, &SoundManager::increaseVolume);
+    std::function<void()> toggleSound = bindMemberFunction(sound, &SoundManager::toggleSound);
     optionsMenu.addItemBar("sound", funcL, funcR);
-    optionsMenu.addItemToggle("sound: ", funcL);
+    optionsMenu.addItemToggle("sound: ", toggleSound);
     optionsMenu.addItemState("asd", 1);
 
     // int soundVolume;

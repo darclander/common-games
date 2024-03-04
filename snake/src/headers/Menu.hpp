@@ -58,8 +58,6 @@ class Menu : public Observer {
 
         int addItemToggle(std::string name, std::function<void()> refFuncToggle);
 
-
-
         void render();
         int update(double deltaTime, bool gameRunning);
         int getMenuIndex();
@@ -117,6 +115,7 @@ class MenuItem {
 
 
             m_menuText = createText(name, m_xPos, m_yPos, menuc::WHITE);
+            m_color = g_color::WHITE;
             m_menuText.updateX(m_xPos + (m_mi.getMenuWidth() - m_menuText.width) / 2 );
 
         }
@@ -161,19 +160,8 @@ class MenuItem {
         SDL_Renderer *m_renderer;
 
         bool updateTextColor(Text &txt, SDL_Color textColor) {
-            SDL_Surface *textSurface = TTF_RenderText_Solid(m_font, txt.name.c_str(), textColor);
-            if (!textSurface) {
-                std::cerr << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << std::endl;
-            }
-
-            SDL_Texture* textTexture = SDL_CreateTextureFromSurface(m_renderer, textSurface);
-            if (!textTexture) {
-                std::cerr << "Unable to create texture from rendered text! SDL_Error: " << SDL_GetError() << std::endl;
-                SDL_FreeSurface(textSurface);
-            }
-            SDL_FreeSurface(textSurface);
-
-            txt.texture = textTexture;
+            SDL_SetTextureColorMod(txt.texture, textColor.r, textColor.g, textColor.b);
+            txt.color = textColor;
             return true;
         }
 
@@ -189,9 +177,12 @@ class MenuItem {
                 std::cerr << "Unable to create texture from rendered text! SDL_Error: " << SDL_GetError() << std::endl;
                 SDL_FreeSurface(textSurface);
             }
-            SDL_FreeSurface(textSurface);
+            
 
             txt.texture = textTexture;
+            txt.width = textSurface->w;
+            txt.height = textSurface->h;
+            SDL_FreeSurface(textSurface);
             return true;
         }
 
@@ -282,7 +273,12 @@ class MenuToggle : public MenuItem {
 
         void trigger(int key) override {
             if(key == KEY_ENTER) {
-                updateTextValue(m_menuText, m_menuText.name + "on");
+                m_on_off = !m_on_off;
+                if(m_on_off) {
+                    updateTextValue(m_menuText, m_menuText.name + "on");
+                } else {
+                    updateTextValue(m_menuText, m_menuText.name + "off");
+                }
                 m_referenceFunction();
             }
         }
