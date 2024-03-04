@@ -90,7 +90,7 @@ void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
 }
 
 void loadTextures(GUI *gui) {
-    gui->loadTexture("berry", "./textures/berry.png");
+    gui->loadTexture("berry", "./gfx/berry.png");
 }
 
 int main(int argc, char **argv) {
