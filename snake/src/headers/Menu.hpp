@@ -306,7 +306,7 @@ class MenuBar : public MenuItem {
             m_min           = 0;
             m_barWidth      = m_mi.getMenuWidth() - (m_mi.getMenuWidth() / 5);
             m_barHeight     = m_menuText.height / 2;
-            m_step          = (m_mi.getMenuWidth() - (m_mi.getMenuWidth() / 5)) / (m_max - m_min);
+            m_step          = m_barWidth / (m_max - m_min);
             m_progress      = m_step * ((m_max - m_min) / 2);
             m_highlighted   = false;
             // std::cout << m_barWidth << std::endl;
@@ -363,7 +363,6 @@ class MenuBar : public MenuItem {
             SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
             SDL_RenderFillRect(m_renderer, &m_rectB);
         }
-
 
     private:
 
