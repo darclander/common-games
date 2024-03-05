@@ -30,6 +30,13 @@ Snake::Snake(SDL_Renderer *renderer, int xPos, int yPos, Grid *grid, int snakeWi
 
 }
 
+void Snake::reset() {
+    m_snakeSize = 3; // TODO: should be initial size
+    while(snakeBlocks.size() > 3) {
+        snakeBlocks.pop_back();
+    }
+}
+
 Snake::~Snake() {
     SDL_DestroyTexture(m_textureSnakeHead);
 }
