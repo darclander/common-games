@@ -214,10 +214,6 @@ class MenuItem {
             return textInfo;
         }
 
-
-
-
-
 };
 
 class MenuState : public MenuItem {
