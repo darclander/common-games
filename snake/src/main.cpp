@@ -93,6 +93,13 @@ void loadTextures(GUI *gui) {
     gui->loadTexture("berry", "./gfx/berry.png");
 }
 
+void reset(Grid &grid, int &score, Snake &snake, bool &alive) {
+    score = 0;
+    snake.reset();
+    alive = true;
+    grid.reset();
+}
+
 int main(int argc, char **argv) {
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     loadTextures(&ui);
@@ -173,6 +180,12 @@ int main(int argc, char **argv) {
 
         if (state == START_MENU) {
             startMenu.render();
+            if(!isAlive) {
+                // Reset everything to initial gamestate if we are in the start menu and the snake
+                // is dead.
+                reset(grid, s, snake, isAlive);
+                ui.updateTextValue(t, "Score: " + std::to_string(s)); 
+            }
         } else if (state == OPTIONS) {
             optionsMenu.render();
             // sound.setVolume("song", volume);

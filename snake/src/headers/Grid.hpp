@@ -24,6 +24,8 @@ class Gridpoint {
         void setScore();
         void removeScore();
 
+        void reset();
+
         bool hasScore();
 
         int getGridPointX();
@@ -51,6 +53,8 @@ class Grid {
         ~Grid();
 
         void render();
+
+        void reset();
 
         int getGridPointWidth();
         int getGridPointHeight();
