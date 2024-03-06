@@ -195,8 +195,8 @@ int main(int argc, char **argv) {
             // ui.render(grid);
             if(!hasScore) {
                 std::pair<int, int> pos = getRandomCoordinate();
-                std::cout << "X: " << pos.first << " Y: " << pos.second << std::endl;
-                std::cout << snake.size() << std::endl;
+                // std::cout << "X: " << pos.first << " Y: " << pos.second << std::endl;
+                // std::cout << snake.size() << std::endl;
                 scorePoint = grid.getPoint(pos.first, pos.second);
                 if(scorePoint != nullptr && scorePoint->isEmpty()) {
                     scorePoint->setScore();
