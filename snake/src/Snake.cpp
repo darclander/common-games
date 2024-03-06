@@ -108,6 +108,7 @@ bool Snake::update(double deltaTime, float limit) {
     Gridpoint *oldPoint = m_grid->getPoint(oldPosX + m_snakeWidth / 2, oldPosY + m_snakeHeight / 2);
 
     if(oldPoint != nullptr) oldPoint->setEmpty();
+    if(newPoint == nullptr) return false;
     if(newPoint != nullptr) {
         if(!newPoint->isEmpty()) {
             std::cout << "GAME OVER!" << std::endl;
