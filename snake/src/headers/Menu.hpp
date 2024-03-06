@@ -186,9 +186,6 @@ class MenuItem {
             return true;
         }
 
-    private:
-        std::string m_textString;
-
         Text createText(const std::string &name, int xPos, int yPos, SDL_Color textColor) {
             SDL_Surface *textSurface = TTF_RenderText_Solid(m_font, name.c_str(), textColor);
 
@@ -213,6 +210,11 @@ class MenuItem {
             SDL_FreeSurface(textSurface);
             return textInfo;
         }
+
+    private:
+        std::string m_textString;
+
+        
 
 };
 
@@ -257,35 +259,42 @@ class MenuToggle : public MenuItem {
             m_referenceFunction = refFunc;
             m_on_off = true; // Always true for now?
             // m_nextState = nextState;
+            m_menuTextOff   = createText(m_menuText.name + "off", m_menuText.xPos, m_menuText.yPos, g_color::WHITE);
+            m_menuTextOn    = createText(m_menuText.name + "on", m_menuText.xPos, m_menuText.yPos, g_color::WHITE);
+
         }
 
         void update() override {
-            updateTextColor(m_menuText, menuc::RED);
+            updateTextColor(m_menuTextOn, menuc::RED);
+            updateTextColor(m_menuTextOff, menuc::RED);
         }
 
         void reset() override {
-            updateTextColor(m_menuText, menuc::WHITE);
+            updateTextColor(m_menuTextOn, menuc::WHITE);
+            updateTextColor(m_menuTextOff, menuc::WHITE);
         }
 
         void trigger(int key) override {
             if(key == KEY_ENTER) {
                 m_on_off = !m_on_off;
-                if(m_on_off) {
-                    updateTextValue(m_menuText, m_menuText.name + "on");
-                } else {
-                    updateTextValue(m_menuText, m_menuText.name + "off");
-                }
                 m_referenceFunction();
             }
         }
 
         void render() override {
             SDL_Rect renderQuad = {m_menuText.xPos, m_menuText.yPos, m_menuText.width, m_menuText.height};
-            SDL_RenderCopy(m_renderer, m_menuText.texture, nullptr, &renderQuad);
+            if(m_on_off) {
+                SDL_RenderCopy(m_renderer, m_menuTextOn.texture, nullptr, &renderQuad);
+            } else {
+                SDL_RenderCopy(m_renderer, m_menuTextOff.texture, nullptr, &renderQuad);
+            }
         }
 
     private:
         int m_nextState;
+
+        Text m_menuTextOn;
+        Text m_menuTextOff;
         bool m_on_off;
         std::function<void()> m_referenceFunction;
 };
