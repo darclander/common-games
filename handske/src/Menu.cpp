@@ -284,11 +284,11 @@ void Menu::render() {
 
     SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
 
-    SDL_Rect rectL = {m_xPos, m_yPos, 1, m_height};
-    SDL_Rect rectR = {m_xPos + m_width, m_yPos, 1, m_height};
+    // SDL_Rect rectL = {m_xPos, m_yPos, 1, m_height};
+    // SDL_Rect rectR = {m_xPos + m_width, m_yPos, 1, m_height};
 
-    SDL_RenderFillRect(m_renderer, &rectL);
-    SDL_RenderFillRect(m_renderer, &rectR);
+    // SDL_RenderFillRect(m_renderer, &rectL);
+    // SDL_RenderFillRect(m_renderer, &rectR);
 
     for (auto &m : m_items) {
         // SDL_Rect renderQuad = {m.menuText.xPos, m.menuText.yPos, m.menuText.width, m.menuText.height};
