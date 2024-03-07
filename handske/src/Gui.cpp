@@ -5,6 +5,7 @@ GUI::GUI(const char *title, int windowWidth, int windowHeight, bool fullscreen) 
     this->m_windowWidth = windowWidth;
     this->m_windowHeight = windowHeight;
     this->m_windowClose = false;
+    m_camera = new Camera(); // TODO: Replace with unique ptr?
 
     if (fullscreen) {
         flags = SDL_WINDOW_FULLSCREEN;
@@ -114,6 +115,8 @@ void GUI::update() {
     //     m->render();
         
     // }
+    std::cout << m_camera->getXPos() << std::endl;
+    std::cout << m_camera->getYPos() << std::endl;
 
 }
 
@@ -208,6 +211,24 @@ SDL_Renderer *GUI::getRenderer() {
     return m_renderer;
 }
 
+Camera *GUI::getCamera() {
+    return m_camera;
+}
+
+
+bool GUI::getCulling(int x, int y) {
+    double d = std::sqrt(std::pow(x - getCenterX(), 2) + std::pow(y - getCenterY(), 2));
+    return d > VIEW_CULLING;
+}
+
+int GUI::getCenterX() {
+    return m_windowWidth / 2;
+}
+
+int GUI::getCenterY() {
+    return m_windowHeight / 2;
+}
+
 bool GUI::loadFont(std::string name, std::string path, int f_size) {
     // Check if the font is already loaded
         if (m_fonts.find(name) != m_fonts.end()) {
@@ -233,6 +254,7 @@ TTF_Font *GUI::getFont() {
 }
 
 GUI::~GUI() {
+    delete m_camera;
     TTF_CloseFont(m_font);
     TTF_Quit();
     Mix_Quit();
