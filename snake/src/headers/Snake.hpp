@@ -82,6 +82,5 @@ class Snake : public Observer {
         SDL_Texture *m_textureSnakeHead;
 
         std::vector<Snakeblock> snakeBlocks;
-
 };
 
