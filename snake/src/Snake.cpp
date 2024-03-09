@@ -50,7 +50,6 @@ void Snake::render() {
             snakeBlocks[i].render();
         }
     }
-
 }
 
 bool operator!=(const direction& lhs, const direction& rhs) {
