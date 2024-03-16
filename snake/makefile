@@ -40,4 +40,3 @@ clean: remove snake
 remove:
 	rm -r **/*.o
 	rm ./debug/snake.exe
-
