@@ -17,6 +17,7 @@ typedef std::chrono::high_resolution_clock Clock;
 #define FPS 60
 #define frameDelay = 1000 / FPS
 
+
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 
