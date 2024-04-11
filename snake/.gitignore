@@ -46,6 +46,7 @@ src/SDL2
 *.zip
 
 *.mp4
+debug/snake
 
 # Python files
 *.py
