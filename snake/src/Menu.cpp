@@ -1,10 +1,12 @@
 #include "Menu.hpp"
 
-Menu::Menu(Controller *controller, GUI *gui, int menuid, int xPos, int yPos, 
+Menu::Menu(Controller *controller, GUI *gui, SoundManager *sm, int menuid, int xPos, int yPos, 
             int width, int height, TTF_Font *font, int &state, int previousState, int menuOwnState) {
 
     m_gui = gui;
     m_renderer = m_gui->getRenderer();
+
+    m_sm = sm;
 
     m_xPos          = xPos;
     m_yPos          = yPos;
@@ -133,15 +135,15 @@ void Menu::onEvent(const SDL_Event& event) {
           const Uint8 *key_state = SDL_GetKeyboardState(NULL);
           if (m_items.size() > 0) {
             if (key_state[SDL_SCANCODE_DOWN]) {
-              m_items[m_menuIndex]->reset();
-              if (m_menuIndex < m_items.size() - 1)
-                m_menuIndex++;
-              m_items[m_menuIndex]->update();
+                m_sm->playSound("menu_down");
+                m_items[m_menuIndex]->reset();
+                if (m_menuIndex < m_items.size() - 1) m_menuIndex++;
+                m_items[m_menuIndex]->update();
             } else if (key_state[SDL_SCANCODE_UP]) {
-              m_items[m_menuIndex]->reset();
-              if (m_menuIndex > 0)
-                m_menuIndex--;
-              m_items[m_menuIndex]->update();
+                m_sm->playSound("menu_up");
+                m_items[m_menuIndex]->reset();
+                if (m_menuIndex > 0) m_menuIndex--;
+                m_items[m_menuIndex]->update();
             }
             // if(key_state[SDL_SCANCODE_DOWN]) {
             //     updateText(m_items[m_menuIndex]->getColor(), menuc::WHITE);

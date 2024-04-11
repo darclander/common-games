@@ -93,6 +93,14 @@ void loadTextures(GUI *gui) {
     gui->loadTexture("berry", "./gfx/berry.png");
 }
 
+void loadSounds(SoundManager *sm) {
+    sm->loadSound("./sfx/s2.wav", "song");
+
+    sm->loadSound("./sfx/menu_up.wav", "menu_up");
+
+    sm->loadSound("./sfx/menu_down.wav", "menu_down");
+}
+
 void reset(Grid &grid, int &score, Snake &snake, bool &alive) {
     score = 0;
     snake.reset();
@@ -110,8 +118,9 @@ int main(int argc, char **argv) {
     int volume = 64;
     int playSound = 1;
     SoundManager sound = SoundManager(volume, playSound);
-    sound.loadSound("./sfx/s1.wav", "song");
-    sound.setVolume("song", volume); // 50%
+    loadSounds(&sound);
+    sound.setVolume(volume); // 50%
+    sound.setVolumeAll();
     sound.playSound("song", -1);
 
     double deltaTime = 0;
@@ -121,13 +130,13 @@ int main(int argc, char **argv) {
     // gameState state         = START_MENU;
     // gameState previousState = START_MENU;
 
-    Menu startMenu      = Menu(&controller, &ui, 0, WINDOW_MIDDLE_X - (250 / 2), 
+    Menu startMenu      = Menu(&controller, &ui, &sound, 0, WINDOW_MIDDLE_X - (250 / 2), 
                                                     WINDOW_MIDDLE_Y - (200 / 2), 
                                                     250, 
                                                     200, 
                                                     ui.getFont(), state, START_MENU, START_MENU);
     
-    Menu optionsMenu    = Menu(&controller, &ui, 1, WINDOW_MIDDLE_X - (250 / 2), 
+    Menu optionsMenu    = Menu(&controller, &ui, &sound, 1, WINDOW_MIDDLE_X - (250 / 2), 
                                                     WINDOW_MIDDLE_Y - (200 / 2), 
                                                     250, 
                                                     200, 

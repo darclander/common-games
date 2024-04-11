@@ -17,7 +17,8 @@ public:
     bool loadSound(const char* filePath, const char* soundKey);
     void playSound(const char* soundKey, int loops = 0);
     void stopSound(const char* soundKey);
-    void setVolume(const char* soundKey, int volume); // New function for volume control
+    void setVolume(int volume);
+    void setSoundVolume(const char* soundKey, int volume); // New function for volume control
 
     void increaseVolume();
     void decreaseVolume();

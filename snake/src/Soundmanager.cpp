@@ -98,9 +98,13 @@ void SoundManager::increaseVolume() {
     setVolumeAll();
 }
 
-void SoundManager::setVolume(const char* soundKey, int volume) {
-    auto it = m_soundMap.find(soundKey);
+void SoundManager::setVolume(int volume) {
     *m_volume = volume;
+}
+
+void SoundManager::setSoundVolume(const char* soundKey, int volume) {
+    auto it = m_soundMap.find(soundKey);
+    *m_volume = volume; // TODO: remove this?
     if (it != m_soundMap.end()) {
         Mix_VolumeChunk(it->second, volume);
     }

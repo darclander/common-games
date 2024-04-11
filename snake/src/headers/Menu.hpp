@@ -11,6 +11,7 @@
 
 #include "Controller.hpp"
 #include "Gui.hpp"
+#include "Soundmanager.hpp"
 
 #define MENU_STATE      0x0
 #define MENU_OPTION     0x1
@@ -38,7 +39,7 @@ class MenuItem;
 class Menu : public Observer {
 
     public:
-        Menu(Controller *controller, GUI *gui, int menuid, int xPos, int yPos, 
+        Menu(Controller *controller, GUI *gui, SoundManager *sm, int menuid, int xPos, int yPos, 
                 int width, int height, TTF_Font *font, int &state, int previousState, int menuOwnState);
         ~Menu();
 
@@ -77,6 +78,7 @@ class Menu : public Observer {
 
         size_t m_menuIndex;
 
+        SoundManager *m_sm;
         Controller *m_controller;
         GUI *m_gui; 
 
