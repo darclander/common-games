@@ -130,17 +130,20 @@ int main(int argc, char **argv) {
     // gameState state         = START_MENU;
     // gameState previousState = START_MENU;
 
-    Menu startMenu      = Menu(&controller, &ui, &sound, 0, WINDOW_MIDDLE_X - (250 / 2), 
-                                                    WINDOW_MIDDLE_Y - (200 / 2), 
-                                                    250, 
-                                                    200, 
-                                                    ui.getFont(), state, START_MENU, START_MENU);
+    Menu startMenu      = Menu(&controller, &ui, &sound, 0, 
+                            WINDOW_MIDDLE_X - (250 / 2), 
+                            WINDOW_MIDDLE_Y - (200 / 2), 
+                            250, 
+                            200, 
+                            ui.getFont(), state, START_MENU, START_MENU);
     
-    Menu optionsMenu    = Menu(&controller, &ui, &sound, 1, WINDOW_MIDDLE_X - (250 / 2), 
-                                                    WINDOW_MIDDLE_Y - (200 / 2), 
-                                                    250, 
-                                                    200, 
-                                                    ui.getFont(), state, START_MENU, OPTIONS);
+    Menu optionsMenu    = Menu(&controller, &ui, &sound, 1, 
+                            WINDOW_MIDDLE_X - (250 / 2), 
+                            WINDOW_MIDDLE_Y - (200 / 2), 
+                            250, 
+                            200, 
+                            ui.getFont(), state, START_MENU, OPTIONS);
+    
     int option = 0;
     startMenu.addItemState("START GAME", GAME_PLAY);
     startMenu.addItemState("OPTIONS",    OPTIONS  );
