@@ -98,7 +98,8 @@ void loadSounds(SoundManager *sm) {
 
     sm->loadSound("./sfx/menu_up.wav", "menu_up");
 
-    sm->loadSound("./sfx/menu_down.wav", "menu_down");
+    // sm->loadSound("./sfx/menu_down.wav", "menu_down");
+    sm->loadSound("./sfx/menu_up.wav", "menu_down");
 }
 
 void reset(Grid &grid, int &score, Snake &snake, bool &alive) {
