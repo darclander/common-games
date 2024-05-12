@@ -16,7 +16,7 @@ else
 endif
 
 IDIR = ./src/headers
-_DEPS = Gui.hpp Snake.hpp Grid.hpp Menu.hpp Score.hpp Controller.hpp Soundmanager.hpp
+_DEPS = Gui.hpp Snake.hpp Grid.hpp Menu.hpp Score.hpp Controller.hpp Soundmanager.hpp Task.hpp
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 ODIR = ./obj

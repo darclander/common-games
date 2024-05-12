@@ -30,6 +30,7 @@ class Controller {
 
         // Notify all attached observers about an event
         void notifyEvent(const SDL_Event& event) {
+            m_events.push_back(event);
             for (auto observer : observers) {
                 observer->onEvent(event);
             }
@@ -60,6 +61,10 @@ class Controller {
             listener();
         }
 
+        std::vector<SDL_Event> getEvents() {
+            return m_events;
+        }
+
     private:
 
         void listener() {
@@ -69,6 +74,7 @@ class Controller {
         }
 
         std::vector<Observer*> observers;
+        std::vector<SDL_Event> m_events;
         // std::thread m_controllerThread;
         SDL_Event m_event;
         bool running = true;

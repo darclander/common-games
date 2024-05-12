@@ -11,6 +11,7 @@
 #include "Score.hpp"
 #include "Controller.hpp"
 #include "Soundmanager.hpp"
+#include "Task.hpp"
 
 typedef std::chrono::high_resolution_clock Clock;
 
@@ -52,7 +53,8 @@ std::pair<int, int> getRandomCoordinate() {
 enum gameState {START_MENU  = 0, 
                 GAME_PLAY   = 1,
                 OPTIONS     = 2, 
-                GAME_QUIT   = 3};
+                GAME_QUIT   = 3,
+                STARTUP     = 4};
 
 std::string gameStateToString(gameState value) {
     switch (value) {
@@ -100,6 +102,8 @@ void loadSounds(SoundManager *sm) {
 
     // sm->loadSound("./sfx/menu_down.wav", "menu_down");
     sm->loadSound("./sfx/menu_up.wav", "menu_down");
+
+    sm->loadSound("./sfx/start.wav", "startup");
 }
 
 void reset(Grid &grid, int &score, Snake &snake, bool &alive) {
@@ -127,7 +131,7 @@ int main(int argc, char **argv) {
     double deltaTime = 0;
     uint32_t startingTick = 0;
 
-    int state = START_MENU;
+    int state = STARTUP;
     // gameState state         = START_MENU;
     // gameState previousState = START_MENU;
 
@@ -173,24 +177,47 @@ int main(int argc, char **argv) {
 
     int s = 0;
     ui.loadFont("regular_18", "./font.ttf", 18);
+    ui.loadFont("regular_32", "./font.ttf", 32);
     ui.loadFont("regular_108", "./font.ttf", 108);
     Text t = ui.createText("Score: " + std::to_string(s), 75, 50, g_color::WHITE, "regular_18");
+    
+    Text startText = ui.createText("S N A K E", 0, 0, g_color::RED, "regular_108");
+    ui.updateTextPos(startText, WINDOW_MIDDLE_X - startText.width / 2, WINDOW_HEIGHT + startText.height);
+
+    Text pressStart = ui.createText("Press any key to continue...", 0, 0, g_color::RED, "regular_32");
+    ui.updateTextPos(pressStart, WINDOW_MIDDLE_X - pressStart.width / 2, WINDOW_MIDDLE_Y + startText.height);
+
     Text game_over = ui.createText("GAME OVER!", 0, 0, g_color::RED, "regular_108");
     ui.updateTextPos(game_over, WINDOW_MIDDLE_X - game_over.width / 2, WINDOW_MIDDLE_Y - game_over.height / 2);
 
+    TaskMove tm = TaskMove( std::bind(&Text::updatePos, std::ref(startText), std::placeholders::_1, std::placeholders::_2), 
+                            std::bind(&Text::getX, std::ref(startText)), 
+                            std::bind(&Text::getY, std::ref(startText)), 
+                            Point(WINDOW_MIDDLE_X - startText.width / 2, WINDOW_MIDDLE_Y - startText.height / 2), 500);
+
     bool running = true;
     bool isAlive = true;
+    
+    TaskDelay td = TaskDelay ([&sound](){sound.playSound("startup");}, 500);
+    TaskBlink tb = TaskBlink (std::bind(&Text::render, std::ref(pressStart)), 1000);
+
     while(ui.getWindowClose() && running) {
 
         controller.update();
-
+    
         auto t1 = Clock::now();
         startingTick = SDL_GetTicks();
 
         ui.clearRenderer();
         ui.update();
 
-        if (state == START_MENU) {
+        if (state == STARTUP) {
+            startText.render();
+            td.update(deltaTime);
+            tm.update(deltaTime);
+            tb.update(deltaTime);
+            if(controller.getEvents().back().type == SDL_KEYUP) state = START_MENU;
+        } else if (state == START_MENU) {
             startMenu.render();
             if(!isAlive) {
                 // Reset everything to initial gamestate if we are in the start menu and the snake
