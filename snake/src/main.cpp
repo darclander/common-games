@@ -92,8 +92,19 @@ void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
     }
 }
 
-void loadTextures(GUI *gui) {
+void guiLoadTextures(GUI *gui) {
     gui->loadTexture("berry", "./gfx/berry.png");
+}
+
+void guiLoadFonts(GUI *gui) {
+    gui->loadFont("regular_18", "./font.ttf", 18);
+    gui->loadFont("regular_32", "./font.ttf", 32);
+    gui->loadFont("regular_108", "./font.ttf", 108);
+}
+
+void initGui(GUI *gui) {
+    guiLoadTextures(gui);
+    guiLoadFonts(gui);
 }
 
 void loadSounds(SoundManager *sm) {
@@ -116,9 +127,53 @@ void reset(Grid &grid, int &score, Snake &snake, bool &alive) {
     grid.reset();
 }
 
+Menu createStartMenu(Controller &c, GUI &gui, SoundManager &sm, int &state) {
+    Menu startMenu = Menu(&c, &gui, &sm, 0, 
+                        WINDOW_MIDDLE_X - (250 / 2), 
+                        WINDOW_MIDDLE_Y - (200 / 2), 
+                        250, 
+                        200, 
+                        gui.getFont(), state, START_MENU, START_MENU);
+
+    startMenu.addItemState("START GAME", GAME_PLAY);
+    startMenu.addItemState("OPTIONS", OPTIONS);
+    startMenu.addItemState("ABOUT", GAME_ABOUT);
+    startMenu.addItemState("QUIT", GAME_QUIT);
+
+    return startMenu;
+}
+
+Menu createOptionsMenu(Controller &c, GUI &gui, SoundManager &sm, int &state) {
+    Menu optionsMenu = Menu(&c, &gui, &sm, 1, 
+                        WINDOW_MIDDLE_X - (250 / 2), 
+                        WINDOW_MIDDLE_Y - (200 / 2), 
+                        250, 
+                        200, 
+                        gui.getFont(), state, START_MENU, OPTIONS);
+
+    std::function<void()> funcL = bindMemberFunction(sm, &SoundManager::decreaseVolume);
+    std::function<void()> funcR = bindMemberFunction(sm, &SoundManager::increaseVolume);
+    std::function<void()> toggleSound = bindMemberFunction(sm, &SoundManager::toggleSound);
+    optionsMenu.addItemBar("sound", funcL, funcR);
+    optionsMenu.addItemToggle("sound: ", toggleSound);
+
+    return optionsMenu;
+}
+
+Menu createAboutMenu(Controller &c, GUI &gui, SoundManager &sm, int &state) {
+    Menu aboutMenu = Menu(&c, &gui, &sm, 2, 
+                        WINDOW_MIDDLE_X - (250 / 2), 
+                        WINDOW_MIDDLE_Y - (200 / 2), 
+                        500, 
+                        500, 
+                        gui.getFont(), state, START_MENU, GAME_ABOUT);
+
+    return aboutMenu;
+}
+
 int main(int argc, char **argv) {
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, 0);
-    loadTextures(&ui);
+    initGui(&ui);
 
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20, 15);
     Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 5);
@@ -138,38 +193,17 @@ int main(int argc, char **argv) {
     // gameState state         = START_MENU;
     // gameState previousState = START_MENU;
 
-    Menu startMenu      = Menu(&controller, &ui, &sound, 0, 
-                            WINDOW_MIDDLE_X - (250 / 2), 
-                            WINDOW_MIDDLE_Y - (200 / 2), 
-                            250, 
-                            200, 
-                            ui.getFont(), state, START_MENU, START_MENU);
+    Menu startMenu = createStartMenu(controller, ui, sound, state);
     
-    Menu optionsMenu    = Menu(&controller, &ui, &sound, 1, 
-                            WINDOW_MIDDLE_X - (250 / 2), 
-                            WINDOW_MIDDLE_Y - (200 / 2), 
-                            250, 
-                            200, 
-                            ui.getFont(), state, START_MENU, OPTIONS);
+    Menu optionsMenu = createOptionsMenu(controller, ui, sound, state);
 
-    Menu aboutMenu      = Menu(&controller, &ui, &sound, 2, 
-                            WINDOW_MIDDLE_X - (250 / 2), 
-                            WINDOW_MIDDLE_Y - (200 / 2), 
-                            250, 
-                            200, 
-                            ui.getFont(), state, START_MENU, GAME_ABOUT);
+    Menu aboutMenu = createAboutMenu(controller, ui, sound, state);
+    
     
     int option = 0;
-    startMenu.addItemState("START GAME", GAME_PLAY);
-    startMenu.addItemState("OPTIONS", OPTIONS);
-    startMenu.addItemState("ABOUT", GAME_ABOUT);
-    startMenu.addItemState("QUIT", GAME_QUIT);
 
-    std::function<void()> funcL = bindMemberFunction(sound, &SoundManager::decreaseVolume);
-    std::function<void()> funcR = bindMemberFunction(sound, &SoundManager::increaseVolume);
-    std::function<void()> toggleSound = bindMemberFunction(sound, &SoundManager::toggleSound);
-    optionsMenu.addItemBar("sound", funcL, funcR);
-    optionsMenu.addItemToggle("sound: ", toggleSound);
+
+
 
     // int soundVolume;
     // optionsMenu.addItem("sound: ", MENU_ON_OFF, playSound);
@@ -188,11 +222,8 @@ int main(int argc, char **argv) {
     Score score = Score(&ui, grid.getGridPointWidth(), grid.getGridPointHeight());
 
     int s = 0;
-    ui.loadFont("regular_18", "./font.ttf", 18);
-    ui.loadFont("regular_32", "./font.ttf", 32);
-    ui.loadFont("regular_108", "./font.ttf", 108);
+
     Text t = ui.createText("Score: " + std::to_string(s), 75, 50, g_color::WHITE, "regular_18");
-    
     Text startText = ui.createText("S N A K E", 0, 0, g_color::RED, "regular_108");
     ui.updateTextPos(startText, WINDOW_MIDDLE_X - startText.width / 2, WINDOW_HEIGHT + startText.height);
 

@@ -59,6 +59,8 @@ class Menu : public Observer {
 
         int addItemToggle(std::string name, std::function<void()> refFuncToggle);
 
+        void addText(Text &textName); 
+
         void render();
         int update(double deltaTime, bool gameRunning);
         int getMenuIndex();
@@ -99,6 +101,7 @@ class Menu : public Observer {
         bool updateTextValue(Text &t, const std::string newText, MenuItem &mi);
 
         std::vector<std::shared_ptr<MenuItem>> m_items;
+        std::vector<std::shared_ptr<Text>> m_texts;
 
         TTF_Font *m_font;
         SDL_Renderer *m_renderer;

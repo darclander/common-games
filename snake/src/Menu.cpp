@@ -57,6 +57,10 @@ int Menu::addItem() {
     return m_items.size();
 }
 
+void Menu::addText(Text &textName) {
+    m_texts.push_back(std::move(std::make_shared<Text>(textName)));
+}
+
 
 int Menu::addItemToggle(std::string name, std::function<void()> refFuncToggle) {
     std::unique_ptr<MenuToggle> mi = std::make_unique<MenuToggle>(m_renderer, name, m_xPos, m_yPos + m_items.size() * 50, m_font, refFuncToggle, *this);
@@ -112,7 +116,7 @@ void Menu::updateMenu() {
 
 void Menu::onEvent(const SDL_Event& event) {
     
-    // Replace with game menu.
+    // Replace with game menu. This means we are in game and can take esc as a command to return to menu...
     if(event.type == SDL_USEREVENT) {
         if(event.user.code == 3) {
             const Uint8 *key_state = SDL_GetKeyboardState(NULL);
@@ -295,10 +299,14 @@ void Menu::render() {
     // SDL_RenderFillRect(m_renderer, &rectL);
     // SDL_RenderFillRect(m_renderer, &rectR);
 
-    for (auto &m : m_items) {
+    for (auto &i : m_items) {
         // SDL_Rect renderQuad = {m.menuText.xPos, m.menuText.yPos, m.menuText.width, m.menuText.height};
         // SDL_RenderCopy(m_renderer, m.menuText.texture, nullptr, &renderQuad); 
-        m->render();
+        i->render();
+    }
+
+    for (auto &t : m_texts) {
+        t->render();
     }
 
 }
