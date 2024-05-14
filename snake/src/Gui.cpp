@@ -219,6 +219,7 @@ bool GUI::loadFont(std::string name, std::string path, int f_size) {
         TTF_Font* font = TTF_OpenFont(path.c_str(), f_size);
         if (!font) {
             // Failed to load the font
+            std::cout << "Failed to load font" << std::endl;
             return false;
         }
 

@@ -155,12 +155,15 @@ void Menu::onEvent(const SDL_Event& event) {
             //     updateText(m_items[m_menuIndex].menuText, menuc::RED);
             // }
 
+            // TODO: Bad implementation! Move to specific menuclass
             else if (key_state[SDL_SCANCODE_RIGHT]) {
               m_items[m_menuIndex]->trigger(KEY_RIGHT);
+              m_sm->playSound("options_change");
             }
 
             else if (key_state[SDL_SCANCODE_LEFT]) {
               m_items[m_menuIndex]->trigger(KEY_LEFT);
+              m_sm->playSound("options_change");
             }
 
             else if (key_state[SDL_SCANCODE_RETURN]) {

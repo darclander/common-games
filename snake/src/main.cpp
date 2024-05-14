@@ -54,7 +54,8 @@ enum gameState {START_MENU  = 0,
                 GAME_PLAY   = 1,
                 OPTIONS     = 2, 
                 GAME_QUIT   = 3,
-                STARTUP     = 4};
+                STARTUP     = 4,
+                GAME_ABOUT  = 5};
 
 std::string gameStateToString(gameState value) {
     switch (value) {
@@ -103,6 +104,8 @@ void loadSounds(SoundManager *sm) {
     // sm->loadSound("./sfx/menu_down.wav", "menu_down");
     sm->loadSound("./sfx/menu_up.wav", "menu_down");
 
+    sm->loadSound("./sfx/menu_down.wav", "options_change");
+
     sm->loadSound("./sfx/start.wav", "startup");
 }
 
@@ -148,11 +151,19 @@ int main(int argc, char **argv) {
                             250, 
                             200, 
                             ui.getFont(), state, START_MENU, OPTIONS);
+
+    Menu aboutMenu      = Menu(&controller, &ui, &sound, 2, 
+                            WINDOW_MIDDLE_X - (250 / 2), 
+                            WINDOW_MIDDLE_Y - (200 / 2), 
+                            250, 
+                            200, 
+                            ui.getFont(), state, START_MENU, GAME_ABOUT);
     
     int option = 0;
     startMenu.addItemState("START GAME", GAME_PLAY);
-    startMenu.addItemState("OPTIONS",    OPTIONS  );
-    startMenu.addItemState("QUIT",       GAME_QUIT);
+    startMenu.addItemState("OPTIONS", OPTIONS);
+    startMenu.addItemState("ABOUT", GAME_ABOUT);
+    startMenu.addItemState("QUIT", GAME_QUIT);
 
     std::function<void()> funcL = bindMemberFunction(sound, &SoundManager::decreaseVolume);
     std::function<void()> funcR = bindMemberFunction(sound, &SoundManager::increaseVolume);
@@ -166,6 +177,7 @@ int main(int argc, char **argv) {
 
     controller.attachObserver(&startMenu);
     controller.attachObserver(&optionsMenu);
+    controller.attachObserver(&aboutMenu);
     controller.attachObserver(&ui);
     controller.attachObserver(&snake);
     controller.attachObserver(&sound);
@@ -220,8 +232,7 @@ int main(int argc, char **argv) {
         } else if (state == START_MENU) {
             startMenu.render();
             if(!isAlive) {
-                // Reset everything to initial gamestate if we are in the start menu and the snake
-                // is dead.
+                // Reset everything to initial gamestate if we are in the start menu and the snake is dead.
                 reset(grid, s, snake, isAlive);
                 ui.updateTextValue(t, "Score: " + std::to_string(s)); 
             }
@@ -229,6 +240,8 @@ int main(int argc, char **argv) {
             optionsMenu.render();
             // sound.setVolume("song", volume);
             // std::cout << volume << std::endl;
+        } else if(state == GAME_ABOUT) {
+            aboutMenu.render();
         } else if (state == GAME_PLAY) {
             controller.broadcastNewMenu(3);
             // ui.render(grid);
