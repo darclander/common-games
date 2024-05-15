@@ -117,6 +117,43 @@ void GUI::update() {
 
 }
 
+bool GUI::updateTextPos(Text &txt, int xPos, int yPos) {
+    txt.xPos = xPos;
+    txt.yPos = yPos;
+    return true;
+}
+
+Text GUI::createTextCentralized(const std::string &name, int xPos, int yPos, SDL_Color textColor, std::string font) {
+    
+    SDL_Surface *textSurface = TTF_RenderText_Solid(m_fonts[font], name.c_str(), textColor);
+
+    if (!textSurface) {
+        std::cerr << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << std::endl;
+    }
+
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(m_renderer, textSurface);
+    if (!textTexture) {
+        std::cerr << "Unable to create texture from rendered text! SDL_Error: " << SDL_GetError() << std::endl;
+        SDL_FreeSurface(textSurface);
+    }
+
+    Text textInfo;
+    textInfo.width      = textSurface->w;
+    textInfo.height     = textSurface->h;
+    textInfo.texture    = textTexture;
+    textInfo.xPos       = xPos;
+    textInfo.yPos       = yPos;
+    textInfo.color      = textColor;
+    textInfo.name       = name;
+    textInfo.font       = m_fonts[font];
+    textInfo.renderer   = m_renderer;
+
+    SDL_FreeSurface(textSurface);
+
+    updateTextPos(textInfo, xPos - textInfo.width / 2, yPos - textInfo.height / 2);
+    return textInfo;
+}
+
 Text GUI::createText(const std::string &name, int xPos, int yPos, SDL_Color textColor, std::string font) {
     
     SDL_Surface *textSurface = TTF_RenderText_Solid(m_fonts[font], name.c_str(), textColor);
@@ -160,12 +197,6 @@ bool GUI::updateTextColor(Text &txt, SDL_Color textColor) {
     SDL_FreeSurface(textSurface);
 
     txt.texture = textTexture;
-    return true;
-}
-
-bool GUI::updateTextPos(Text &txt, int xPos, int yPos) {
-    txt.xPos = xPos;
-    txt.yPos = yPos;
     return true;
 }
 

@@ -118,6 +118,10 @@ void loadSounds(SoundManager *sm) {
     sm->loadSound("./sfx/menu_down.wav", "options_change");
 
     sm->loadSound("./sfx/start.wav", "startup");
+
+    sm->loadSound("./sfx/gameover.wav", "gameover");
+
+    sm->loadSound("./sfx/chomp.wav", "score");
 }
 
 void reset(Grid &grid, int &score, Snake &snake, bool &alive) {
@@ -161,14 +165,39 @@ Menu createOptionsMenu(Controller &c, GUI &gui, SoundManager &sm, int &state) {
 }
 
 Menu createAboutMenu(Controller &c, GUI &gui, SoundManager &sm, int &state) {
+    const int baseY = WINDOW_MIDDLE_Y - WINDOW_HEIGHT / 5;
+    const int offsetY = 32 + 32 / 6;
+    
     Menu aboutMenu = Menu(&c, &gui, &sm, 2, 
                         WINDOW_MIDDLE_X - (250 / 2), 
-                        WINDOW_MIDDLE_Y - (200 / 2), 
-                        500, 
-                        500, 
+                        baseY + offsetY * 5, 
+                        250, 
+                        200, 
                         gui.getFont(), state, START_MENU, GAME_ABOUT);
+    
+    aboutMenu.addItemState("Back", START_MENU); // TODO: Triggers instantly.
+
+    aboutMenu.addText(gui.createTextCentralized("Creator: Darclander", 
+        WINDOW_MIDDLE_X, baseY + offsetY*0, g_color::BLUE, "regular_32"));
+
+    aboutMenu.addText(gui.createTextCentralized("Co-creator: Kumole", 
+        WINDOW_MIDDLE_X, baseY + offsetY*1, g_color::BLUE, "regular_32"));
+    
+    aboutMenu.addText(gui.createTextCentralized("Sound effects: Isak", 
+        WINDOW_MIDDLE_X, baseY + offsetY*2, g_color::BLUE, "regular_32"));
 
     return aboutMenu;
+}
+
+void notifyStateChange(SoundManager &sm, gameState oldState, gameState state) {
+    std::cout << gameStateToString(oldState) << " -> " << gameStateToString(state) << std::endl;
+    if(state != GAME_PLAY) {
+        sm.stopSound("song");
+    }
+
+    if (state == GAME_PLAY) {
+        sm.playSound("song", -1);
+    }
 }
 
 int main(int argc, char **argv) {
@@ -176,20 +205,24 @@ int main(int argc, char **argv) {
     initGui(&ui);
 
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 20, 15);
-    Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 5);
-    Controller controller = Controller();
+    
+
+    int state = STARTUP;
+    int oldState = STARTUP;
+    Controller controller = Controller(state);
     int volume = 64;
     int playSound = 1;
     SoundManager sound = SoundManager(volume, playSound);
     loadSounds(&sound);
     sound.setVolume(volume); // 50%
     sound.setVolumeAll();
-    sound.playSound("song", -1);
+    // sound.playSound("song", -1);
+
+    Snake snake = Snake(ui.getRenderer(), &sound, WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 5);
 
     double deltaTime = 0;
     uint32_t startingTick = 0;
 
-    int state = STARTUP;
     // gameState state         = START_MENU;
     // gameState previousState = START_MENU;
 
@@ -202,18 +235,16 @@ int main(int argc, char **argv) {
     
     int option = 0;
 
-
-
-
     // int soundVolume;
     // optionsMenu.addItem("sound: ", MENU_ON_OFF, playSound);
     // optionsMenu.addItem("sound", MENU_BAR, volume);
 
-    controller.attachObserver(&startMenu);
-    controller.attachObserver(&optionsMenu);
-    controller.attachObserver(&aboutMenu);
+    // TODO: update so some observers are conditional. Ui should always be notified but the rest should on condition.
+    controller.attachObserver(&startMenu, START_MENU);
+    controller.attachObserver(&optionsMenu, OPTIONS);
+    controller.attachObserver(&aboutMenu, GAME_ABOUT);
     controller.attachObserver(&ui);
-    controller.attachObserver(&snake);
+    controller.attachObserver(&snake, GAME_PLAY);
     controller.attachObserver(&sound);
 
     bool hasScore = false;
@@ -240,16 +271,24 @@ int main(int argc, char **argv) {
 
     bool running = true;
     bool isAlive = true;
+    bool playMusic = false;
     
     TaskDelay td = TaskDelay ([&sound](){sound.playSound("startup");}, 500);
     TaskBlink tb = TaskBlink (std::bind(&Text::render, std::ref(pressStart)), 1000);
 
     while(ui.getWindowClose() && running) {
 
-        controller.update();
+        controller.update(state);
     
         auto t1 = Clock::now();
         startingTick = SDL_GetTicks();
+
+        if(!(state == oldState)) {
+            notifyStateChange(sound, (gameState)oldState, (gameState)state);
+            oldState = state;
+        } else {
+            // Do nothing, we remain in the same state.
+        }
 
         ui.clearRenderer();
         ui.update();
@@ -269,12 +308,16 @@ int main(int argc, char **argv) {
             }
         } else if (state == OPTIONS) {
             optionsMenu.render();
-            // sound.setVolume("song", volume);
-            // std::cout << volume << std::endl;
         } else if(state == GAME_ABOUT) {
             aboutMenu.render();
         } else if (state == GAME_PLAY) {
             controller.broadcastNewMenu(3);
+
+            if(!playMusic) {
+                playMusic = true;
+                sound.playSound("song", -1);
+            }
+
             // ui.render(grid);
             if(!hasScore) {
                 std::pair<int, int> pos = getRandomCoordinate();

@@ -57,7 +57,7 @@ int Menu::addItem() {
     return m_items.size();
 }
 
-void Menu::addText(Text &textName) {
+void Menu::addText(Text textName) {
     m_texts.push_back(std::move(std::make_shared<Text>(textName)));
 }
 

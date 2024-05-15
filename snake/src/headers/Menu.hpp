@@ -59,7 +59,7 @@ class Menu : public Observer {
 
         int addItemToggle(std::string name, std::function<void()> refFuncToggle);
 
-        void addText(Text &textName); 
+        void addText(Text textName); 
 
         void render();
         int update(double deltaTime, bool gameRunning);

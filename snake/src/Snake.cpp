@@ -1,12 +1,13 @@
 #include "Snake.hpp"
 
-Snake::Snake(SDL_Renderer *renderer, int xPos, int yPos, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize) {
+Snake::Snake(SDL_Renderer *renderer, SoundManager *sm, int xPos, int yPos, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize) {
 
     this->m_renderer = renderer;
     // this->m_snakeWidth = snakeWidth;
     // this->m_snakeHeight = snakeHeight;
     this->m_snakeSize = snakeSize;
     this->m_grid = grid;
+    this->m_sm = sm;
 
     m_snakeDirection = DIR_RIGHT;
     m_newSnakeDirection = m_snakeDirection;
@@ -32,8 +33,10 @@ Snake::Snake(SDL_Renderer *renderer, int xPos, int yPos, Grid *grid, int snakeWi
 
 void Snake::reset() {
     m_snakeSize = 3; // TODO: should be initial size
-    while(snakeBlocks.size() > 3) {
-        snakeBlocks.pop_back();
+    
+    snakeBlocks.clear();
+    while(snakeBlocks.size() <= 3) {
+        snakeBlocks.push_back(Snakeblock(m_renderer, 400, 300, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees));
     }
 }
 
@@ -106,16 +109,21 @@ bool Snake::update(double deltaTime, float limit) {
     Gridpoint *oldPoint = m_grid->getPoint(oldPosX + m_snakeWidth / 2, oldPosY + m_snakeHeight / 2);
 
     if(oldPoint != nullptr) oldPoint->setEmpty();
-    if(newPoint == nullptr) return false;
+    if(newPoint == nullptr) {
+        m_sm->playSound("gameover");
+        return false;
+    }
     if(newPoint != nullptr) {
         if(!newPoint->isEmpty()) {
             std::cout << "GAME OVER!" << std::endl;
+            m_sm->playSound("gameover");
             return false;
         }
 
         if(newPoint->hasScore()) {
             snakeBlocks.push_back(Snakeblock(m_renderer, (snakeBlocks.size()-1)*m_snakeWidth, 1, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees));
             newPoint->removeScore();
+            m_sm->playSound("score");
         }
         newPoint->setNotEmpty();
 

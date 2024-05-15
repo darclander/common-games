@@ -105,6 +105,7 @@ class GUI : public Observer {
         bool loadFont(std::string name, std::string path, int f_size);
 
         Text createText(const std::string &name, int xPos, int yPos, SDL_Color textColor, std::string font);
+        Text createTextCentralized(const std::string &name, int xPos, int yPos, SDL_Color textColor, std::string font);
         bool updateTextColor(Text &t, SDL_Color textColor);
         bool updateTextValue(Text &t, std::string newName);
         bool updateTextPos(Text &t, int xPos, int yPos);
