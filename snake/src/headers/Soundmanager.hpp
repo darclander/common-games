@@ -38,7 +38,7 @@ private:
 
     bool m_soundOn = true;
 
-    int m_volumeMax = 128;
+    int m_volumeMax = 100;
     int m_volumeMin = 0;
     int m_step; 
 

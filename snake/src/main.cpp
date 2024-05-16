@@ -108,7 +108,7 @@ void initGui(GUI *gui) {
 }
 
 void loadSounds(SoundManager *sm) {
-    sm->loadSound("./sfx/s2.wav", "song");
+    sm->loadSound("./sfx/song.wav", "song");
 
     sm->loadSound("./sfx/menu_up.wav", "menu_up");
 
@@ -210,7 +210,7 @@ int main(int argc, char **argv) {
     int state = STARTUP;
     int oldState = STARTUP;
     Controller controller = Controller(state);
-    int volume = 64;
+    int volume = 50;
     int playSound = 1;
     SoundManager sound = SoundManager(volume, playSound);
     loadSounds(&sound);

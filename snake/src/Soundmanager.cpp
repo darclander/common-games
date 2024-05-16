@@ -51,9 +51,11 @@ bool SoundManager::loadSound(const char* filePath, const char* soundKey) {
 }
 
 void SoundManager::playSound(const char* soundKey, int loops) {
-    auto it = m_soundMap.find(soundKey);
-    if (it != m_soundMap.end()) {
-        Mix_PlayChannel(-1, it->second, loops);
+    if(m_soundOn) {
+        auto it = m_soundMap.find(soundKey);
+        if (it != m_soundMap.end()) {
+            Mix_PlayChannel(-1, it->second, loops);
+        }
     }
 }
 

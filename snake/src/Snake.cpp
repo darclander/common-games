@@ -35,7 +35,7 @@ void Snake::reset() {
     m_snakeSize = 3; // TODO: should be initial size
     
     snakeBlocks.clear();
-    while(snakeBlocks.size() <= 3) {
+    while(snakeBlocks.size() <= m_snakeSize) {
         snakeBlocks.push_back(Snakeblock(m_renderer, 400, 300, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees));
     }
 }
