@@ -3,13 +3,13 @@ OBJS = ./src/*.cpp
 
 CC=g++
 
-OPTIMIZATION= #-O3
+OPTIMIZATION= -O3
 
 CFLAGS= -I$(IDIR) -Wall
 
 ifeq ($(OS),Windows_NT)
     # Windows system
-    CFLAGS += -lmingw32 -lSDL2main -lSDL2 -lSDL2_Image -lSDL2_TTF -lSDL2_Mixer
+    CFLAGS += -lmingw32 -lSDL2main -lSDL2 -lSDL2_Image -lSDL2_TTF -lSDL2_Mixer -mwindows
 else
     # Non-Windows system
     CFLAGS += -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer
