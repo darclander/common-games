@@ -1,6 +1,5 @@
 #include "Score.hpp"
 
-
 Score::Score(GUI *ui, int width, int height) {
     // SDL_Surface* surface = IMG_Load("./gfx/berry.png");
     // if (!surface) {

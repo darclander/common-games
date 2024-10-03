@@ -70,20 +70,20 @@ std::function<void()> bindMemberFunction(ClassType& object, void (ClassType::*me
     return std::bind(memberFunction, std::ref(object));
 }
 
-void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
-    menu.render();
-    int menuChoice = 0;
-    menuChoice = menu.getMenuIndex();
-    std::cout << menuChoice << std::endl;
-    if(menuChoice > 0) {
-        gameState newState = static_cast<gameState>(menuChoice);
-        previousState = state;
-        state = newState;
-        std::cout << gameStateToString(previousState) << " -> " << gameStateToString(state) << std::endl;
-    } else if (menuChoice == -1) {
-        state = previousState;
-    }
-}
+// void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
+//     menu.render();
+//     int menuChoice = 0;
+//     menuChoice = menu.getMenuIndex();
+//     std::cout << menuChoice << std::endl;
+//     if(menuChoice > 0) {
+//         gameState newState = static_cast<gameState>(menuChoice);
+//         previousState = state;
+//         state = newState;
+//         std::cout << gameStateToString(previousState) << " -> " << gameStateToString(state) << std::endl;
+//     } else if (menuChoice == -1) {
+//         state = previousState;
+//     }
+// }
 
 void loadTextures(GUI *gui) {
     // gui->loadTexture("berry", "./textures/berry.png");

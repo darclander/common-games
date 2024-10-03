@@ -7,6 +7,7 @@
 
 #include "Grid.hpp"
 #include "Controller.hpp"
+#include "Soundmanager.hpp"
 
 struct direction {
     int x;
@@ -49,7 +50,7 @@ class Snakeblock {
 class Snake : public Observer {
 
     public:
-        Snake(SDL_Renderer *renderer, int xPos, int yPos, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize);
+        Snake(SDL_Renderer *renderer, SoundManager *sm, int xPos, int yPos, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize);
         ~Snake();
 
         void render();
@@ -57,6 +58,8 @@ class Snake : public Observer {
         // void update(double deltaTime, float limit);
 
         void onEvent(const SDL_Event& event) override;
+
+        void reset();
 
         int size() {
             return snakeBlocks.size();
@@ -75,11 +78,11 @@ class Snake : public Observer {
         direction m_newSnakeDirection;
 
         Grid *m_grid;
+        SoundManager *m_sm;
 
         SDL_Renderer *m_renderer;
         SDL_Texture *m_textureSnakeHead;
 
         std::vector<Snakeblock> snakeBlocks;
-
 };
 

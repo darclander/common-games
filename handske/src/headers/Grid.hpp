@@ -44,6 +44,7 @@ class Gridpoint {
 
     private:
         GUI             *m_gui;
+        Camera          *m_camera;
         SDL_Renderer    *m_renderer;
         SDL_Texture     *m_texture;
 

@@ -22,7 +22,7 @@
 
 typedef std::chrono::high_resolution_clock Clock;
 
-#define FPS 5
+#define FPS 60
 #define frameDelay = 1000 / FPS
 
 #define SEND_LIMIT 100

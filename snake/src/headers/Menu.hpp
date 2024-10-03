@@ -11,6 +11,7 @@
 
 #include "Controller.hpp"
 #include "Gui.hpp"
+#include "Soundmanager.hpp"
 
 #define MENU_STATE      0x0
 #define MENU_OPTION     0x1
@@ -38,7 +39,7 @@ class MenuItem;
 class Menu : public Observer {
 
     public:
-        Menu(Controller *controller, GUI *gui, int menuid, int xPos, int yPos, 
+        Menu(Controller *controller, GUI *gui, SoundManager *sm, int menuid, int xPos, int yPos, 
                 int width, int height, TTF_Font *font, int &state, int previousState, int menuOwnState);
         ~Menu();
 
@@ -58,7 +59,7 @@ class Menu : public Observer {
 
         int addItemToggle(std::string name, std::function<void()> refFuncToggle);
 
-
+        void addText(Text textName); 
 
         void render();
         int update(double deltaTime, bool gameRunning);
@@ -79,6 +80,7 @@ class Menu : public Observer {
 
         size_t m_menuIndex;
 
+        SoundManager *m_sm;
         Controller *m_controller;
         GUI *m_gui; 
 
@@ -99,6 +101,7 @@ class Menu : public Observer {
         bool updateTextValue(Text &t, const std::string newText, MenuItem &mi);
 
         std::vector<std::shared_ptr<MenuItem>> m_items;
+        std::vector<std::shared_ptr<Text>> m_texts;
 
         TTF_Font *m_font;
         SDL_Renderer *m_renderer;
@@ -117,6 +120,7 @@ class MenuItem {
 
 
             m_menuText = createText(name, m_xPos, m_yPos, menuc::WHITE);
+            m_color = g_color::WHITE;
             m_menuText.updateX(m_xPos + (m_mi.getMenuWidth() - m_menuText.width) / 2 );
 
         }
@@ -161,19 +165,8 @@ class MenuItem {
         SDL_Renderer *m_renderer;
 
         bool updateTextColor(Text &txt, SDL_Color textColor) {
-            SDL_Surface *textSurface = TTF_RenderText_Solid(m_font, txt.name.c_str(), textColor);
-            if (!textSurface) {
-                std::cerr << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << std::endl;
-            }
-
-            SDL_Texture* textTexture = SDL_CreateTextureFromSurface(m_renderer, textSurface);
-            if (!textTexture) {
-                std::cerr << "Unable to create texture from rendered text! SDL_Error: " << SDL_GetError() << std::endl;
-                SDL_FreeSurface(textSurface);
-            }
-            SDL_FreeSurface(textSurface);
-
-            txt.texture = textTexture;
+            SDL_SetTextureColorMod(txt.texture, textColor.r, textColor.g, textColor.b);
+            txt.color = textColor;
             return true;
         }
 
@@ -189,14 +182,14 @@ class MenuItem {
                 std::cerr << "Unable to create texture from rendered text! SDL_Error: " << SDL_GetError() << std::endl;
                 SDL_FreeSurface(textSurface);
             }
-            SDL_FreeSurface(textSurface);
+            
 
             txt.texture = textTexture;
+            txt.width = textSurface->w;
+            txt.height = textSurface->h;
+            SDL_FreeSurface(textSurface);
             return true;
         }
-
-    private:
-        std::string m_textString;
 
         Text createText(const std::string &name, int xPos, int yPos, SDL_Color textColor) {
             SDL_Surface *textSurface = TTF_RenderText_Solid(m_font, name.c_str(), textColor);
@@ -223,9 +216,10 @@ class MenuItem {
             return textInfo;
         }
 
+    private:
+        std::string m_textString;
 
-
-
+        
 
 };
 
@@ -270,30 +264,42 @@ class MenuToggle : public MenuItem {
             m_referenceFunction = refFunc;
             m_on_off = true; // Always true for now?
             // m_nextState = nextState;
+            m_menuTextOff   = createText(m_menuText.name + "off", m_menuText.xPos, m_menuText.yPos, g_color::WHITE);
+            m_menuTextOn    = createText(m_menuText.name + "on", m_menuText.xPos, m_menuText.yPos, g_color::WHITE);
+
         }
 
         void update() override {
-            updateTextColor(m_menuText, menuc::RED);
+            updateTextColor(m_menuTextOn, menuc::RED);
+            updateTextColor(m_menuTextOff, menuc::RED);
         }
 
         void reset() override {
-            updateTextColor(m_menuText, menuc::WHITE);
+            updateTextColor(m_menuTextOn, menuc::WHITE);
+            updateTextColor(m_menuTextOff, menuc::WHITE);
         }
 
         void trigger(int key) override {
             if(key == KEY_ENTER) {
-                updateTextValue(m_menuText, m_menuText.name + "on");
+                m_on_off = !m_on_off;
                 m_referenceFunction();
             }
         }
 
         void render() override {
             SDL_Rect renderQuad = {m_menuText.xPos, m_menuText.yPos, m_menuText.width, m_menuText.height};
-            SDL_RenderCopy(m_renderer, m_menuText.texture, nullptr, &renderQuad);
+            if(m_on_off) {
+                SDL_RenderCopy(m_renderer, m_menuTextOn.texture, nullptr, &renderQuad);
+            } else {
+                SDL_RenderCopy(m_renderer, m_menuTextOff.texture, nullptr, &renderQuad);
+            }
         }
 
     private:
         int m_nextState;
+
+        Text m_menuTextOn;
+        Text m_menuTextOff;
         bool m_on_off;
         std::function<void()> m_referenceFunction;
 };
@@ -310,7 +316,7 @@ class MenuBar : public MenuItem {
             m_min           = 0;
             m_barWidth      = m_mi.getMenuWidth() - (m_mi.getMenuWidth() / 5);
             m_barHeight     = m_menuText.height / 2;
-            m_step          = (m_mi.getMenuWidth() - (m_mi.getMenuWidth() / 5)) / (m_max - m_min);
+            m_step          = m_barWidth / (m_max - m_min);
             m_progress      = m_step * ((m_max - m_min) / 2);
             m_highlighted   = false;
             // std::cout << m_barWidth << std::endl;
@@ -367,7 +373,6 @@ class MenuBar : public MenuItem {
             SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
             SDL_RenderFillRect(m_renderer, &m_rectB);
         }
-
 
     private:
 

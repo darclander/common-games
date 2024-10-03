@@ -24,5 +24,4 @@ class Score {
         SDL_Texture *m_textureScore;
         SDL_Renderer *m_renderer;
         GUI *m_gui;
-
 };

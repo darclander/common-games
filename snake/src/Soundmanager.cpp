@@ -4,6 +4,7 @@ SoundManager::SoundManager(int &volume, int &playSound) {
     m_volume = &volume;
     m_playSound = &playSound;
     m_loops = -1;
+    m_step = (m_volumeMax - m_volumeMin) / 10;
     // Initialize SDL audio subsystem
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
         printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
@@ -50,9 +51,11 @@ bool SoundManager::loadSound(const char* filePath, const char* soundKey) {
 }
 
 void SoundManager::playSound(const char* soundKey, int loops) {
-    auto it = m_soundMap.find(soundKey);
-    if (it != m_soundMap.end()) {
-        Mix_PlayChannel(-1, it->second, loops);
+    if(m_soundOn) {
+        auto it = m_soundMap.find(soundKey);
+        if (it != m_soundMap.end()) {
+            Mix_PlayChannel(-1, it->second, loops);
+        }
     }
 }
 
@@ -71,6 +74,16 @@ void SoundManager::stopSoundAll() {
     Mix_Pause(-1);
 }
 
+void SoundManager::toggleSound() {
+    if(m_soundOn) {
+        m_soundOn = false;
+        stopSoundAll();
+    } else {
+        m_soundOn = true;
+        playSoundAll();
+    }
+}
+
 void SoundManager::setVolumeAll() {
     for (auto& sound : m_soundMap) {
         Mix_VolumeChunk(sound.second, *m_volume);
@@ -78,18 +91,22 @@ void SoundManager::setVolumeAll() {
 }
 
 void SoundManager::decreaseVolume() {
-    *m_volume -= 8;
+    *m_volume -= m_step;
     setVolumeAll();
 }
 
 void SoundManager::increaseVolume() {
-    *m_volume += 8;
+    *m_volume += m_step;
     setVolumeAll();
 }
 
-void SoundManager::setVolume(const char* soundKey, int volume) {
-    auto it = m_soundMap.find(soundKey);
+void SoundManager::setVolume(int volume) {
     *m_volume = volume;
+}
+
+void SoundManager::setSoundVolume(const char* soundKey, int volume) {
+    auto it = m_soundMap.find(soundKey);
+    *m_volume = volume; // TODO: remove this?
     if (it != m_soundMap.end()) {
         Mix_VolumeChunk(it->second, volume);
     }

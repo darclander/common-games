@@ -9,14 +9,26 @@
 class Observer {
     public:
         virtual void onEvent(const SDL_Event& event) = 0;
+
+        void setNotifyState(int newNotifyState) {
+            m_notifyState = newNotifyState;
+        }
+
+        int getNotifyState() {
+            return m_notifyState;
+        }
+
+    private:
+        int m_notifyState = -1;
 };
 
 
 class Controller {
     public:
 
-        Controller() {
+        Controller(int state) {
             // m_controllerThread = std::thread(listener, this);
+            m_state = state;
         }
 
         ~Controller() {
@@ -24,12 +36,26 @@ class Controller {
         }
 
         // Attach an observer to the controller
-        void attachObserver(Observer* observer) {
+        void attachObserver(Observer* observer, int notifyState = -1) {
+            observer->setNotifyState(notifyState);
             observers.push_back(observer);
         }
 
         // Notify all attached observers about an event
         void notifyEvent(const SDL_Event& event) {
+            m_events.push_back(event);
+            // std::cout << std::endl << std::endl;
+            for (auto observer : observers) {
+                // std::cout << (m_state == observer->getNotifyState()) << std::endl;
+                if(m_state == observer->getNotifyState() || observer->getNotifyState() == -1) {
+                    // std::cout << observer->getNotifyState() << std::endl;
+                    observer->onEvent(event);
+                }
+            }
+        }
+
+        void notifyEventBroadcast(const SDL_Event& event) {
+            m_events.push_back(event);
             for (auto observer : observers) {
                 observer->onEvent(event);
             }
@@ -46,7 +72,7 @@ class Controller {
             SDL_Event event;
             event.type = SDL_USEREVENT;
             event.user.code = menuid;
-            notifyEvent(event);
+            notifyEventBroadcast(event);
         }
 
         void broadcastEvent(int eventId) {
@@ -56,8 +82,13 @@ class Controller {
             notifyEvent(event);
         }
 
-        void update() {
+        void update(int state) {
+            m_state = state;
             listener();
+        }
+
+        std::vector<SDL_Event> getEvents() {
+            return m_events;
         }
 
     private:
@@ -69,8 +100,10 @@ class Controller {
         }
 
         std::vector<Observer*> observers;
+        std::vector<SDL_Event> m_events;
         // std::thread m_controllerThread;
         SDL_Event m_event;
         bool running = true;
+        int m_state;
 };
 

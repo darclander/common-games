@@ -1,10 +1,12 @@
 #include "Menu.hpp"
 
-Menu::Menu(Controller *controller, GUI *gui, int menuid, int xPos, int yPos, 
+Menu::Menu(Controller *controller, GUI *gui, SoundManager *sm, int menuid, int xPos, int yPos, 
             int width, int height, TTF_Font *font, int &state, int previousState, int menuOwnState) {
 
     m_gui = gui;
     m_renderer = m_gui->getRenderer();
+
+    m_sm = sm;
 
     m_xPos          = xPos;
     m_yPos          = yPos;
@@ -53,6 +55,10 @@ bool Menu::updateTextValue(Text &txt, const std::string newText, MenuItem &mi) {
 
 int Menu::addItem() {
     return m_items.size();
+}
+
+void Menu::addText(Text textName) {
+    m_texts.push_back(std::move(std::make_shared<Text>(textName)));
 }
 
 
@@ -110,7 +116,7 @@ void Menu::updateMenu() {
 
 void Menu::onEvent(const SDL_Event& event) {
     
-    // Replace with game menu.
+    // Replace with game menu. This means we are in game and can take esc as a command to return to menu...
     if(event.type == SDL_USEREVENT) {
         if(event.user.code == 3) {
             const Uint8 *key_state = SDL_GetKeyboardState(NULL);
@@ -133,15 +139,15 @@ void Menu::onEvent(const SDL_Event& event) {
           const Uint8 *key_state = SDL_GetKeyboardState(NULL);
           if (m_items.size() > 0) {
             if (key_state[SDL_SCANCODE_DOWN]) {
-              m_items[m_menuIndex]->reset();
-              if (m_menuIndex < m_items.size() - 1)
-                m_menuIndex++;
-              m_items[m_menuIndex]->update();
+                m_sm->playSound("menu_down");
+                m_items[m_menuIndex]->reset();
+                if (m_menuIndex < m_items.size() - 1) m_menuIndex++;
+                m_items[m_menuIndex]->update();
             } else if (key_state[SDL_SCANCODE_UP]) {
-              m_items[m_menuIndex]->reset();
-              if (m_menuIndex > 0)
-                m_menuIndex--;
-              m_items[m_menuIndex]->update();
+                m_sm->playSound("menu_up");
+                m_items[m_menuIndex]->reset();
+                if (m_menuIndex > 0) m_menuIndex--;
+                m_items[m_menuIndex]->update();
             }
             // if(key_state[SDL_SCANCODE_DOWN]) {
             //     updateText(m_items[m_menuIndex]->getColor(), menuc::WHITE);
@@ -153,12 +159,15 @@ void Menu::onEvent(const SDL_Event& event) {
             //     updateText(m_items[m_menuIndex].menuText, menuc::RED);
             // }
 
+            // TODO: Bad implementation! Move to specific menuclass
             else if (key_state[SDL_SCANCODE_RIGHT]) {
               m_items[m_menuIndex]->trigger(KEY_RIGHT);
+              m_sm->playSound("options_change");
             }
 
             else if (key_state[SDL_SCANCODE_LEFT]) {
               m_items[m_menuIndex]->trigger(KEY_LEFT);
+              m_sm->playSound("options_change");
             }
 
             else if (key_state[SDL_SCANCODE_RETURN]) {
@@ -284,16 +293,20 @@ void Menu::render() {
 
     SDL_SetRenderDrawColor(m_renderer, 255, 0, 0, 255);
 
-    SDL_Rect rectL = {m_xPos, m_yPos, 1, m_height};
-    SDL_Rect rectR = {m_xPos + m_width, m_yPos, 1, m_height};
+    // SDL_Rect rectL = {m_xPos, m_yPos, 1, m_height};
+    // SDL_Rect rectR = {m_xPos + m_width, m_yPos, 1, m_height};
 
-    SDL_RenderFillRect(m_renderer, &rectL);
-    SDL_RenderFillRect(m_renderer, &rectR);
+    // SDL_RenderFillRect(m_renderer, &rectL);
+    // SDL_RenderFillRect(m_renderer, &rectR);
 
-    for (auto &m : m_items) {
+    for (auto &i : m_items) {
         // SDL_Rect renderQuad = {m.menuText.xPos, m.menuText.yPos, m.menuText.width, m.menuText.height};
         // SDL_RenderCopy(m_renderer, m.menuText.texture, nullptr, &renderQuad); 
-        m->render();
+        i->render();
+    }
+
+    for (auto &t : m_texts) {
+        t->render();
     }
 
 }

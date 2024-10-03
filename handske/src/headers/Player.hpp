@@ -24,17 +24,24 @@ class Player : public Observer {
     private:
         int m_speed;
 
-        int m_xPos;
+        // For rendering
+        int m_xPos; 
         int m_yPos;
+
+        int m_xPosWorld; // Real X position
+        int m_yPosWorld; // Real Y position
 
         int m_newPosX;
         int m_newPosY;
 
         float m_limit;
         
+        int m_width;
+        int m_height;
 
-        GUI *m_gui;
-        Grid *m_grid;
+        GUI     *m_gui;
+        Camera  *m_camera;
+        Grid    *m_grid;
 
         SDL_Renderer    *m_renderer;
         SDL_Rect         m_playerDestinationRect;

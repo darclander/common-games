@@ -23,6 +23,17 @@ namespace g_color {
     const SDL_Color WHITE   = {255, 255, 255, 255};
 }
 
+struct Point {
+    int xPos;
+    int yPos;
+
+    Point(int x, int y) {
+        xPos = x;
+        yPos = y;
+    }
+};
+
+
 struct Text {
     int width;
     int height;
@@ -35,11 +46,24 @@ struct Text {
 
     TTF_Font *font;
 
+    int getX() {
+        return xPos;
+    }
+
+    int getY() {
+        return yPos;
+    }
+
     void updateX(int newX) {
         xPos = newX;
     }
 
     void updateY(int newY) {
+        yPos = newY;
+    }
+
+    void updatePos(int newX, int newY) {
+        xPos = newX;
         yPos = newY;
     }
 
@@ -81,6 +105,7 @@ class GUI : public Observer {
         bool loadFont(std::string name, std::string path, int f_size);
 
         Text createText(const std::string &name, int xPos, int yPos, SDL_Color textColor, std::string font);
+        Text createTextCentralized(const std::string &name, int xPos, int yPos, SDL_Color textColor, std::string font);
         bool updateTextColor(Text &t, SDL_Color textColor);
         bool updateTextValue(Text &t, std::string newName);
         bool updateTextPos(Text &t, int xPos, int yPos);

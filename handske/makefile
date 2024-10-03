@@ -5,11 +5,18 @@ CC=g++
 
 OPTIMIZATION= #-O3
 
-CFLAGS= -I$(IDIR) -lmingw32 -lSDL2main -lSDL2 -lSDL2_Image -lSDL2_TTF -lSDL2_Mixer
+CFLAGS= -I$(IDIR) # -lmingw32 -lSDL2main -lSDL2 -lSDL2_Image -lSDL2_TTF -lSDL2_Mixer
 
+ifeq ($(OS),Windows_NT)
+    # Windows system
+    CFLAGS += -lmingw32 -lSDL2main -lSDL2 -lSDL2_Image -lSDL2_TTF -lSDL2_Mixer
+else
+    # Non-Windows system
+    CFLAGS += -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer
+endif
 
 IDIR = ./src/headers
-_DEPS = Gui.hpp Grid.hpp Menu.hpp Score.hpp Controller.hpp Soundmanager.hpp Player.hpp
+_DEPS = Gui.hpp Grid.hpp Menu.hpp Score.hpp Controller.hpp Soundmanager.hpp Player.hpp Camera.hpp
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 ODIR = ./obj

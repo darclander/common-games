@@ -22,6 +22,12 @@ Grid::Grid(SDL_Renderer *renderer, int width, int height, int granularityX, int 
     }    
 }
 
+void Grid::reset() {
+    for(auto &gp : m_gridpoints) {
+        gp.reset();
+    }
+}
+
 void Grid::render() {
     for(auto &gp : m_gridpoints) {
         gp.render();
@@ -45,6 +51,9 @@ Gridpoint *Grid::getPoint(int x, int y) {
 
 Grid::~Grid() {}
 
+void Gridpoint::reset() {
+    m_gridPointIsEmpty = true;
+}
 
 Gridpoint::Gridpoint(SDL_Renderer *renderer, int xPos, int yPos, int width, int height) {
     this->m_renderer = renderer;
