@@ -90,7 +90,7 @@ void menuHandler(Menu &menu, gameState &state, gameState &previousState) {
 }
 
 void loadTextures(GUI *gui) {
-    gui->loadTexture("berry", "./textures/berry.png");
+    gui->loadTexture("berry", "./gfx/berry.png");
 }
 
 int main(int argc, char **argv) {
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
     int volume = 64;
     int playSound = 1;
     SoundManager sound = SoundManager(volume, playSound);
-    sound.loadSound("./debug/sounds/s.wav", "song");
+    sound.loadSound("./sfx/s2.mp3", "song");
     sound.setVolume("song", volume); // 50%
     sound.playSound("song", -1);
 
