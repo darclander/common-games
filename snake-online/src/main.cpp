@@ -85,6 +85,7 @@ std::function<void()> bindMemberFunction(ClassType& object, void (ClassType::*me
     return std::bind(memberFunction, std::ref(object));
 }
 
+// break out to controller.config.get("key")
 void getColor(GUI &ui, SDL_Color &color, std::string &colorString) {
     std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
 
@@ -94,14 +95,6 @@ void getColor(GUI &ui, SDL_Color &color, std::string &colorString) {
         color = ui.getColor(color_it->second);
         colorString = color_it->second;
     } 
-}
-
-void getName(std::string &name) {
-    std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
-
-    auto name_it = config.find("name");
-
-    if (name_it != config.end()) name = name_it->second;
 }
 
 int main(int argc, char **argv) {
@@ -135,6 +128,7 @@ int main(int argc, char **argv) {
 
     double deltaTime = 0;
     uint32_t startingTick = 0;
+    std::cout << "here";
 
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 40, 30);
     Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 3, color::GREEN);

@@ -9,22 +9,24 @@
 
 class TcpCommunication {
     public:
-        TcpCommunication(const char *ip, int port) : clientSocket(-1) {
+        TcpCommunication(const char *ip, int port) : m_clientSocket(-1) {
             if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
                 std::cerr << "Failed to initialize Winsock\n";
             }
 
-            clientSocket = socket(AF_INET, SOCK_STREAM, 0);
-            if (clientSocket == INVALID_SOCKET) {
+            m_clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+            if (m_clientSocket == INVALID_SOCKET) {
                 std::cerr << "Error creating socket\n";
                 WSACleanup();
             }
 
             m_ip = ip;
             m_port = port;
+            std::cout << m_ip << std::endl;
+            std::cout << m_port << std::endl;
 
-            connectToServer();
-
+            m_isConnected = connectToServer();
+    
         }
 
         ~TcpCommunication() {
@@ -56,14 +58,40 @@ class TcpCommunication {
             }
         }
 
+        bool receive(std::string& receivedData) {
+            if (m_clientSocket == -1) {
+                std::cerr << "Not connected to a server\n";
+                return false;
+            }
+
+            const size_t bufferSize = 1024; // You can adjust this based on your needs
+            char buffer[bufferSize];
+
+            ssize_t bytesRead = ::recv(m_clientSocket, buffer, bufferSize - 1, 0);
+            if (bytesRead == -1) {
+                std::cerr << "Error receiving data\n";
+                closeConnection();
+                return false;
+            } else if (bytesRead == 0) {
+                std::cout << "Server disconnected\n";
+                closeConnection();
+                return false;
+            }
+
+            buffer[bytesRead] = '\0'; // Null-terminate the received data
+            receivedData = buffer;    // Assign the buffer to the std::string
+            // std::cout << "Received data from server: " << receivedData << "\n";
+            return true;
+        }
+
         bool send(const char* data, size_t size) {
-            if (clientSocket == -1) {
+            if (m_clientSocket == -1) {
                 std::cerr << "Not connected to a server\n";
                 m_isConnected = false;
                 return false;
             }
 
-            ssize_t bytesSent = ::send(clientSocket, data, size, 0);
+            ssize_t bytesSent = ::send(m_clientSocket, data, size, 0);
             if (bytesSent == -1) {
                 std::cerr << "Error sending data\n";
                 return false;
@@ -75,14 +103,14 @@ class TcpCommunication {
 
         std::string receiveChar(size_t bufferSize) {
             
-            if (clientSocket == -1) {
+            if (m_clientSocket == -1) {
                 std::cerr << "Not connected to a server\n";
                 m_isConnected = false;
                 return "false";
             }
 
             char buffer[bufferSize];
-            ssize_t bytesRead = ::recv(clientSocket, buffer, bufferSize - 1, 0);
+            ssize_t bytesRead = ::recv(m_clientSocket, buffer, bufferSize - 1, 0);
             if (bytesRead == -1) {
                 std::cerr << "Error receiving data\n";
                 closeConnection();
@@ -98,14 +126,15 @@ class TcpCommunication {
             return std::string(buffer);
         }
 
+        // Move to comm_util?
         void closeConnection() {
-            if (clientSocket != -1) {
+            if (m_clientSocket != -1) {
                 #ifdef _WIN32
-                closesocket(clientSocket);
+                closesocket(m_clientSocket);
                 #else
-                close(clientSocket);
+                close(m_clientSocket);
                 #endif
-                clientSocket = -1;
+                m_clientSocket = -1;
                 std::cout << "Connection closed\n";
             }
         }
@@ -120,24 +149,27 @@ class TcpCommunication {
         const char *m_ip;
         int m_port;
 
-        SOCKET clientSocket;
+        SOCKET m_clientSocket;
         WSADATA wsaData;
 
         bool m_isConnected = true;
 
         bool connectToServer() {
-
+            
+            std::cout << "Connecting" << std::endl;
             sockaddr_in serverAddr{};
             serverAddr.sin_family = AF_INET;
             serverAddr.sin_port = htons(m_port);  // Use the same port as the server
             serverAddr.sin_addr.s_addr = inet_addr(m_ip);  // Use the server's IP address
 
             // Connect to the server
-            if (connect(clientSocket, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR) {
+            if (connect(m_clientSocket, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR) {
                 std::cerr << "Error connecting to server\n";
                 m_isConnected = false;
-                closesocket(clientSocket);
+                closesocket(m_clientSocket);
+                std::cout << "Closed socket" << std::endl;
                 WSACleanup();
+                std::cout << "WSA cleaned up" << std::endl;
                 return false;
             }
 
