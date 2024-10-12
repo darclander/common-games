@@ -12,7 +12,6 @@
 #include <thread>
 
 #include "Menu.hpp"
-#include "Controller.hpp"
 
 
 namespace color {

@@ -48,7 +48,6 @@ src/SDL2
 *.mp4
 
 # Python files
-*.py
 debug/*
 config.txt
 *.class

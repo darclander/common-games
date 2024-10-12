@@ -5,6 +5,7 @@
 #include <thread>
 #include <SDL2/SDL.h>
 
+#include "Client_interface.hpp"
 
 class Observer {
     public:
@@ -17,6 +18,7 @@ class Controller {
 
         Controller() {
             // m_controllerThread = std::thread(listener, this);
+            
         }
 
         ~Controller() {
@@ -61,6 +63,16 @@ class Controller {
         }
 
     private:
+
+        void getIpAdressAndPort(std::string &ip, int &port) {
+            std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
+
+            auto ip_it      = config.find("ip");
+            auto port_it    = config.find("port");
+            
+            if (ip_it   != config.end()) ip = ip_it->second;
+            if (port_it != config.end()) port = std::stoi(port_it->second);
+        }
 
         void listener() {
             while(SDL_PollEvent(&m_event)) {

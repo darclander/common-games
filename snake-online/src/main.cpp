@@ -15,7 +15,7 @@
 #include "Score.hpp"
 #include "Controller.hpp"
 #include "Soundmanager.hpp"
-#include "Client.hpp"
+// #include "Client.hpp"
 
 #include <windows.h>
 #include <winbase.h>
@@ -85,24 +85,6 @@ std::function<void()> bindMemberFunction(ClassType& object, void (ClassType::*me
     return std::bind(memberFunction, std::ref(object));
 }
 
-void getIpAdressAndPort(std::string &ip, int &port) {
-    std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
-
-    auto ip_it      = config.find("ip");
-    auto port_it    = config.find("port");
-    
-    if (ip_it   != config.end()) ip = ip_it->second;
-    if (port_it != config.end()) port = std::stoi(port_it->second);
-}
-
-void getName(std::string &name) {
-    std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
-
-    auto name_it = config.find("name");
-
-    if (name_it != config.end()) name = name_it->second;
-}
-
 void getColor(GUI &ui, SDL_Color &color, std::string &colorString) {
     std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
 
@@ -114,31 +96,15 @@ void getColor(GUI &ui, SDL_Color &color, std::string &colorString) {
     } 
 }
 
+void getName(std::string &name) {
+    std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
 
-void receiveData(TcpClient &client) {
-    char responseBuffer[1024];
-    int resp;
-    std::string input;
-    while (true) {
-        // Example: Receiving a response from the server
-        
-        resp = client.receive(input);
-        // Process the received data as needed
-        std::unordered_map<std::string, std::string> recvData = parseInput(input);
+    auto name_it = config.find("name");
 
-        for (auto &d : recvData) {
-            if(d.first == "NEW_PLAYER") {
-                // addNewPlayer();
-            }
-        }
-
-        if (resp == 0) return;
-    }
+    if (name_it != config.end()) name = name_it->second;
 }
 
 int main(int argc, char **argv) {
-
-    SetDllDirectoryA("./dlls");
 
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_FULLSCREEN);
     ui.loadTexture("berry", "./textures/berry.png");
@@ -155,57 +121,57 @@ int main(int argc, char **argv) {
     std::unordered_map<int, std::shared_ptr<Snake>> players{};
     std::unordered_map<std::string, std::shared_ptr<Score>> scores{};
     
-    int pid = -1;
-    std::string ipAddress = "127.0.0.1";
-    int port = 0;
-    std::string nickname = "default";
-    SDL_Color color = color::GREEN;
-    std::string colorString = "green";
-    float sendTimer = 0;
+    // int pid = -1;
+    // std::string ipAddress = "127.0.0.1";
+    // int port = 0;
+    // std::string nickname = "default";
+    // SDL_Color color = color::GREEN;
+    // std::string colorString = "green";
 
-    getIpAdressAndPort(ipAddress, port);
-    getName(nickname);
-    getColor(ui, color, colorString);
+
+    // getIpAdressAndPort(ipAddress, port);
+    // getName(nickname);
+    // getColor(ui, color, colorString);
 
     double deltaTime = 0;
     uint32_t startingTick = 0;
 
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 40, 30);
-    Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 3, color);
+    Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 3, color::GREEN);
 
-    TcpClient client = TcpClient(ui.getRenderer(), &ui, &grid, &players, &scores);
+    // TcpClient client = TcpClient(ui.getRenderer(), &ui, &grid, &players, &scores);
 
-    if (client.connectToServer(ipAddress.c_str(), port)) {
+    // if (client.connectToServer(ipAddress.c_str(), port)) {
 
-        // Initial communication between server and client
-        std::string command = "ADD_NEW_PLAYER;" + nickname + ";" + colorString; 
-        std::cout << command << std::endl;
-        std::string input = "";
-        if (client.send(command.c_str(), command.size())) {
-            client.receive(input);
-            std::vector<std::string> parsedInput = splitString(input, ';');
-            for (auto x : parsedInput) std::cout << x << std::endl;
-            pid             = stoi(parsedInput[1]);
-            int xPos        = stoi(parsedInput[2]);
-            int yPos        = stoi(parsedInput[3]);
-            int gw          = stoi(parsedInput[4]);
-            int gh          = stoi(parsedInput[5]);
-            client.setPid(pid);
-            // int gridWidth   = stoi(parsedInput[4]);
-            // int gridHeight  = stoi(parsedInput[5]);
-            grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, gw, gh);
-            snake = Snake(ui.getRenderer(), xPos, yPos, &grid, 40, 40, 3, color);
-        }
+    //     // Initial communication between server and client
+    //     std::string command = "ADD_NEW_PLAYER;" + nickname + ";" + colorString; 
+    //     std::cout << command << std::endl;
+    //     std::string input = "";
+    //     if (client.send(command.c_str(), command.size())) {
+    //         client.receive(input);
+    //         std::vector<std::string> parsedInput = splitString(input, ';');
+    //         for (auto x : parsedInput) std::cout << x << std::endl;
+    //         pid             = stoi(parsedInput[1]);
+    //         int xPos        = stoi(parsedInput[2]);
+    //         int yPos        = stoi(parsedInput[3]);
+    //         int gw          = stoi(parsedInput[4]);
+    //         int gh          = stoi(parsedInput[5]);
+    //         client.setPid(pid);
+    //         // int gridWidth   = stoi(parsedInput[4]);
+    //         // int gridHeight  = stoi(parsedInput[5]);
+    //         grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, gw, gh);
+    //         snake = Snake(ui.getRenderer(), xPos, yPos, &grid, 40, 40, 3, color);
+    //     }
 
-        // Allow for client to communicate
-        std::thread receiveThread(&TcpClient::receiveData, std::ref(client));
-        receiveThread.detach();
-    }
+    //     // Allow for client to communicate
+    //     std::thread receiveThread(&TcpClient::receiveData, std::ref(client));
+    //     receiveThread.detach();
+    // }
 
     std::shared_ptr<Snake> player1 = std::make_shared<Snake>(snake);
-    players[pid] = player1;
+    players[0] = player1;
 
-    Snake *player = players[pid].get();
+    Snake *player = players[0].get();
 
     int state = START_MENU;
     // gameState state         = START_MENU;
@@ -315,12 +281,12 @@ int main(int argc, char **argv) {
         Gridpoint *gp = grid.getPoint(player->getPosX(), player->getPosY());
         gridXPos = (gp->getGridPointX() / grid.getGridPointWidth());
         gridYPos = (gp->getGridPointY() / grid.getGridPointHeight());
-        std::string command = "PLAYER_UPDATE_POSITION;" + std::to_string(pid) + ";" + std::to_string(gridXPos) + ";" + std::to_string(gridYPos) + ";";
-        if(client.isConnected()) client.send(command.c_str(), command.size()); 
+        // std::string command = "PLAYER_UPDATE_POSITION;" + std::to_string(pid) + ";" + std::to_string(gridXPos) + ";" + std::to_string(gridYPos) + ";";
+        // if(client.isConnected()) client.send(command.c_str(), command.size()); 
 
 
     }
 
-    client.closeConnection();
+    // client.closeConnection();
     return 0;
 }
