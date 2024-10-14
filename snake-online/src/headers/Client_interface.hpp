@@ -58,6 +58,31 @@ class TcpCommunication {
             }
         }
 
+        std::string receiveChar(size_t bufferSize) {
+            
+            if (m_clientSocket == -1) {
+                std::cerr << "Not connected to a server\n";
+                m_isConnected = false;
+                return "false";
+            }
+
+            char buffer[bufferSize];
+            ssize_t bytesRead = ::recv(m_clientSocket, buffer, bufferSize - 1, 0);
+            if (bytesRead == -1) {
+                std::cerr << "Error receiving data\n";
+                closeConnection();
+                return "false";
+            } else if (bytesRead == 0) {
+                std::cout << "Server disconnected\n";
+                closeConnection();
+                return "false";
+            }
+
+            buffer[bytesRead] = '\0'; // Null-terminate the received data
+            // std::cout << "Received data from server: " << buffer << "\n";
+            return std::string(buffer);
+        }
+
         bool receive(std::string& receivedData) {
             if (m_clientSocket == -1) {
                 std::cerr << "Not connected to a server\n";
@@ -99,31 +124,6 @@ class TcpCommunication {
 
             // std::cout << "Sent data to server: " << data << "\n";
             return true;
-        }
-
-        std::string receiveChar(size_t bufferSize) {
-            
-            if (m_clientSocket == -1) {
-                std::cerr << "Not connected to a server\n";
-                m_isConnected = false;
-                return "false";
-            }
-
-            char buffer[bufferSize];
-            ssize_t bytesRead = ::recv(m_clientSocket, buffer, bufferSize - 1, 0);
-            if (bytesRead == -1) {
-                std::cerr << "Error receiving data\n";
-                closeConnection();
-                return "false";
-            } else if (bytesRead == 0) {
-                std::cout << "Server disconnected\n";
-                closeConnection();
-                return "false";
-            }
-
-            buffer[bytesRead] = '\0'; // Null-terminate the received data
-            // std::cout << "Received data from server: " << buffer << "\n";
-            return std::string(buffer);
         }
 
         // Move to comm_util?

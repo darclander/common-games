@@ -85,7 +85,6 @@ class Snake : public Observer {
             }
         }
 
-
         void onEvent(const SDL_Event& event) override;
 
     private:
