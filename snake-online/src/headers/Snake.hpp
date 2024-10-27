@@ -6,7 +6,7 @@
 #include <SDL2/SDL_image.h>
 
 #include "Grid.hpp"
-#include "Controller.hpp"
+#include "Observer.hpp"
 
 struct direction {
     int x;

@@ -2,10 +2,11 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
+
 #include <unordered_map>
 #include <string>
 
-#include "Controller.hpp"
+#include "Observer.hpp"
 
 
 class SoundManager : public Observer {
