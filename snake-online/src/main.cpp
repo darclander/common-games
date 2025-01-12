@@ -15,6 +15,8 @@
 #include "Score.hpp"
 #include "Controller.hpp"
 #include "Soundmanager.hpp"
+#include "GameController.hpp"
+// #include "Event.hpp"
 // #include "Client.hpp"
 
 #include <windows.h>
@@ -140,13 +142,13 @@ int main(int argc, char **argv) {
     // gameState state         = START_MENU;
     // gameState previousState = START_MENU;
 
-    Menu startMenu      = Menu(&controller, ui.getRenderer(), 0, WINDOW_MIDDLE_X - (250 / 2), 
+    Menu startMenu      = Menu(ui.getRenderer(), 0, WINDOW_MIDDLE_X - (250 / 2), 
                                                     WINDOW_MIDDLE_Y - (200 / 2), 
                                                     250, 
                                                     200, 
                                                     ui.getFont(), state, START_MENU, START_MENU);
     
-    Menu optionsMenu    = Menu(&controller, ui.getRenderer(), 1, WINDOW_MIDDLE_X - (250 / 2), 
+    Menu optionsMenu    = Menu(ui.getRenderer(), 1, WINDOW_MIDDLE_X - (250 / 2), 
                                                     WINDOW_MIDDLE_Y - (200 / 2), 
                                                     250, 
                                                     200, 
@@ -176,6 +178,9 @@ int main(int argc, char **argv) {
 
     // Score score = Score(ui.getRenderer(), &ui, grid.getGridPointWidth(), grid.getGridPointHeight());
 
+    Game g = Game{&ui, &grid, &players, &scores};
+    GameController c = GameController(g);
+    controller.attachObserver(&c);
     bool running = true;
     while(ui.getWindowClose() && running) {
 

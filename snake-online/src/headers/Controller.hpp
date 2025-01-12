@@ -3,20 +3,13 @@
 #include <iostream>
 #include <vector>
 #include <thread>
+
+
 #include <SDL2/SDL.h>
 
+
 #include "Client_interface.hpp"
-
-class Observer {
-    public:
-        virtual void onEvent(const SDL_Event& event) = 0;
-        virtual void onServerMessage(const std::string &serverMessage) {};
-};
-
-// TODO: 
-// eventMap["ADD_PLAYER"]->execute()
-
-
+#include "Observer.hpp"
 
 class Controller {
     public:
@@ -136,9 +129,11 @@ class Controller {
                 std::string input = "";
                 m_client->receive(input);
                 std::cout << input << std::endl;
-                // for (auto observer : observers) {
-                //     observer->onServerMessage(input);
-                // }
+                // std::vector<std::string> parsedInput = splitString(input, ';');
+
+                for (auto observer : observers) {
+                    observer->onServerMessage(input);
+                }
             }
         }
 

@@ -7,6 +7,7 @@ OPTIMIZATION= #-O3
 
 STATIC= -static -static-libgcc -static-libstdc++ 
 
+# https://www.reddit.com/r/gamedev/comments/5pl8vs/sdl2_staticlly_link/
 LINKER_FLAGS= -static
 LINKER_FLAGS += `pkg-config --libs --static SDL2`
 LINKER_FLAGS += `pkg-config --libs --static SDL2_ttf`

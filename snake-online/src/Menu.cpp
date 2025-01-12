@@ -1,6 +1,6 @@
 #include "Menu.hpp"
 
-Menu::Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos, int yPos, 
+Menu::Menu(SDL_Renderer *renderer, int menuid, int xPos, int yPos, 
             int width, int height, TTF_Font *font, int &state, int previousState, int menuOwnState) {
 
     m_renderer = renderer;
@@ -24,9 +24,6 @@ Menu::Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos,
     // m_menuThread = std::thread(&Menu::updateMenu, this);
     // std::cout << &m_items << std::endl;
 
-
-
-    m_controller = controller;
 
 }
 
