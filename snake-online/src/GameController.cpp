@@ -9,6 +9,15 @@ void GameController::onServerMessage(const std::string &message) {
     }
 }
 
+void GameController::onMessage(const std::string &message) {
+    std::vector<std::string> inputs = splitString(message, ';');
+    std::string command = inputs[0];
+
+    if (command == "PLAYER_POS") { 
+        
+    }
+}
+
 void GameController::addScoreEvent(std::vector<std::string> &inputs) {
     std::shared_ptr<Score> score = std::make_shared<Score>(m_gui->getRenderer(), m_gui, m_grid->getGridPointWidth(), m_grid->getGridPointWidth());
     int xPos = std::stoi(inputs[3]);

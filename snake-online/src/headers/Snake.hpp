@@ -4,6 +4,7 @@
 #include <vector>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <functional>
 
 #include "Grid.hpp"
 #include "Observer.hpp"
@@ -87,6 +88,16 @@ class Snake : public Observer {
 
         void onEvent(const SDL_Event& event) override;
 
+        void setSignalCallback(std::function<void(const std::string&)> callback) override {
+            signalCallback = std::move(callback);
+        } 
+
+        void signalController(const std::string& message) {
+            if (signalCallback) {
+                signalCallback(message);
+            }
+        }
+
     private:
         int m_snakeSize;
         int m_snakeWidth;
@@ -106,6 +117,8 @@ class Snake : public Observer {
         SDL_Color m_color;
 
         std::vector<Snakeblock> snakeBlocks;
+
+        std::function<void(const std::string&)> signalCallback;
 
 };
 

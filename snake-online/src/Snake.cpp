@@ -105,6 +105,8 @@ void Snake::update(double deltaTime, float limit) {
 
     if(oldPoint != nullptr) oldPoint->setEmpty();
     if(newPoint != nullptr) {
+        std::string command = "PLAYER_UPDATE_POSITION;0;" + std::to_string(newPosX) + ";" + std::to_string(newPosY) + ";";
+        signalController(command);
         if(!newPoint->isEmpty()) {
             std::cout << "GAME OVER!" << std::endl;
         }
