@@ -169,13 +169,13 @@ public class Server {
                         players.put(newPlayer.getPid(), newPlayer);
 
 
-                        msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getPid()*50, newPlayer.getYPos(), playingField.getWidth(), playingField.getHeight());
+                        msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getxPos(), newPlayer.getYPos(), playingField.getWidth(), playingField.getHeight());
                         send(msg, outputStream); // NEW_PLAYER_RESPONSE;pid;xPos;yPos;fieldWidth;fieldHeight
 
-                        msg = appendDelimitor("PLAYING_FIELD", playingField.getWidth(), playingField.getHeight(), playingField.encodeField());
+                        //msg = appendDelimitor("PLAYING_FIELD", playingField.getWidth(), playingField.getHeight(), playingField.encodeField());
 // SEND PLAYING FIELD   send(msg, outputStream); // PLAYING_FIELD;fieldWidth;fieldHeight;|e|e|e|h/1|e|e|e|b/1|e|
 
-                        msg = appendDelimitor("NEW_PLAYER", newPlayer.getPid(), newPlayer.getName(), newPlayer.getColor(), (newPlayer.getPid() + 1)*50, (newPlayer.getPid() + 1));
+                        msg = appendDelimitor("NEW_PLAYER", newPlayer.getPid(), newPlayer.getName(), newPlayer.getColor(), newPlayer.getxPos(), newPlayer.getYPos());
                         broadcast(msg, clientSocket); // NEW_PLAYER;pid;name;color;xPos;yPos
                         
                         for (Player p : players.values()) {
@@ -259,6 +259,10 @@ public class Server {
 
 
     private static void broadcast(String message, Socket... excludeClients) {
+        List<String> blacklist = Arrays.asList("dddwafw", "blacklisted_word2");
+        boolean isBlacklisted = blacklist.stream().anyMatch(message::contains);
+        int broadcastCount = 0;
+    
         for (Socket clientSocket : clientList) {
             if (Arrays.asList(excludeClients).contains(clientSocket)) {
                 continue;
@@ -266,16 +270,15 @@ public class Server {
             try {
                 OutputStream outputStream = clientSocket.getOutputStream();
                 outputStream.write(message.getBytes());
+                broadcastCount++;
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        List<String> blacklist = Arrays.asList("dddwafw", "blacklisted_word2");
-        boolean isBlacklisted = blacklist.stream().anyMatch(message::contains);
-        if(clientList.size() > 1 && !isBlacklisted) {
-            System.out.println("Broadcasted: '" + message + "' to " + clientList.size() + " clients.");
+    
+        if (!isBlacklisted) {
+            System.out.println("Broadcasted: '" + message + "' to " + broadcastCount + " clients.");
         }
-        
     }
 
 
