@@ -1,7 +1,7 @@
 #include "GameController.hpp"
 
 void GameController::onServerMessage(const std::string &message) {
-    std::vector<std::string> inputs =  splitString(message, ';');
+    std::vector<std::string> inputs = splitString(message, ';');
     std::string command = inputs[0];
 
     if (command == "ADD_SCORE") { 
