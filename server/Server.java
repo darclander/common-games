@@ -5,7 +5,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.Random;
@@ -18,7 +20,7 @@ public class Server {
     private static final int PORT = 12345;
     private static List<Socket> clientList = new ArrayList<>();
     private static ExecutorService executorService = Executors.newCachedThreadPool();
-    private static List<Player> players = new ArrayList<>();
+    private static Map<Integer, Player> players = new HashMap<>();
     private static int playerIDCounter = 0;
     private static PlayingField playingField = new PlayingField(40, 30);
 
@@ -91,6 +93,7 @@ public class Server {
             String msg;
             byte[] buffer = new byte[1024];
 
+
             while (true) {
                 // Wait for data from the client
                 int bytesRead = inputStream.read(buffer);
@@ -103,7 +106,7 @@ public class Server {
 
                 // Process the received data and parse it into a command
                 String receivedData = new String(buffer, 0, bytesRead);
-                // System.out.println("Client " + clientSocket.getInetAddress() + ": " + receivedData);
+                System.out.println("Client " + clientSocket.getInetAddress() + ": " + receivedData);
                 Command command = Command.parse(receivedData);
 
                 String cmd = command.getCommand();
@@ -117,8 +120,17 @@ public class Server {
                         break;
                     
                     case "PLAYER_UPDATE_POSITION": // PLAYER_UPDATE_POSITION;pid;xPos;yPos
-                        String moveResponse  = playingField.checkPosition(Integer.parseInt(params.get(0)), Integer.parseInt(params.get(1)), Integer.parseInt(params.get(2)));
+                        int playerID = Integer.parseInt(params.get(0));
+                        Player player = players.get(playerID);
+                        int xPos = Integer.parseInt(params.get(1));
+                        int yPos = Integer.parseInt(params.get(2));
+                        Square square = playingField.getField()[yPos][xPos];
 
+                        String moveResponse = playingField.checkPosition(playerID, xPos, yPos);
+
+                        if (player.getxPos() == xPos && player.getYPos() == yPos) {
+                            return; // Ignore if the player doesn't move
+                        }
 
                         if (moveResponse == "berry"){// SCORE_COLLECTED;pid;type;amount;xPos;yPos
                             msg = appendDelimitor("SCORE_COLLECTED", params.get(0), "berry", 1, Integer.parseInt(params.get(1)), Integer.parseInt(params.get(2))); // SCORE_COLLECTED;pid;type;amount;xPos;yPos
@@ -130,24 +142,46 @@ public class Server {
                         //     break;
                         // }
 
+                        if (player != null) {
+                            // Remove old position
+                            for (BodySegment segment : player.getBody()) {
+                                playingField.getField()[segment.getyPos()][segment.getxPos()].clear();
+                            }
+                            player.move(xPos, yPos);
+                        
+                            // New head position
+                            for (BodySegment segment : player.getBody()) {
+                                playingField.getField()[segment.getyPos()][segment.getxPos()].setType("playerbody");
+                                playingField.getField()[segment.getyPos()][segment.getxPos()].setPlayerID(playerID);
+                            }
+                            Square headSquare = playingField.getField()[player.getYPos()][player.getxPos()];
+                            headSquare.setType("head");
+                            headSquare.setPlayerID(playerID);
+                        }
+
                         msg = appendDelimitor("PLAYER_NEW_POS", params.get(0), params.get(1), params.get(2));
                         broadcast(msg, clientSocket); // PLAYER_NEW_POS;pid;xPos;yPos
+                        System.out.println("Player " + playerID + " moved to: " + xPos + ", " + yPos);
                         break;
 
                     case "ADD_NEW_PLAYER": // ADD_NEW_PLAYER;name;color
-                        Player newPlayer = new Player(clientSocket, playerIDCounter++, params.get(0), params.get(1), 0, 0); // 0 = pid, 1 = name, 2 = color, 3 = xPosition, 4 = yPosition
-                        players.add(newPlayer);
+
+                        Player newPlayer = new Player(clientSocket, playerIDCounter++, params.get(0), params.get(1), playerIDCounter, playerIDCounter*50); // 0 = pid, 1 = name, 2 = color, 3 = xPosition, 4 = yPosition
+                        players.put(newPlayer.getPid(), newPlayer);
 
 
-                        msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getPid()*50, newPlayer.getYPos(), playingField.getWidth(), playingField.getHeight());
+                        msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getxPos(), newPlayer.getYPos(), playingField.getWidth(), playingField.getHeight());
                         send(msg, outputStream); // NEW_PLAYER_RESPONSE;pid;xPos;yPos;fieldWidth;fieldHeight
 
-                        msg = appendDelimitor("NEW_PLAYER", newPlayer.getPid(), newPlayer.getName(), newPlayer.getColor(), (newPlayer.getPid() + 1)*50, (newPlayer.getPid() + 1));
+                        //msg = appendDelimitor("PLAYING_FIELD", playingField.getWidth(), playingField.getHeight(), playingField.encodeField());
+// SEND PLAYING FIELD   send(msg, outputStream); // PLAYING_FIELD;fieldWidth;fieldHeight;|e|e|e|h/1|e|e|e|b/1|e|
+
+                        msg = appendDelimitor("NEW_PLAYER", newPlayer.getPid(), newPlayer.getName(), newPlayer.getColor(), newPlayer.getxPos(), newPlayer.getYPos());
                         broadcast(msg, clientSocket); // NEW_PLAYER;pid;name;color;xPos;yPos
                         
-                        for (Player p : players) {
-                            if(p == newPlayer) continue;
-                            msg = appendDelimitor("PLAYER_INFO", p.getPid(), p.getName(), p.getColor(), (p.getPid() + 1)*50, (p.getPid() + 1));         // Merge with NEW_PLAYER????
+                        for (Player p : players.values()) {
+                            if (p == newPlayer) continue;
+                            msg = appendDelimitor("PLAYER_INFO", p.getPid(), p.getName(), p.getColor(), (p.getPid() + 1) * 50, (p.getPid() + 1)); // Merge with NEW_PLAYER????
                             send(msg, outputStream); // PLAYER_INFO;pid;name;color;xPos;yPos
                         }
 
@@ -160,8 +194,21 @@ public class Server {
                         broadcast(params.get(0));
                         break;
 
-                    case "BERRY_TEST": // BERRY_TEST
-                        playingField.spawnScore("berry", 1, Integer.parseInt(params.get(0)), Integer.parseInt(params.get(1)));
+                    case "BERRY_TEST": // BERRY_TEST;(xPos;yPos)
+                        if (params.size() >= 2) {
+                            playingField.spawnScore("berry", 1, Integer.parseInt(params.get(0)), Integer.parseInt(params.get(1)));
+                        } else {
+                            playingField.spawnScore("berry", 1);
+                        }
+                        break;
+
+                    case "XY": // XY;x;y
+                        System.out.println("X:" + params.get(0) + " Y:" + params.get(1) + " = " + playingField.getField()[Integer.parseInt(params.get(1))][Integer.parseInt(params.get(0))].getType());
+                        break;
+
+                    case "TEST":
+                        System.out.println("Test command received");
+                        System.out.println(playingField.encodeField());
                         break;
 
                     default:
@@ -174,9 +221,9 @@ public class Server {
             if (e instanceof java.net.SocketException && e.getMessage().equals("Connection reset")) {
                 // Client disconnected abruptly
                 System.out.println("Client disconnected abruptly: " + clientSocket.getInetAddress());
-                for (Player p : players) {
+                for (Player p : players.values()) {
                     if (p.getPlayerSocket() == clientSocket) {
-                        players.remove(p);
+                        players.remove(p.getPid());
                         break;
                     }
                 }
@@ -213,6 +260,10 @@ public class Server {
 
 
     private static void broadcast(String message, Socket... excludeClients) {
+        List<String> blacklist = Arrays.asList("dddwafw", "blacklisted_word2");
+        boolean isBlacklisted = blacklist.stream().anyMatch(message::contains);
+        int broadcastCount = 0;
+    
         for (Socket clientSocket : clientList) {
             if (Arrays.asList(excludeClients).contains(clientSocket)) {
                 continue;
@@ -220,14 +271,15 @@ public class Server {
             try {
                 OutputStream outputStream = clientSocket.getOutputStream();
                 outputStream.write(message.getBytes());
+                broadcastCount++;
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        if(clientList.size() > 1) {
-            System.out.println("Broadcasted: '" + message + "' to " + clientList.size() + " clients.");
+    
+        if (!isBlacklisted) {
+            System.out.println("Broadcasted: '" + message + "' to " + broadcastCount + " clients.");
         }
-        
     }
 
 
@@ -248,7 +300,7 @@ public class Server {
             this.color = color;
             this.headXPos = headXPos;
             this.headYPos = headYPos;
-            this.length = 1; // NOT IMPLEMENTED
+            this.length = 3; // NOT IMPLEMENTED
             this.body = new ArrayList<>(); // NOT IMPLEMENTED
             this.body.add(new BodySegment(headXPos, headYPos)); // NOT IMPLEMENTED
         }
@@ -268,6 +320,18 @@ public class Server {
         public int getLength() { return length; }
 
         public List<BodySegment> getBody() { return body; }
+
+        public void move(int newX, int newY) {
+            // Add new head position
+            body.add(0, new BodySegment(newX, newY));
+            // Remove the last segment if the length is exceeded
+            if (body.size() > length) {
+                body.remove(body.size() - 1);
+            }
+            // Update head position
+            headXPos = newX;
+            headYPos = newY;
+        }
     }
 
 
@@ -320,6 +384,29 @@ public class Server {
             return height;
         }
 
+        public String encodeField() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("|");
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    Square square = field[i][j];
+                    if (square.getType().equals("head")) {
+                        sb.append("H");
+                        sb.append(square.getPlayerID());
+                    } else if (square.getType().equals("playerbody")) {
+                        sb.append("P");
+                        sb.append(square.getPlayerID());
+                    } else if (square.getType().equals("berry")) {
+                        sb.append("B");
+                        sb.append(square.getMagnitude());
+                    } else {
+                        sb.append(".");
+                    }
+                    sb.append("|");
+                }            }
+            return sb.toString();
+        }
+
         // Spawns a score item on a random unoccupied square
         public void spawnScore(String type, int magnitude) { 
             int xPos;
@@ -330,13 +417,16 @@ public class Server {
             } while ( !field[yPos][xPos].getType().equals("empty") );
 
             field[yPos][xPos].setType(type);
+            field[yPos][xPos].setMagnitude(magnitude);
             String msg = appendDelimitor("ADD_SCORE", type, magnitude, xPos, yPos);
             broadcast(msg);
+            System.out.println(type + " spawned at: " + xPos + ", " + yPos);
         }
 
         // @Overload    Spawns a score item on a specific square
         public void spawnScore(String type, int magnitude, int xPos, int yPos) { 
             field[yPos][xPos].setType(type);
+            field[yPos][xPos].setMagnitude(magnitude);
             String msg = appendDelimitor("ADD_SCORE", type, magnitude, xPos, yPos);
             broadcast(msg);
         }
@@ -355,14 +445,23 @@ public class Server {
     
             return null;
         }
+
     }
 
 
     public static class Square {
         private String type;
+        private int magnitude;
+        private int playerID;
 
         public Square() {
             this.type = "empty";
+        }
+
+        public void clear() {
+            this.type = "empty";
+            this.magnitude = 0;
+            this.playerID = 0;
         }
 
         public String getType() {
@@ -371,6 +470,22 @@ public class Server {
 
         public void setType(String type) {
             this.type = type;
+        }
+
+        public int getMagnitude() {
+            return magnitude;
+        }
+
+        public void setMagnitude(int magnitude) {
+            this.magnitude = magnitude;
+        }
+
+        public int getPlayerID() {
+            return playerID;
+        }
+
+        public void setPlayerID(int playerID) {
+            this.playerID = playerID;
         }
     }
 

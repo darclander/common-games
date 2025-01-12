@@ -167,6 +167,7 @@ int main(int argc, char **argv) {
     // optionsMenu.addItem("sound: ", MENU_ON_OFF, playSound);
     // optionsMenu.addItem("sound", MENU_BAR, volume);
 
+    // TODO: Move logic to GameController?
     controller.attachObserver(&startMenu);
     controller.attachObserver(&optionsMenu);
     controller.attachObserver(&ui);
