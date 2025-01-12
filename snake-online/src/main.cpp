@@ -109,6 +109,7 @@ void getColor(GUI &ui, SDL_Color &color, std::string &colorString) {
 
 int main(int argc, char **argv) {
 
+    int pid = -1;
     Controller controller = Controller();
 
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_FULLSCREEN);
@@ -128,15 +129,13 @@ int main(int argc, char **argv) {
     uint32_t startingTick = 0;
     
 
-    Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 40, 30);
-    Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 3, color::GREEN);
+    // Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 40, 30);
 
+    Game g = Game{&ui, nullptr, &players, &scores};
+    GameController c = GameController(g);
 
-
-    std::shared_ptr<Snake> player1 = std::make_shared<Snake>(snake);
-    players[0] = player1;
-
-    Snake *player = players[0].get();
+    while(c.getPid() == -1) {}
+    std::cout << c.getPid() << std::endl;
 
     int state = START_MENU;
     // gameState state         = START_MENU;
@@ -168,24 +167,22 @@ int main(int argc, char **argv) {
     // optionsMenu.addItem("sound", MENU_BAR, volume);
 
     // TODO: Move logic to GameController?
-    controller.attachObserver(&startMenu);
-    controller.attachObserver(&optionsMenu);
-    controller.attachObserver(&ui);
-    controller.attachObserver(player);
-    controller.attachObserver(&sound);
+    c.attachObserver(&startMenu);
+    c.attachObserver(&optionsMenu);
+    c.attachObserver(&ui);
+    // controller.attachObserver(player);
+    // controller.attachObserver(&sound);
 
     bool hasScore = false;
     Gridpoint *scorePoint;
 
     // Score score = Score(ui.getRenderer(), &ui, grid.getGridPointWidth(), grid.getGridPointHeight());
 
-    Game g = Game{&ui, &grid, &players, &scores};
-    GameController c = GameController(g);
-    controller.attachObserver(&c);
     bool running = true;
     while(ui.getWindowClose() && running) {
 
-        controller.update();
+        
+        c.update();
 
         auto t1 = Clock::now();
         startingTick = SDL_GetTicks();
@@ -231,7 +228,7 @@ int main(int argc, char **argv) {
             // ui.render(*player); // Perhaps a better solution?
 
             // snake.update(deltaTime, 100.f);
-            player->update(deltaTime, 100.f);
+            // player->update(deltaTime, 100.f);
         } else if (state == GAME_QUIT) {
             running = false;
         }
@@ -245,11 +242,11 @@ int main(int argc, char **argv) {
 
         // fpsCap(startingTick);
         
-        int gridXPos = 0;
-        int gridYPos = 0;
-        Gridpoint *gp = grid.getPoint(player->getPosX(), player->getPosY());
-        gridXPos = (gp->getGridPointX() / grid.getGridPointWidth());
-        gridYPos = (gp->getGridPointY() / grid.getGridPointHeight());
+        // int gridXPos = 0;
+        // int gridYPos = 0;
+        // Gridpoint *gp = grid.getPoint(player->getPosX(), player->getPosY());
+        // gridXPos = (gp->getGridPointX() / grid.getGridPointWidth());
+        // gridYPos = (gp->getGridPointY() / grid.getGridPointHeight());
         // std::string command = "PLAYER_UPDATE_POSITION;" + std::to_string(pid) + ";" + std::to_string(gridXPos) + ";" + std::to_string(gridYPos) + ";";
         // if(client.isConnected()) client.send(command.c_str(), command.size()); 
 

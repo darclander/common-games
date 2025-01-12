@@ -1,6 +1,22 @@
 #include "GameController.hpp"
 
-void GameController::onServerMessage(const std::string &message) {
+
+GameController::GameController(Game &game) {
+    m_gui = game.gui;
+    m_grid = game.grid;
+    m_players = game.players;
+    m_scores = game.scores;
+
+    // Initial communication between server and client
+    // TODO: replace this logic with CONFIG
+    std::string colorString = "green";
+    std::string m_nickname = "default";
+    std::string command = "ADD_NEW_PLAYER;" + m_nickname + ";" + colorString;
+    Controller::sendMessage(command);
+}
+
+void GameController::handleInput(const std::string &message) {
+
     std::vector<std::string> inputs = splitString(message, ';');
     std::string command = inputs[0];
 
@@ -11,18 +27,47 @@ void GameController::onServerMessage(const std::string &message) {
     if (command == "SCORE_COLLECTED") {
         collectScoreEvent(inputs);
     }
-
     
+    if (command == "NEW_PLAYER_RESPONSE") {
+        onNewPlayerEvent(inputs);
+    }
+
+    for (auto observer : observers) {
+        observer->onServerMessage(message);
+    }
 }
 
 
-void GameController::onMessage(const std::string &message) {
-    std::vector<std::string> inputs = splitString(message, ';');
-    std::string command = inputs[0];
+// void GameController::onMessage(const std::string &message) {
+//     std::vector<std::string> inputs = splitString(message, ';');
+//     std::string command = inputs[0];
 
-    if (command == "PLAYER_POS") { 
+//     if (command == "PLAYER_POS") { 
         
-    }
+//     }
+// }
+
+void GameController::onNewPlayerEvent(std::vector<std::string> &inputs) {
+
+    m_myPid        = stoi(inputs[1]);
+    int xPos        = stoi(inputs[2]);
+    int yPos        = stoi(inputs[3]);
+    int gw          = stoi(inputs[4]);
+    int gh          = stoi(inputs[5]);
+
+    Grid grid = Grid(m_gui->getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 40, 30);
+    *m_grid = grid;
+    
+    Snake snake = Snake(m_gui->getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, m_grid, 40, 40, 3, color::GREEN);
+    (*m_players)[m_myPid] = std::move(std::make_shared<Snake>(snake));
+
+
+    // TODO: move this logic to snake and grid on creation
+    // int gridWidth   = stoi(parsedInput[4]);
+    // int gridHeight  = stoi(parsedInput[5]);
+    // grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, gw, gh);
+    // snake = Snake(ui.getRenderer(), xPos, yPos, &grid, 40, 40, 3, color);
+
 }
 
 void GameController::addScoreEvent(std::vector<std::string> &inputs) {
@@ -71,4 +116,8 @@ void GameController::collectScoreEvent(std::vector<std::string> &inputs) {
     if (iterator != m_players->end()) {
         iterator->second->grow();
     }
+}
+
+int GameController::getPid() {
+    return m_myPid;
 }
