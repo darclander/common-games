@@ -40,6 +40,14 @@ int Grid::getGridPointHeight() {
     return m_gridPointHeight;
 }
 
+int Grid::getWidth() {
+    return m_gridWidth;
+}
+
+int Grid::getHeight() {
+    return m_gridHeight;
+}
+
 Gridpoint *Grid::getPoint(int x, int y) {
     for (auto &gp : m_gridpoints) {
         if(gp.contains(x, y)) return &gp;
