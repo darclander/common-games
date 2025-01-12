@@ -36,6 +36,7 @@ class GameController : public Observer {
 
         void addScoreEvent(std::vector<std::string> &inputs);
         void addPlayerEvent(std::vector<std::string> &inputs);
+        void collectScoreEvent(std::vector<std::string> &inputs);
 
         GUI *m_gui;
         Grid *m_grid;
