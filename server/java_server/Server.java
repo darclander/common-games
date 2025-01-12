@@ -3,6 +3,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -124,7 +125,12 @@ public class Server {
                         Player player = players.get(playerID);
                         int xPos = Integer.parseInt(params.get(1));
                         int yPos = Integer.parseInt(params.get(2));
-                        Square square = playingField.getField()[yPos][xPos];
+
+
+                        if (xPos < 0 || xPos >= playingField.getWidth() || yPos < 0 || yPos >= playingField.getHeight()) {
+                            System.out.println("Invalid position: " + xPos + ", " + yPos);
+                            break;
+                        }
 
                         String moveResponse = playingField.checkPosition(playerID, xPos, yPos);
 
@@ -132,7 +138,7 @@ public class Server {
                             return; // Ignore if the player doesn't move
                         }
 
-                        if (moveResponse == "berry"){// SCORE_COLLECTED;pid;type;amount;xPos;yPos
+                        if (moveResponse == "berry"){// SCORE_COLLECTED;pid;type;magnitude;xPos;yPos
                             msg = appendDelimitor("SCORE_COLLECTED", params.get(0), "berry", 1, Integer.parseInt(params.get(1)), Integer.parseInt(params.get(2))); // SCORE_COLLECTED;pid;type;amount;xPos;yPos
                             broadcast(msg);
                         } 
@@ -143,17 +149,17 @@ public class Server {
                         // }
 
                         if (player != null) {
-                            // Remove old position
-                            for (BodySegment segment : player.getBody()) {
-                                playingField.getField()[segment.getyPos()][segment.getxPos()].clear();
-                            }
+                            // Remove old position       !!!
+                            //for (BodySegment segment : player.getBody()) {
+                              //  playingField.getField()[segment.getyPos()][segment.getxPos()].clear();
+                            //}
                             player.move(xPos, yPos);
                         
-                            // New head position
-                            for (BodySegment segment : player.getBody()) {
-                                playingField.getField()[segment.getyPos()][segment.getxPos()].setType("playerbody");
-                                playingField.getField()[segment.getyPos()][segment.getxPos()].setPlayerID(playerID);
-                            }
+                            // New head position        !!!
+                            //for (BodySegment segment : player.getBody()) {
+                              //  playingField.getField()[segment.getyPos()][segment.getxPos()].setType("playerbody");
+                               // playingField.getField()[segment.getyPos()][segment.getxPos()].setPlayerID(playerID);
+                            //}
                             Square headSquare = playingField.getField()[player.getYPos()][player.getxPos()];
                             headSquare.setType("head");
                             headSquare.setPlayerID(playerID);
@@ -161,7 +167,6 @@ public class Server {
 
                         msg = appendDelimitor("PLAYER_NEW_POS", params.get(0), params.get(1), params.get(2));
                         broadcast(msg, clientSocket); // PLAYER_NEW_POS;pid;xPos;yPos
-                        System.out.println("Player " + playerID + " moved to: " + xPos + ", " + yPos);
                         break;
 
                     case "ADD_NEW_PLAYER": // ADD_NEW_PLAYER;name;color
@@ -272,6 +277,16 @@ public class Server {
                 OutputStream outputStream = clientSocket.getOutputStream();
                 outputStream.write(message.getBytes());
                 broadcastCount++;
+
+            } catch (SocketException e) {
+                System.out.println("Client disconnected abruptly: " + clientSocket.getInetAddress());
+                clientList.remove(clientSocket);
+                try {
+                    clientSocket.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -420,7 +435,6 @@ public class Server {
             field[yPos][xPos].setMagnitude(magnitude);
             String msg = appendDelimitor("ADD_SCORE", type, magnitude, xPos, yPos);
             broadcast(msg);
-            System.out.println(type + " spawned at: " + xPos + ", " + yPos);
         }
 
         // @Overload    Spawns a score item on a specific square
