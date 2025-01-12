@@ -8,7 +8,9 @@
 #include "Score.hpp"
 #include "Gui.hpp"
 #include "Observer.hpp"
+#include "Controller.hpp"
 #include "comm_util.hpp"
+
 
 struct Game {
     GUI *gui;
@@ -27,6 +29,7 @@ class GameController : public Observer {
         }
 
         void onServerMessage(const std::string &message) override;
+        void onMessage(const std::string &message) override;
         void onEvent(const SDL_Event& event) override {}
 
     private:

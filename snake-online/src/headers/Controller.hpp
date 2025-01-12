@@ -57,12 +57,30 @@ class Controller {
         // Attach an observer to the controller
         void attachObserver(Observer* observer) {
             observers.push_back(observer);
+
+            observer->setSignalCallback([this](const std::string &message) {
+                this->onObserverSignal(message);
+            });
+        }
+
+        void onObserverSignal(const std::string &message) {
+            std::cout << "Controller received notification: " << message << std::endl;
+            notifyMessage(message);
         }
 
         // Notify all attached observers about an event
         void notifyEvent(const SDL_Event& event) {
             for (auto observer : observers) {
                 observer->onEvent(event);
+            }
+        }
+
+        void notifyMessage(const std::string &message) {
+            if(m_client->isConnected()) {
+                m_client->send(message.c_str(), message.size());
+            }
+            for (auto observer : observers) {
+                observer->onMessage(message);
             }
         }
 
