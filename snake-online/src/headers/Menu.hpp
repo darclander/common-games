@@ -5,11 +5,12 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+
 #include <vector>
 #include <thread>
 #include <functional>
 
-#include "Controller.hpp"
+#include "Observer.hpp"
 
 #define MENU_STATE      0x0
 #define MENU_OPTION     0x1
@@ -53,7 +54,7 @@ class MenuItem;
 class Menu : public Observer {
 
     public:
-        Menu(Controller *controller, SDL_Renderer *renderer, int menuid, int xPos, int yPos, 
+        Menu(SDL_Renderer *renderer, int menuid, int xPos, int yPos, 
                 int width, int height, TTF_Font *font, int &state, int previousState, int menuOwnState);
         ~Menu();
 
@@ -88,8 +89,6 @@ class Menu : public Observer {
         int m_menuIndex;
         int m_limit;
         int m_menuid;
-
-        Controller *m_controller;
 
         int *m_state;
         int m_menuOwnState;

@@ -6,7 +6,7 @@
 #include <SDL2/SDL_image.h>
 
 #include "Grid.hpp"
-#include "Controller.hpp"
+#include "Observer.hpp"
 
 struct direction {
     int x;
@@ -84,7 +84,6 @@ class Snake : public Observer {
                 std::cout << sb.getPosX() << ", " << sb.getPosY() << std::endl; 
             }
         }
-
 
         void onEvent(const SDL_Event& event) override;
 

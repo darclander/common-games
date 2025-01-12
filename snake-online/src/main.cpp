@@ -15,6 +15,8 @@
 #include "Score.hpp"
 #include "Controller.hpp"
 #include "Soundmanager.hpp"
+#include "GameController.hpp"
+// #include "Event.hpp"
 // #include "Client.hpp"
 
 #include <windows.h>
@@ -97,12 +99,20 @@ void getColor(GUI &ui, SDL_Color &color, std::string &colorString) {
     } 
 }
 
+// struct Game {
+//     GUI gui = ...
+//     SoundManager = ..
+//     Snake =
+//     Grid = 
+// }
+
+
 int main(int argc, char **argv) {
+
+    Controller controller = Controller();
 
     GUI ui = GUI("Snake", WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_FULLSCREEN);
     ui.loadTexture("berry", "./textures/berry.png");
-    
-    Controller controller = Controller();
 
     int volume = 64;
     int playSound = 1;
@@ -113,54 +123,15 @@ int main(int argc, char **argv) {
 
     std::unordered_map<int, std::shared_ptr<Snake>> players{};
     std::unordered_map<std::string, std::shared_ptr<Score>> scores{};
-    
-    // int pid = -1;
-    // std::string ipAddress = "127.0.0.1";
-    // int port = 0;
-    // std::string nickname = "default";
-    // SDL_Color color = color::GREEN;
-    // std::string colorString = "green";
-
-
-    // getIpAdressAndPort(ipAddress, port);
-    // getName(nickname);
-    // getColor(ui, color, colorString);
 
     double deltaTime = 0;
     uint32_t startingTick = 0;
-    std::cout << "here";
+    
 
     Grid grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, 40, 30);
     Snake snake = Snake(ui.getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, &grid, 40, 40, 3, color::GREEN);
 
-    // TcpClient client = TcpClient(ui.getRenderer(), &ui, &grid, &players, &scores);
 
-    // if (client.connectToServer(ipAddress.c_str(), port)) {
-
-    //     // Initial communication between server and client
-    //     std::string command = "ADD_NEW_PLAYER;" + nickname + ";" + colorString; 
-    //     std::cout << command << std::endl;
-    //     std::string input = "";
-    //     if (client.send(command.c_str(), command.size())) {
-    //         client.receive(input);
-    //         std::vector<std::string> parsedInput = splitString(input, ';');
-    //         for (auto x : parsedInput) std::cout << x << std::endl;
-    //         pid             = stoi(parsedInput[1]);
-    //         int xPos        = stoi(parsedInput[2]);
-    //         int yPos        = stoi(parsedInput[3]);
-    //         int gw          = stoi(parsedInput[4]);
-    //         int gh          = stoi(parsedInput[5]);
-    //         client.setPid(pid);
-    //         // int gridWidth   = stoi(parsedInput[4]);
-    //         // int gridHeight  = stoi(parsedInput[5]);
-    //         grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, gw, gh);
-    //         snake = Snake(ui.getRenderer(), xPos, yPos, &grid, 40, 40, 3, color);
-    //     }
-
-    //     // Allow for client to communicate
-    //     std::thread receiveThread(&TcpClient::receiveData, std::ref(client));
-    //     receiveThread.detach();
-    // }
 
     std::shared_ptr<Snake> player1 = std::make_shared<Snake>(snake);
     players[0] = player1;
@@ -171,13 +142,13 @@ int main(int argc, char **argv) {
     // gameState state         = START_MENU;
     // gameState previousState = START_MENU;
 
-    Menu startMenu      = Menu(&controller, ui.getRenderer(), 0, WINDOW_MIDDLE_X - (250 / 2), 
+    Menu startMenu      = Menu(ui.getRenderer(), 0, WINDOW_MIDDLE_X - (250 / 2), 
                                                     WINDOW_MIDDLE_Y - (200 / 2), 
                                                     250, 
                                                     200, 
                                                     ui.getFont(), state, START_MENU, START_MENU);
     
-    Menu optionsMenu    = Menu(&controller, ui.getRenderer(), 1, WINDOW_MIDDLE_X - (250 / 2), 
+    Menu optionsMenu    = Menu(ui.getRenderer(), 1, WINDOW_MIDDLE_X - (250 / 2), 
                                                     WINDOW_MIDDLE_Y - (200 / 2), 
                                                     250, 
                                                     200, 
@@ -207,6 +178,9 @@ int main(int argc, char **argv) {
 
     // Score score = Score(ui.getRenderer(), &ui, grid.getGridPointWidth(), grid.getGridPointHeight());
 
+    Game g = Game{&ui, &grid, &players, &scores};
+    GameController c = GameController(g);
+    controller.attachObserver(&c);
     bool running = true;
     while(ui.getWindowClose() && running) {
 

@@ -68,7 +68,7 @@ SDL_Texture *GUI::loadTexture(std::string name, const std::string &filePath) {
 
     m_textureMap[name] = texture;
 
-    return texture;  
+    return texture;
 }
 
 SDL_Texture *GUI::getTexture(const std::string &key) {

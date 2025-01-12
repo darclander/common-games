@@ -3,15 +3,13 @@
 #include <iostream>
 #include <vector>
 #include <thread>
+
+
 #include <SDL2/SDL.h>
 
+
 #include "Client_interface.hpp"
-
-class Observer {
-    public:
-        virtual void onEvent(const SDL_Event& event) = 0;
-};
-
+#include "Observer.hpp"
 
 class Controller {
     public:
@@ -23,7 +21,7 @@ class Controller {
             m_nickname = "default";
             getIpAdressAndPort(m_ip, m_port);
             m_client = std::make_unique<TcpCommunication>(m_ip.c_str(), m_port); 
-            std::cout << "HELLO" << std::endl;
+
             if (m_client->isConnected()) {
                 // Initial communication between server and client
                 std::string command = "ADD_NEW_PLAYER;" + m_nickname + ";" + colorString; 
@@ -46,7 +44,7 @@ class Controller {
                 }
 
                 // Allow for client to communicate
-                std::thread receiveThread(&TcpCommunication::receiveData, m_client.get());
+                std::thread receiveThread(&Controller::comm_receive, this);
                 receiveThread.detach();
             }            
         }
@@ -124,6 +122,19 @@ class Controller {
             auto name_it = config.find("name");
 
             if (name_it != config.end()) name = name_it->second;
+        }
+
+        void comm_receive() {
+            while(m_client->isConnected()) {
+                std::string input = "";
+                m_client->receive(input);
+                std::cout << input << std::endl;
+                // std::vector<std::string> parsedInput = splitString(input, ';');
+
+                for (auto observer : observers) {
+                    observer->onServerMessage(input);
+                }
+            }
         }
 
         void listener() {
