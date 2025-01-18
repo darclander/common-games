@@ -32,6 +32,10 @@ void Game::handleEvent(std::vector<std::string> &event) {
         playerGrow();
     }
 
+    if (command == "NEW_PLAYER") {
+        addNewPlayer(event);
+    }
+
     if (command == "NEW_PLAYER_JOINED") {
 
     }
@@ -39,6 +43,15 @@ void Game::handleEvent(std::vector<std::string> &event) {
     if (command == "PLAYER_UPDATE_POSITION") {
 
     }
+}
+
+void Game::addNewPlayer(std::vector<std::string> &event) {
+    int pid = stoi(event[1]);
+    std::string color = event[3];
+    int xPos = stoi(event[4]);
+    int yPos = stoi(event[5]);
+    std::shared_ptr<Snake> newPlayer = std::make_shared<Snake>(m_gui->getRenderer(), xPos, yPos, m_grid.get(), 40, 40, 3, m_gui->getColor(color));
+    m_players[pid] = std::move(newPlayer);
 }
 
 void Game::setupFromServer(std::vector<std::string> &event) {
