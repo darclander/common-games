@@ -40,7 +40,7 @@ Snake::~Snake() {
 
 void Snake::render() {
 
-    for(int i = 0; i < snakeBlocks.size(); i++) {
+    for (int i = 0; i < snakeBlocks.size(); i++) {
         if(i == 0) {
             snakeBlocks[i].renderHead();
         } else {
@@ -55,7 +55,6 @@ bool operator!=(const direction& lhs, const direction& rhs) {
 }
 
 void Snake::onEvent(const SDL_Event& event) {
-    // if (event.type == SDL_KEYDOWN) {
     const Uint8 *key_state = SDL_GetKeyboardState(NULL);
 
     if(key_state[SDL_SCANCODE_S] || key_state[SDL_SCANCODE_DOWN]) {
@@ -88,9 +87,7 @@ void Snake::onEvent(const SDL_Event& event) {
 }
 
 void Snake::update(double deltaTime, float limit) {
-
-    m_limit += deltaTime;   
-
+    m_limit += deltaTime;
     if(m_limit < limit) return;
     m_limit = 0;
     m_snakeDirection = m_newSnakeDirection;
@@ -105,8 +102,8 @@ void Snake::update(double deltaTime, float limit) {
 
     if(oldPoint != nullptr) oldPoint->setEmpty();
     if(newPoint != nullptr) {
-        std::string command = "PLAYER_UPDATE_POSITION;0;" + std::to_string(newPoint->getGridPointX() / m_grid->getGridPointWidth()) + ";" + std::to_string(newPoint->getGridPointY() / m_grid->getGridPointHeight()) + ";";
-        signalController(command);
+        // std::string command = "PLAYER_UPDATE_POSITION;0;" + std::to_string(newPoint->getGridPointX() / m_grid->getGridPointWidth()) + ";" + std::to_string(newPoint->getGridPointY() / m_grid->getGridPointHeight()) + ";";
+        // signalController(command);
         if(!newPoint->isEmpty()) {
             std::cout << "GAME OVER!" << std::endl;
         }
@@ -129,7 +126,7 @@ void Snake::update(double deltaTime, float limit) {
 }
 
 void Snake::grow() {
-    // Could be a better implementation?
+    // TODO: Could be a better implementation?
     snakeBlocks.push_back(Snakeblock(m_renderer, -99, -99, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees, m_color));
 }
 
