@@ -7,30 +7,38 @@
 
 #include <SDL2/SDL.h>
 
-
 #include "Client_interface.hpp"
 #include "Observer.hpp"
+
+void getIpAdressAndPort(std::string &ip, int &port);
+void getName(std::string &name);
 
 class Controller {
     public:
 
         Controller() {
 
-
-            getIpAdressAndPort(m_ip, m_port);
-            m_client = std::make_unique<TcpCommunication>(m_ip.c_str(), m_port); 
-
-            if (m_client->isConnected()) {
-                
-                // Allow for client to communicate
-                std::thread receiveThread(&Controller::comm_receive, this);
-                receiveThread.detach();
-            }            
         }
 
         ~Controller() {
             // m_controllerThread.join();
             // delete m_client;
+        }
+
+        std::vector<std::string> getServerEvents() {
+            std::vector<std::string> m_serverEventsCopy = m_serverEvents;
+            m_serverEvents.clear();
+            return m_serverEventsCopy;
+        }
+
+        void connect(std::string m_ip, int m_port) {
+            m_client = std::make_unique<TcpCommunication>(m_ip.c_str(), m_port); 
+
+            if (m_client->isConnected()) {
+                // Allow for client to communicate
+                std::thread receiveThread(&Controller::comm_receive, this);
+                receiveThread.detach();
+            }
         }
 
         // Attach an observer to the controller
@@ -102,40 +110,22 @@ class Controller {
         std::string m_ip = "127.0.0.1";
         int m_port = 12345;
 
-
-
         std::vector<Observer*> observers;
         // std::thread m_controllerThread;
         SDL_Event m_event;
         bool running = true;
-
-        void getIpAdressAndPort(std::string &ip, int &port) {
-            std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
-
-            auto ip_it      = config.find("ip");
-            auto port_it    = config.find("port");
-            
-            if (ip_it   != config.end()) ip = ip_it->second;
-            if (port_it != config.end()) port = std::stoi(port_it->second);
-        }
-
-        void getName(std::string &name) {
-            std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
-
-            auto name_it = config.find("name");
-
-            if (name_it != config.end()) name = name_it->second;
-        }
 
         virtual void handleInput(const std::string& input) {
             // Default implementation: just notify observers
             for (auto observer : observers) {
                 observer->onServerMessage(input);
             }
+
+            m_serverEvents.push_back(input);
         }
 
         void comm_receive() {
-            while(m_client->isConnected()) {
+            while(m_client && m_client->isConnected()) {
                 std::string input = "";
                 m_client->receive(input);
                 std::cout << input << std::endl;
@@ -152,6 +142,7 @@ class Controller {
         }
 
     private:
+        std::vector<std::string> m_serverEvents;
 
 };
 
