@@ -20,11 +20,11 @@ LIBS= -lmingw32 -lws2_32 -lSDL2main -lSDL2 -lSDL2_Image -lSDL2_TTF -lSDL2_Mixer
 CFLAGS= -I$(IDIR) $(LIBS) $(EXTRA_LIBS) 
 
 IDIR = ./src/headers
-_DEPS = Gui.hpp Snake.hpp Grid.hpp Menu.hpp Score.hpp Controller.hpp Soundmanager.hpp comm_util.hpp Observer.hpp GameController.hpp
+_DEPS = Gui.hpp Snake.hpp Grid.hpp Menu.hpp Score.hpp Controller.hpp Soundmanager.hpp comm_util.hpp Observer.hpp Game.hpp
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 ODIR = ./obj
-_OBJ =  Gui.o Snake.o Grid.o main.o Menu.o Score.o Soundmanager.o comm_util.o GameController.o
+_OBJ =  Gui.o Snake.o Grid.o main.o Menu.o Score.o Soundmanager.o comm_util.o Game.o GameLogic.o Controller.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 all: snake
