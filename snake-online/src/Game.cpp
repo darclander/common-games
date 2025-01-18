@@ -14,7 +14,9 @@ void Game::update(double deltaTime) {
     m_deltaTime = deltaTime;
     m_gameController->update();
 
-    handleServerEvents(m_gameController->getServerEvents());
+    // Change name to controller events?
+    handleEvents(m_gameController->getServerEvents());
+    handleEvents(m_gameController->getLocalEvents());
 
     if (m_state == GAME_PLAY) {
         auto player = m_players[m_myPid];
@@ -46,7 +48,7 @@ void Game::createGrid() {
 }
 
 void Game::createPlayer() {
-    std::shared_ptr<Snake> snake = std::make_shared<Snake>(m_gui->getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, m_grid.get(), 40, 40, 30, color::GREEN);
+    std::shared_ptr<Snake> snake = std::make_shared<Snake>(m_gui->getRenderer(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, m_grid.get(), 40, 40, 3, color::GREEN);
     m_gameController->attachObserver(snake.get());
     m_players[m_myPid] = std::move(snake);
 }
@@ -71,13 +73,23 @@ void Game::renderState() {
 
 void Game::setupGame() {
 
-    createGrid();
-    createPlayer();
-
     getIpAdressAndPort(m_serverIp, m_serverPort);
     getName(m_playerName);
+    getColor(m_playerColor);
+
+    std::string firstCommand = "ADD_NEW_PLAYER;" + m_playerName + ";" + m_playerColor;
 
     m_gameController->connect(m_serverIp, m_serverPort);
+    m_gameController->sendMessage(firstCommand);
+
+    // Wait for server response
+    // TODO: fix timeout
+    while (!m_serverSetupIsComplete) {
+        handleEvents(m_gameController->getServerEvents());
+    }
+
+    createGrid();
+    createPlayer();
 }
 
 void Game::setupGui() {

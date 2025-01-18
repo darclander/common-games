@@ -42,7 +42,7 @@ class Game : public Observer{
     public:
         Game();
 
-        void addScore(int xPos, int yPos);
+
         void createGrid();
         void createPlayer();
         void addPlayer();
@@ -61,11 +61,13 @@ class Game : public Observer{
         int m_myPid = -1;
         int m_state = START_MENU;
         bool m_isRunning = true;
+        bool m_serverSetupIsComplete = false;
 
         std::string m_serverIp = ""; 
         int m_serverPort = -1; 
 
         std::string m_playerName = "default";
+        std::string m_playerColor = "green";
 
         std::unordered_map<int, std::shared_ptr<Snake>> m_players{};
         std::unordered_map<std::string, std::shared_ptr<Score>> m_scores{};
@@ -84,11 +86,18 @@ class Game : public Observer{
         int m_playSound = 1;
         std::unique_ptr<SoundManager> m_sound;
 
-        void handleServerEvents(std::vector<std::string> serverEvents);
+        void handleEvents(std::vector<std::string> serverEvents);
         void handleEvent(std::vector<std::string> &event);
 
         void setupGui();
         void setupSound();
         void setupController();
         void setupGame();
+
+        // Game logic
+        void setupFromServer(std::vector<std::string> &event);
+
+        void addScore(int xPos, int yPos);
+        void removeScore(int xPos, int yPos);
+        void playerGrow();
 };

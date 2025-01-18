@@ -108,11 +108,13 @@ void Snake::update(double deltaTime, float limit) {
             std::cout << "GAME OVER!" << std::endl;
         }
 
-        // if(newPoint->hasScore()) {
-        //     std::cout << "TRUEEE";
-        //     snakeBlocks.push_back(Snakeblock(m_renderer, (snakeBlocks.size()-1)*m_snakeWidth, 1, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees, m_color));
-        //     newPoint->removeScore();
-        // }
+        if(newPoint->hasScore()) {
+            std::cout << "TRUEEE";
+            // snakeBlocks.push_back(Snakeblock(m_renderer, (snakeBlocks.size()-1)*m_snakeWidth, 1, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees, m_color));
+            // newPoint->removeScore();
+            std::string command = "PLAYER_SCORE_COLLECTED;" + std::to_string(newPoint->getGridPointX()) + ";" + std::to_string(newPoint->getGridPointY());
+            signalController(command);
+        }
         newPoint->setNotEmpty();
 
         snakeBlocks.pop_back();
@@ -126,7 +128,6 @@ void Snake::update(double deltaTime, float limit) {
 }
 
 void Snake::grow() {
-    // TODO: Could be a better implementation?
     snakeBlocks.push_back(Snakeblock(m_renderer, -99, -99, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees, m_color));
 }
 

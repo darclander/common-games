@@ -17,3 +17,11 @@ void getName(std::string &name) {
 
     if (name_it != config.end()) name = name_it->second;
 }
+
+void getColor(std::string &color) {
+    std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
+
+    auto color_it = config.find("color");
+
+    if (color_it != config.end()) color = color_it->second;
+}

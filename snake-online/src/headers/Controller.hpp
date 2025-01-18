@@ -12,6 +12,7 @@
 
 void getIpAdressAndPort(std::string &ip, int &port);
 void getName(std::string &name);
+void getColor(std::string &color);
 
 class Controller {
     public:
@@ -29,6 +30,12 @@ class Controller {
             std::vector<std::string> m_serverEventsCopy = m_serverEvents;
             m_serverEvents.clear();
             return m_serverEventsCopy;
+        }
+
+        std::vector<std::string> getLocalEvents() {
+            std::vector<std::string> m_localEventsCopy = m_localEvents;
+            m_localEvents.clear();
+            return m_localEventsCopy;
         }
 
         void connect(std::string m_ip, int m_port) {
@@ -66,9 +73,12 @@ class Controller {
             if(m_client->isConnected()) {
                 m_client->send(message.c_str(), message.size());
             }
+
             for (auto observer : observers) {
                 observer->onMessage(message);
             }
+
+            m_localEvents.push_back(message);
         }
 
         void sendMessage(const std::string &message) {
@@ -143,6 +153,7 @@ class Controller {
 
     private:
         std::vector<std::string> m_serverEvents;
+        std::vector<std::string> m_localEvents;
 
 };
 
