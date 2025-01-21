@@ -7,51 +7,45 @@
 
 #include <SDL2/SDL.h>
 
-
 #include "Client_interface.hpp"
 #include "Observer.hpp"
+
+void getIpAdressAndPort(std::string &ip, int &port);
+void getName(std::string &name);
+void getColor(std::string &color);
 
 class Controller {
     public:
 
         Controller() {
 
-            // TODO: replace this logic with CONFIG
-            std::string colorString = "green";
-            m_nickname = "default";
-            getIpAdressAndPort(m_ip, m_port);
-            m_client = std::make_unique<TcpCommunication>(m_ip.c_str(), m_port); 
-
-            if (m_client->isConnected()) {
-                // Initial communication between server and client
-                std::string command = "ADD_NEW_PLAYER;" + m_nickname + ";" + colorString; 
-                std::cout << command << std::endl;
-                std::string input = "";
-                if (m_client->send(command.c_str(), command.size())) {
-                    m_client->receive(input);
-                    std::vector<std::string> parsedInput = splitString(input, ';');
-                    for (auto x : parsedInput) std::cout << x << std::endl;
-                    // pid             = stoi(parsedInput[1]);
-                    int xPos        = stoi(parsedInput[2]);
-                    int yPos        = stoi(parsedInput[3]);
-                    int gw          = stoi(parsedInput[4]);
-                    int gh          = stoi(parsedInput[5]);
-                    // TODO: move this logic to snake and grid on creation
-                    // int gridWidth   = stoi(parsedInput[4]);
-                    // int gridHeight  = stoi(parsedInput[5]);
-                    // grid = Grid(ui.getRenderer(), WINDOW_WIDTH, WINDOW_HEIGHT, gw, gh);
-                    // snake = Snake(ui.getRenderer(), xPos, yPos, &grid, 40, 40, 3, color);
-                }
-
-                // Allow for client to communicate
-                std::thread receiveThread(&Controller::comm_receive, this);
-                receiveThread.detach();
-            }            
         }
 
         ~Controller() {
             // m_controllerThread.join();
             // delete m_client;
+        }
+
+        std::vector<std::string> getServerEvents() {
+            std::vector<std::string> m_serverEventsCopy = m_serverEvents;
+            m_serverEvents.clear();
+            return m_serverEventsCopy;
+        }
+
+        std::vector<std::string> getLocalEvents() {
+            std::vector<std::string> m_localEventsCopy = m_localEvents;
+            m_localEvents.clear();
+            return m_localEventsCopy;
+        }
+
+        void connect(std::string m_ip, int m_port) {
+            m_client = std::make_unique<TcpCommunication>(m_ip.c_str(), m_port); 
+
+            if (m_client->isConnected()) {
+                // Allow for client to communicate
+                std::thread receiveThread(&Controller::comm_receive, this);
+                receiveThread.detach();
+            }
         }
 
         // Attach an observer to the controller
@@ -79,8 +73,17 @@ class Controller {
             if(m_client->isConnected()) {
                 m_client->send(message.c_str(), message.size());
             }
+
             for (auto observer : observers) {
                 observer->onMessage(message);
+            }
+
+            m_localEvents.push_back(message);
+        }
+
+        void sendMessage(const std::string &message) {
+            if (m_client->isConnected()) {
+                m_client->send(message.c_str(), message.size());
             }
         }
 
@@ -109,7 +112,7 @@ class Controller {
             listener();
         }
 
-    private:
+    protected:
         
         std::unique_ptr<TcpCommunication> m_client; 
 
@@ -117,41 +120,28 @@ class Controller {
         std::string m_ip = "127.0.0.1";
         int m_port = 12345;
 
-
-
         std::vector<Observer*> observers;
         // std::thread m_controllerThread;
         SDL_Event m_event;
         bool running = true;
 
-        void getIpAdressAndPort(std::string &ip, int &port) {
-            std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
+        virtual void handleInput(const std::string& input) {
+            // Default implementation: just notify observers
+            for (auto observer : observers) {
+                observer->onServerMessage(input);
+            }
 
-            auto ip_it      = config.find("ip");
-            auto port_it    = config.find("port");
-            
-            if (ip_it   != config.end()) ip = ip_it->second;
-            if (port_it != config.end()) port = std::stoi(port_it->second);
-        }
-
-        void getName(std::string &name) {
-            std::unordered_map<std::string, std::string> config = getConfiguration("config.txt");
-
-            auto name_it = config.find("name");
-
-            if (name_it != config.end()) name = name_it->second;
+            m_serverEvents.push_back(input);
         }
 
         void comm_receive() {
-            while(m_client->isConnected()) {
+            while(m_client && m_client->isConnected()) {
                 std::string input = "";
                 m_client->receive(input);
                 std::cout << input << std::endl;
                 // std::vector<std::string> parsedInput = splitString(input, ';');
 
-                for (auto observer : observers) {
-                    observer->onServerMessage(input);
-                }
+                handleInput(input);
             }
         }
 
@@ -160,6 +150,10 @@ class Controller {
                 notifyEvent(m_event);
             }
         }
+
+    private:
+        std::vector<std::string> m_serverEvents;
+        std::vector<std::string> m_localEvents;
 
 };
 

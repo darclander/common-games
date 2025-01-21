@@ -52,3 +52,5 @@ debug/*
 config.txt
 *.class
 *config.txt*
+
+old/*
