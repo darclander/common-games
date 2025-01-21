@@ -54,26 +54,25 @@ public class Server {
         try {
             String msg;
             
-            long elapsedTime;
-            long startTime;
-            long ADD_SCORE_COUNTER = 0;
-            long ADD_SCORE_INTERVAL = 5 * 1000;
-            long counter2 = 0;
+            double elapsedTime;
+            double startTime;
+            double ADD_SCORE_COUNTER = 0.0;
+            // seconds = milliseconds * 1000
+            double ADD_SCORE_INTERVAL = 1 * 1000.0;
+            double counter2 = 0.0;
             while (true) {
                 startTime = System.currentTimeMillis();
                 
-
                 if(ADD_SCORE_COUNTER > ADD_SCORE_INTERVAL) {
                     playingField.spawnScore("berry", 1); // ADD_SCORE;type;magnitude;xPos;yPos
-                    ADD_SCORE_COUNTER = 0;
+                    ADD_SCORE_COUNTER = 0.0;
                 }
-
-                if(counter2 > 30 * 1000) {
-                    counter2 = 0;
+        
+                if(counter2 > 30.0 * 1000.0) {
+                    counter2 = 0.0;
                     // addPowerUp();
                 }
-
-                
+        
                 Thread.sleep(250);
                 elapsedTime = (System.currentTimeMillis() - startTime);
                 
@@ -120,7 +119,7 @@ public class Server {
                         broadcast(msg, clientSocket);
                         break;
                     
-                    case "PLAYER_UPDATE_POSITION": // PLAYER_UPDATE_POSITION;pid;xPos;yPos
+                    case "PLAYER_UPDATE_POSITION": // PLAYER_UPDATE_POSITION;pid;xPos;yPos      // FIX NON EXISTENT SNAKE!!!!
                         int playerID = Integer.parseInt(params.get(0));
                         Player player = players.get(playerID);
                         int xPos = Integer.parseInt(params.get(1));
