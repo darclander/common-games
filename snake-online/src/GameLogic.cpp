@@ -36,13 +36,29 @@ void Game::handleEvent(std::vector<std::string> &event) {
         addNewPlayer(event);
     }
 
+    if (command == "PLAYER_INFO") {
+        addNewPlayer(event);
+    }
+
     if (command == "NEW_PLAYER_JOINED") {
 
     }
 
-    if (command == "PLAYER_UPDATE_POSITION") {
-
+    if (command == "PLAYER_NEW_POS") {
+        updatePlayerPosition(event);
     }
+
+    // PLAYER_UPDATE_POSITION;pid;xPos;yPos
+    if (command == "PLAYER_UPDATE_POSITION") {
+        updatePlayerPosition(event);
+    }
+}
+
+void Game::updatePlayerPosition(std::vector<std::string> &event) {
+    int pid = stoi(event[1]);
+    int xPos = stoi(event[2]);
+    int yPos = stoi(event[3]);
+    m_players[pid]->updatePos(xPos, yPos);
 }
 
 void Game::addNewPlayer(std::vector<std::string> &event) {
@@ -55,12 +71,14 @@ void Game::addNewPlayer(std::vector<std::string> &event) {
 }
 
 void Game::setupFromServer(std::vector<std::string> &event) {
-    // Set grid size
-
-    // Set snake color and size
-
     // Set pid
     m_myPid = stoi(event[1]);
+    
+    // Set grid size
+    createGrid(stoi(event[4]), stoi(event[5]));
+
+    // Set snake
+    createPlayer(6, stoi(event[2]), stoi(event[3]));
 }
 
 void Game::removeScore(int xPos, int yPos) {

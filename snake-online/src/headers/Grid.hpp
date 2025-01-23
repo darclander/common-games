@@ -62,6 +62,8 @@ class Grid {
         int getWidth();
         int getHeight();
 
+        void setSize(int width, int height);
+
         Gridpoint *getPoint(int x, int y);
         bool isPointEmpty(Gridpoint point);
 
