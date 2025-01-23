@@ -37,7 +37,7 @@ void Game::handleEvent(std::vector<std::string> &event) {
     }
 
     if (command == "PLAYER_INFO") {
-        addNewPlayer(event);
+        // addNewPlayer(event);
     }
 
     if (command == "NEW_PLAYER_JOINED") {
