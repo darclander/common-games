@@ -134,7 +134,7 @@ public class Server {
                         String moveResponse = playingField.checkPosition(playerID, xPos, yPos);
 
                         if (player.getxPos() == xPos && player.getYPos() == yPos) {
-                            return; // Ignore if the player doesn't move
+                            break; // Ignore if the player doesn't move
                         }
 
                         if (moveResponse == "berry"){// SCORE_COLLECTED;pid;type;magnitude;xPos;yPos
