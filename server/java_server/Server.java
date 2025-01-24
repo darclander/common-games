@@ -1,3 +1,12 @@
+/*
+
+javac -d . *.java
+java java_server.Server
+
+*/
+
+package java_server;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,9 +20,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import java_server.LoggerUtil;
 
 // Server class
 public class Server {
@@ -106,7 +118,7 @@ public class Server {
 
                 // Process the received data and parse it into a command
                 String receivedData = new String(buffer, 0, bytesRead);
-                System.out.println("Client " + clientSocket.getInetAddress() + ": " + receivedData);
+                LoggerUtil.logMessage("Client " + clientSocket.getInetAddress() + ": " + receivedData);
                 Command command = Command.parse(receivedData);
 
                 String cmd = command.getCommand();
@@ -264,8 +276,6 @@ public class Server {
 
 
     private static void broadcast(String message, Socket... excludeClients) {
-        List<String> blacklist = Arrays.asList("dddwafw", "blacklisted_word2");
-        boolean isBlacklisted = blacklist.stream().anyMatch(message::contains);
         int broadcastCount = 0;
     
         for (Socket clientSocket : clientList) {
@@ -291,9 +301,7 @@ public class Server {
             }
         }
     
-        if (!isBlacklisted) {
-            System.out.println("Broadcasted: '" + message + "' to " + broadcastCount + " clients.");
-        }
+        LoggerUtil.logMessage("Broadcasted: '" + message + "' to " + broadcastCount + " clients.");
     }
 
 
