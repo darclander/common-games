@@ -17,6 +17,8 @@ void Game::handleEvent(std::vector<std::string> &event) {
         m_serverSetupIsComplete = true;
     }
 
+    if (!m_serverSetupIsComplete) return;
+
     if(command == "ADD_SCORE") {
         int xPos = stoi(event[3]);
         int yPos = stoi(event[4]);
@@ -37,7 +39,7 @@ void Game::handleEvent(std::vector<std::string> &event) {
     }
 
     if (command == "PLAYER_INFO") {
-        // addNewPlayer(event);
+        addNewPlayer(event);
     }
 
     if (command == "NEW_PLAYER_JOINED") {
@@ -54,14 +56,16 @@ void Game::handleEvent(std::vector<std::string> &event) {
     }
 }
 
-void Game::updatePlayerPosition(std::vector<std::string> &event) {
+void Game::updatePlayerPosition(std::vector<std::string> event) {
     int pid = stoi(event[1]);
     int xPos = stoi(event[2]);
     int yPos = stoi(event[3]);
-    m_players[pid]->updatePos(xPos, yPos);
+    if (m_players[pid]) {
+        m_players[pid]->updatePos(xPos * m_grid->getGridPointWidth(), yPos * m_grid->getGridPointHeight());
+    }
 }
 
-void Game::addNewPlayer(std::vector<std::string> &event) {
+void Game::addNewPlayer(std::vector<std::string> event) {
     int pid = stoi(event[1]);
     std::string color = event[3];
     int xPos = stoi(event[4]);
@@ -70,7 +74,7 @@ void Game::addNewPlayer(std::vector<std::string> &event) {
     m_players[pid] = std::move(newPlayer);
 }
 
-void Game::setupFromServer(std::vector<std::string> &event) {
+void Game::setupFromServer(std::vector<std::string> event) {
     // Set pid
     m_myPid = stoi(event[1]);
     
