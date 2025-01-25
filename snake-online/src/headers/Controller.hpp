@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <thread>
-
+#include <mutex>
 
 #include <SDL2/SDL.h>
 
@@ -18,7 +18,8 @@ class Controller {
     public:
 
         Controller() {
-
+            m_serverEvents = {};
+            m_localEvents = {};
         }
 
         ~Controller() {
@@ -27,6 +28,10 @@ class Controller {
         }
 
         std::vector<std::string> getServerEvents() {
+            std::lock_guard<std::mutex> lock(m_mutexServerEvents);
+            for (auto e : m_serverEvents) {
+                std::cout << "Event: " << e << std::endl;
+            }
             std::vector<std::string> m_serverEventsCopy = m_serverEvents;
             m_serverEvents.clear();
             return m_serverEventsCopy;
@@ -125,12 +130,13 @@ class Controller {
         SDL_Event m_event;
         bool running = true;
 
-        virtual void handleInput(const std::string& input) {
+        void handleInput(const std::string input) {
             // Default implementation: just notify observers
             for (auto observer : observers) {
                 observer->onServerMessage(input);
             }
 
+            std::lock_guard<std::mutex> lock(m_mutexServerEvents);
             m_serverEvents.push_back(input);
         }
 
@@ -154,6 +160,7 @@ class Controller {
     private:
         std::vector<std::string> m_serverEvents;
         std::vector<std::string> m_localEvents;
+        std::mutex m_mutexServerEvents;
 
 };
 

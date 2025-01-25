@@ -97,9 +97,9 @@ class Game : public Observer{
         void setupGame();
 
         // Game logic
-        void setupFromServer(std::vector<std::string> &event);
-        void addNewPlayer(std::vector<std::string> &event);
-        void updatePlayerPosition(std::vector<std::string> &event);
+        void setupFromServer(std::vector<std::string> event);
+        void addNewPlayer(std::vector<std::string> event);
+        void updatePlayerPosition(std::vector<std::string> event);
 
         void addScore(int xPos, int yPos);
         void removeScore(int xPos, int yPos);

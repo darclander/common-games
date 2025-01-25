@@ -96,7 +96,9 @@ void Game::setupGame() {
     // Wait for server response
     // TODO: fix timeout
     while (!m_serverSetupIsComplete) {
-        handleEvents(m_gameController->getServerEvents());
+        std::vector<std::string> events = m_gameController->getServerEvents();
+
+        handleEvents(events);
     }
 
     // createGrid();
