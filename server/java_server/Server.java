@@ -85,7 +85,7 @@ public class Server {
                     // addPowerUp();
                 }
         
-                Thread.sleep(250);
+                // Thread.sleep(250);
                 elapsedTime = (System.currentTimeMillis() - startTime);
                 
                 ADD_SCORE_COUNTER += elapsedTime;

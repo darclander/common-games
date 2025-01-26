@@ -29,8 +29,8 @@ typedef std::chrono::high_resolution_clock Clock;
 #define SEND_LIMIT 100
 
 #define WINDOW_FULLSCREEN 0
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
+// #define WINDOW_WIDTH 800
+// #define WINDOW_HEIGHT 600
 
 #define WINDOW_MIDDLE_X (WINDOW_WIDTH / 2)
 #define WINDOW_MIDDLE_Y (WINDOW_HEIGHT / 2)

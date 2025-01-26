@@ -19,7 +19,11 @@ void Game::handleEvent(std::vector<std::string> &event) {
 
     if (!m_serverSetupIsComplete) return;
 
-    if(command == "ADD_SCORE") {
+    if (command == "PLAYING_FIELD") {
+        
+    }
+
+    if (command == "ADD_SCORE") {
         int xPos = stoi(event[3]);
         int yPos = stoi(event[4]);
         addScore(xPos, yPos);
@@ -70,7 +74,7 @@ void Game::addNewPlayer(std::vector<std::string> event) {
     std::string color = event[3];
     int xPos = stoi(event[4]);
     int yPos = stoi(event[5]);
-    std::shared_ptr<Snake> newPlayer = std::make_shared<Snake>(m_gui->getRenderer(), xPos, yPos, m_grid.get(), 40, 40, 3, m_gui->getColor(color));
+    std::shared_ptr<Snake> newPlayer = std::make_shared<Snake>(m_gui.get(), xPos, yPos, m_grid.get(), 40, 40, 3, m_gui->getColor(color));
     m_players[pid] = std::move(newPlayer);
 }
 

@@ -1,13 +1,19 @@
 #include "Snake.hpp"
 
-Snake::Snake(SDL_Renderer *renderer, int xPos, int yPos, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize, SDL_Color color) {
+Snake::Snake(GUI *gui, int xPos, int yPos, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize, SDL_Color color) {
 
-    this->m_renderer = renderer;
+    this->m_renderer = gui->getRenderer();
     // this->m_snakeWidth = snakeWidth;
     // this->m_snakeHeight = snakeHeight;
     this->m_snakeSize = snakeSize;
     this->m_grid = grid;
+    this->m_gui = gui;
     m_color = color;
+
+    m_speedBoostRect.h = 15;
+    m_speedBoostTimeLimit = 1500.0f;
+    m_speedBoostTime = m_speedBoostTimeLimit;
+    m_speedBoostTimeout = 0.0f;
 
     m_snakeDirection = DIR_RIGHT;
     m_newSnakeDirection = m_snakeDirection;
@@ -40,6 +46,9 @@ Snake::~Snake() {
 
 void Snake::render() {
 
+
+    // SDL_RenderPresent(m_renderer);
+
     for (int i = 0; i < snakeBlocks.size(); i++) {
         if(i == 0) {
             snakeBlocks[i].renderHead();
@@ -48,6 +57,24 @@ void Snake::render() {
         }
     }
 
+    if (true) {
+        std::cout << "Drawing bar" << std::endl;
+        renderBoostBar();
+    }
+
+}
+
+void Snake::renderBoostBar() {
+    int barWidth = m_speedBoostTime / 10;
+    int xPos = m_gui->getWindowCenterX() - (barWidth / 2);
+    int yPos = m_gui->getWindowHeight() - (m_speedBoostRect.h * 2);
+
+    m_speedBoostRect.x = xPos;
+    m_speedBoostRect.y = yPos;
+    m_speedBoostRect.w = barWidth;
+
+    SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
+    SDL_RenderFillRect(m_renderer, &m_speedBoostRect);
 }
 
 bool operator!=(const direction& lhs, const direction& rhs) {
@@ -84,10 +111,39 @@ void Snake::onEvent(const SDL_Event& event) {
             m_newDegrees = 180;
         }
     }
+
+    if (key_state[SDL_SCANCODE_SPACE]) {
+        m_speedBoost = true;
+    }
+
+    if (event.type == SDL_KEYUP && event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+        m_speedBoost = false;
+        m_speedBoostTimeout = 1000.0f;
+    }
 }
 
 void Snake::update(double deltaTime, float limit) {
     m_limit += deltaTime;
+
+    // TODO: move to own function
+    if (m_speedBoostTimeout > 0) m_speedBoostTimeout -= deltaTime;
+    if (m_speedBoostTimeout < 0) m_speedBoostTimeout = 0.0f;
+    if (m_speedBoostTime < 0) {
+        m_speedBoost = false;
+        m_speedBoostTimeout = 1000.0f;
+        m_speedBoostTime = 0;
+    }
+
+    std::cout << m_speedBoostTime << std::endl;
+    std::cout << m_speedBoost << std::endl;
+    std::cout << m_speedBoostTimeout << std::endl;
+    if (m_speedBoost && m_speedBoostTimeout < 0.1f && m_speedBoostTime > 0.1f) {
+        limit *= 0.5;
+        m_speedBoostTime -= deltaTime;
+    } else if (m_speedBoostTimeout < 0.1f && m_speedBoostTime < m_speedBoostTimeLimit) {
+        m_speedBoostTime += deltaTime;
+    }
+
     if(m_limit < limit) return;
     m_limit = 0;
     m_snakeDirection = m_newSnakeDirection;

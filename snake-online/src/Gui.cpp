@@ -96,6 +96,22 @@ void GUI::onEvent(const SDL_Event& event) {
     }
 }
 
+int GUI::getWindowWidth() {
+    return m_windowWidth;
+}
+
+int GUI::getWindowHeight() {
+    return m_windowHeight;
+}
+
+int GUI::getWindowCenterX() {
+    return m_windowWidth / 2;
+}
+
+int GUI::getWindowCenterY() {
+    return m_windowHeight / 2;
+}
+
 SDL_Color GUI::getColor(std::string colorName) {
     if(colorName == "green") {
         return color::GREEN;
@@ -104,6 +120,8 @@ SDL_Color GUI::getColor(std::string colorName) {
     } else if (colorName == "red" ) {
         return color::RED;
     }
+
+    return color::DEFAULT;
 }
 
 
