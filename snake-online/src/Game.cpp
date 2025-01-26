@@ -26,8 +26,13 @@ void Game::update(double deltaTime) {
         Gridpoint *gp = m_grid->getPoint(xPos, yPos);
 
         std::string command = "PLAYER_UPDATE_POSITION;" + std::to_string(m_myPid) + ";" + std::to_string(gp->getGridPointX() / m_grid->getGridPointWidth()) + ";" + std::to_string(gp->getGridPointY() / m_grid->getGridPointHeight());
-        std::cout << command << std::endl;
-        m_gameController->sendMessage(command);
+
+        if (command != m_lastPosition) {
+            std::cout << command << std::endl;
+            m_lastPosition = command;
+            m_gameController->sendMessage(command);
+        }
+
     }
 }
 
