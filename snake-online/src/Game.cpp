@@ -15,6 +15,13 @@ void Game::update(double deltaTime) {
     m_gameController->update();
 
     // Change name to controller events?
+
+    // TODO: add state as an input or how to handle so that observers should act according to state?
+    // Some helper function to set a state?
+    // setState(GAME_PLAY) {
+    //     controller->addObserver(Snake)
+    //     controller->addObserver(...)
+    // }
     handleEvents(m_gameController->getServerEvents());
     handleEvents(m_gameController->getLocalEvents());
 
@@ -138,9 +145,9 @@ void Game::setupSound() {
     m_volume = 64;
     m_playSound = 1;
     m_sound = std::make_unique<SoundManager>(m_volume, m_playSound);
-    m_sound->loadSound("./debug/sounds/s.wav", "song");
-    m_sound->setVolume("song", m_volume); // 50%
-    m_sound->playSound("song", -1);
+    m_sound->loadSound("./debug/sfx/MegaSnake.mp3", "MegaSnake");
+    m_sound->setVolume("MegaSnake", m_volume); // 50%
+    m_sound->playSound("MegaSnake", -1);
 }
 
 void Game::setupController() {
