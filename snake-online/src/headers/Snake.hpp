@@ -7,6 +7,7 @@
 #include <functional>
 
 #include "Grid.hpp"
+#include "Gui.hpp"
 #include "Observer.hpp"
 
 struct direction {
@@ -51,7 +52,7 @@ class Snakeblock {
 class Snake : public Observer {
 
     public:
-        Snake(SDL_Renderer *renderer, int xPos, int yPos, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize, SDL_Color color);
+        Snake(GUI *gui, int xPos, int yPos, Grid *grid, int snakeWidth, int snakeHeight, int snakeSize, SDL_Color color);
         Snake() {
             
         }
@@ -106,17 +107,26 @@ class Snake : public Observer {
         int m_newDegrees;
 
         double m_limit;
+
+        bool m_speedBoost = false;
+        float m_speedBoostTime;
+        float m_speedBoostTimeout;
+        float m_speedBoostTimeLimit;
         
         direction m_snakeDirection;
         direction m_newSnakeDirection;
 
         Grid *m_grid;
+        GUI *m_gui;
 
         SDL_Renderer *m_renderer;
         SDL_Texture *m_textureSnakeHead;
         SDL_Color m_color;
+        SDL_Rect m_speedBoostRect = {0,0,0,0};
 
         std::vector<Snakeblock> snakeBlocks;
+
+        void renderBoostBar();
 
         std::function<void(const std::string&)> signalCallback;
 
