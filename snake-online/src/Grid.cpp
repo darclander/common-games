@@ -15,11 +15,11 @@ Grid::Grid(SDL_Renderer *renderer, int width, int height, int granularityX, int 
     int cols = m_granularityY;
 
     // Wrong order here?
-    for(int i = 0; i < rows; i++) {
-        for(int j = 0; j < cols; j++) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
             m_gridpoints.push_back(Gridpoint(m_renderer, i * m_gridPointWidth, j * m_gridPointHeight, m_gridPointWidth, m_gridPointHeight));
         }
-    }    
+    }
 }
 
 void Grid::setSize(int width, int height) {
@@ -29,8 +29,8 @@ void Grid::setSize(int width, int height) {
     m_gridpoints.clear();
 
     // Wrong order here?
-    for(int i = 0; i < rows; i++) {
-        for(int j = 0; j < cols; j++) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
             m_gridpoints.push_back(Gridpoint(m_renderer, i * m_gridPointWidth, j * m_gridPointHeight, m_gridPointWidth, m_gridPointHeight));
         }
     }
