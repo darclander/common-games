@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package java_server;
+
+message Position {
+    int32 x = 1;
+    int32 y = 2;
+}
+
+message BodySegment {
+    Position position = 1;
+}
+
+message Player {
+    int32 pid = 1;
+    string name = 2;
+    string color = 3;
+    Position headPosition = 4;
+    int32 length = 5;
+    repeated BodySegment body = 6;
+}
+
+message Square {
+    string type = 1;
+    int32 magnitude = 2;
+    int32 playerID = 3;
+}
+
+message PlayingField {
+    int32 width = 1;
+    int32 height = 2;
+    repeated Square field = 3;
+    repeated Player players = 4;
+}
