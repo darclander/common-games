@@ -149,7 +149,7 @@ public class Server {
 
                         String moveResponse = playingField.checkPosition(playerID, xPos, yPos);
 
-                        if (player.getxPos() == xPos && player.getYPos() == yPos) {
+                        if (player.getXPos() == xPos && player.getYPos() == yPos) {
                             break; // Ignore if the player doesn't move
                         }
 
@@ -175,13 +175,13 @@ public class Server {
                         playingField.addPlayer(newPlayer);
                         playingField.spawnPlayer(newPlayer);
 
-                        msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getxPos(), newPlayer.getYPos(), playingField.getWidth(), playingField.getHeight());
+                        msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getXPos(), newPlayer.getYPos(), playingField.getWidth(), playingField.getHeight());
                         send(msg, outputStream); // NEW_PLAYER_RESPONSE;pid;xPos;yPos;fieldWidth;fieldHeight
 
                         //msg = appendDelimitor("PLAYING_FIELD", playingField.getWidth(), playingField.getHeight(), playingField.encodeField());
 // SEND PLAYING FIELD   send(msg, outputStream); // PLAYING_FIELD;fieldWidth;fieldHeight;|e|e|e|h/1|e|e|e|b/1|e|
 
-                        msg = appendDelimitor("NEW_PLAYER", newPlayer.getPid(), newPlayer.getName(), newPlayer.getColor(), newPlayer.getxPos(), newPlayer.getYPos());
+                        msg = appendDelimitor("NEW_PLAYER", newPlayer.getPid(), newPlayer.getName(), newPlayer.getColor(), newPlayer.getXPos(), newPlayer.getYPos());
                         broadcast(msg, clientSocket); // NEW_PLAYER;pid;name;color;xPos;yPos
                         
                         for (Player p : playingField.getPlayers().values()) {
@@ -302,8 +302,7 @@ public class Server {
         private int pid;
         private String name;
         private String color;
-        private int headXPos;
-        private int headYPos;
+        private Position headPosition;
         private int length;
         private List<BodySegment> body;
 
@@ -312,13 +311,8 @@ public class Server {
             this.pid = pid;
             this.name = name;
             this.color = color;
-            this.length = 3;
+            this.length = 6;
             this.body = new ArrayList<>();
-
-            for (int i = 0; i < this.length; i++) {
-                this.body.add(new BodySegment(headXPos - i, headYPos));
-                System.out.println("Player " + name + " body segment added at " + (headXPos - i) + ", " + headYPos);
-            }
 
         }
 
@@ -330,9 +324,11 @@ public class Server {
 
         public String getColor() { return color; }
 
-        public int getxPos() { return headXPos; }
+        public Position getHeadPosition() { return headPosition; }
+        public int getXPos() { return headPosition.getX(); }
+        public int getYPos() { return headPosition.getY(); }
 
-        public int getYPos() { return headYPos; }
+        public void setHeadPos(int x, int y) { headPosition = new Position(x, y); }
 
         public int getLength() { return length; }
 
@@ -348,8 +344,7 @@ public class Server {
                 body.remove(body.size() - 1);
             }
             // Update head position
-            headXPos = newX;
-            headYPos = newY;
+            headPosition = new Position(newX, newY);
         }
     }
 
@@ -423,6 +418,8 @@ public class Server {
                 field[yPos][xPos - i].setType(i == 0 ? "head" : "body");
                 field[yPos][xPos - i].setPlayerID(playerID);
             }
+
+            player.setHeadPos(xPos, playerID);
         }
 
         public void addPlayer(Player player) {
