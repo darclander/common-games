@@ -32,8 +32,9 @@ public class Server {
     private static PlayingField playingField = new PlayingField(40, 30);
 
     public static void main(String[] args) {
+        ServerSocket serverSocket = null;
         try {
-            ServerSocket serverSocket = new ServerSocket(PORT);
+            serverSocket = new ServerSocket(PORT);
             System.out.println("Server listening on port " + PORT);
 
             // Start the game loop
@@ -51,6 +52,14 @@ public class Server {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                try {
+                    serverSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
