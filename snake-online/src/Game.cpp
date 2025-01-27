@@ -64,7 +64,9 @@ void Game::createPlayer() {
 }
 
 void Game::createPlayer(int size, int xPos, int yPos) {
-    std::shared_ptr<Snake> snake = std::make_shared<Snake>(m_gui.get(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, m_grid.get(), xPos, yPos, size, m_gui->getColor(m_playerColor));
+    int xPosGrid = ((xPos) * (m_grid->getGridPointWidth()));
+    int yPosGrid = ((yPos) * (m_grid->getGridPointHeight()));
+    std::shared_ptr<Snake> snake = std::make_shared<Snake>(m_gui.get(), xPosGrid, yPosGrid, m_grid.get(), 40, 40, size, m_gui->getColor(m_playerColor));
     m_gameController->attachObserver(snake.get());
     m_players[m_myPid] = std::move(snake);
 }

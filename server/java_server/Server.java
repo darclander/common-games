@@ -406,7 +406,7 @@ public class Server {
         
                 // Check if there is enough space for the snake
                 for (int i = 0; i < length; i++) {
-                    if (xPos - i < 0 || !field[yPos][xPos - i].getType().equals("empty")) {
+                    if (yPos - i < 0 || !field[yPos - i][xPos].getType().equals("empty")) {
                         validPosition = false;
                         break;
                     }
@@ -415,11 +415,11 @@ public class Server {
         
             // Place the snake on the field
             for (int i = 0; i < length; i++) {
-                field[yPos][xPos - i].setType(i == 0 ? "head" : "body");
-                field[yPos][xPos - i].setPlayerID(playerID);
+                field[yPos - i][xPos].setType(i == 0 ? "head" : "body");
+                field[yPos - i][xPos].setPlayerID(playerID);
             }
-
-            player.setHeadPos(xPos, playerID);
+        
+            player.setHeadPos(xPos, yPos);
         }
 
         public void addPlayer(Player player) {
