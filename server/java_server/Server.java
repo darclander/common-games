@@ -371,11 +371,7 @@ public class Server {
                 playingField.getField()[segment.getPosition().getY()][segment.getPosition().getX()].setType("playerbody");
                 playingField.getField()[segment.getPosition().getY()][segment.getPosition().getX()].setPlayerID(pid);
             }
-        
-            for (BodySegment segment : body) {
-                System.out.println("Segment at: (" + segment.getPosition().getX() + ", " + segment.getPosition().getY() + ")");
-            }
-            System.out.println("--------------------------------------------------------------");
+
         }
     }
 
