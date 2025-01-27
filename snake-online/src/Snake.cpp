@@ -58,7 +58,7 @@ void Snake::render() {
     }
 
     if (true) {
-        std::cout << "Drawing bar" << std::endl;
+        // std::cout << "Drawing bar" << std::endl;
         renderBoostBar();
     }
 
@@ -134,9 +134,9 @@ void Snake::update(double deltaTime, float limit) {
         m_speedBoostTime = 0;
     }
 
-    std::cout << m_speedBoostTime << std::endl;
-    std::cout << m_speedBoost << std::endl;
-    std::cout << m_speedBoostTimeout << std::endl;
+    // std::cout << m_speedBoostTime << std::endl;
+    // std::cout << m_speedBoost << std::endl;
+    // std::cout << m_speedBoostTimeout << std::endl;
     if (m_speedBoost && m_speedBoostTimeout < 0.1f && m_speedBoostTime > 0.1f) {
         limit *= 0.5;
         m_speedBoostTime -= deltaTime;
@@ -165,7 +165,6 @@ void Snake::update(double deltaTime, float limit) {
         }
 
         if(newPoint->hasScore()) {
-            std::cout << "TRUEEE";
             // snakeBlocks.push_back(Snakeblock(m_renderer, (snakeBlocks.size()-1)*m_snakeWidth, 1, m_snakeWidth-2, m_snakeHeight-2, m_textureSnakeHead, m_degrees, m_color));
             // newPoint->removeScore();
             std::string command = "PLAYER_SCORE_COLLECTED;" + std::to_string(newPoint->getGridPointX()) + ";" + std::to_string(newPoint->getGridPointY());

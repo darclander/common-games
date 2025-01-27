@@ -83,6 +83,9 @@ class Game : public Observer{
 
         std::unique_ptr<Controller> m_gameController;
 
+
+        std::string m_lastPosition;
+
         // Sound
         int m_volume = 64;
         int m_playSound = 1;

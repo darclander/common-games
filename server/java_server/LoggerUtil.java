@@ -7,7 +7,7 @@ public class LoggerUtil {
     private static final Map<String, Boolean> blacklist = new HashMap<>();
 
 
-    private static boolean blacklistEnabled = false; // Set to false to disable entire blacklist
+    private static boolean blacklistEnabled = true; // Set to false to disable entire blacklist
     static {
         blacklist.put("dddwafw", true);
         blacklist.put("PLAYER_UPDATE_POSITION", true);

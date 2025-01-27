@@ -33,8 +33,13 @@ void Game::update(double deltaTime) {
         Gridpoint *gp = m_grid->getPoint(xPos, yPos);
 
         std::string command = "PLAYER_UPDATE_POSITION;" + std::to_string(m_myPid) + ";" + std::to_string(gp->getGridPointX() / m_grid->getGridPointWidth()) + ";" + std::to_string(gp->getGridPointY() / m_grid->getGridPointHeight());
-        std::cout << command << std::endl;
-        m_gameController->sendMessage(command);
+
+        if (command != m_lastPosition) {
+            std::cout << command << std::endl;
+            m_lastPosition = command;
+            m_gameController->sendMessage(command);
+        }
+
     }
 }
 
@@ -66,7 +71,9 @@ void Game::createPlayer() {
 }
 
 void Game::createPlayer(int size, int xPos, int yPos) {
-    std::shared_ptr<Snake> snake = std::make_shared<Snake>(m_gui.get(), WINDOW_MIDDLE_X, WINDOW_MIDDLE_Y, m_grid.get(), xPos, yPos, size, m_gui->getColor(m_playerColor));
+    int xPosGrid = ((xPos) * (m_grid->getGridPointWidth()));
+    int yPosGrid = ((yPos) * (m_grid->getGridPointHeight()));
+    std::shared_ptr<Snake> snake = std::make_shared<Snake>(m_gui.get(), xPosGrid, yPosGrid, m_grid.get(), 40, 40, size, m_gui->getColor(m_playerColor));
     m_gameController->attachObserver(snake.get());
     m_players[m_myPid] = std::move(snake);
 }
