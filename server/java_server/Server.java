@@ -154,6 +154,7 @@ public class Server {
                         }
 
                         if (moveResponse == "berry"){ // SCORE_COLLECTED;pid;type;magnitude;xPos;yPos
+                            player.setLength(player.getLength() + 1);
                             msg = appendDelimitor("SCORE_COLLECTED", params.get(0), "berry", 1, Integer.parseInt(params.get(1)), Integer.parseInt(params.get(2))); // SCORE_COLLECTED;pid;type;amount;xPos;yPos
                             broadcast(msg);
                         } 
@@ -227,19 +228,28 @@ public class Server {
             if (e instanceof java.net.SocketException && e.getMessage().equals("Connection reset")) {
                 // Client disconnected abruptly
                 System.out.println("Client disconnected abruptly: " + clientSocket.getInetAddress());
-
-                for (Player p : playingField.getPlayers().values()) {
-                    if (p.getPlayerSocket() == clientSocket) {
-                        playingField.removePlayer(p.getPid());
-                        break;
-                    }
-                }
-                clientList.remove(clientSocket);
+                removeClient(clientSocket);
             } else {
                 e.printStackTrace();
             }
         }
     }
+
+    private static void removeClient(Socket clientSocket) {
+        try {
+            for (Player p : playingField.getPlayers().values()) {
+                if (p.getPlayerSocket() == clientSocket) {
+                    playingField.removePlayer(p);
+                    break;
+                }
+            }
+            clientList.remove(clientSocket);
+            clientSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
 
 
     private static void send(String message, OutputStream outputStream) {
@@ -313,7 +323,6 @@ public class Server {
             this.color = color;
             this.length = 6;
             this.body = new ArrayList<>();
-
         }
 
         public Socket getPlayerSocket() { return playerSocket; }
@@ -337,14 +346,36 @@ public class Server {
         public List<BodySegment> getBody() { return body; }
 
         public void move(int newX, int newY) {
-            // Add new head position
-            body.add(0, new BodySegment(newX, newY));
+            // Clear previous head position from the playing field
+            playingField.getField()[headPosition.getY()][headPosition.getX()].clear();
+        
+            // Add new head position to the body
+            body.add(0, new BodySegment(headPosition.getX(), headPosition.getY()));
+            
             // Remove the last segment if the length is exceeded
-            if (body.size() > length) {
-                body.remove(body.size() - 1);
+            if (body.size() > length - 1) { // length - 1 because length includes the head
+                BodySegment removedSegment = body.remove(body.size() - 1);
+                // Clear the removed segment position from the playing field
+                playingField.getField()[removedSegment.getPosition().getY()][removedSegment.getPosition().getX()].clear();
             }
+            
             // Update head position
             headPosition = new Position(newX, newY);
+        
+            // Update the playing field with the new head position
+            playingField.getField()[newY][newX].setType("head");
+            playingField.getField()[newY][newX].setPlayerID(pid);
+        
+            // Update the playing field with the new body segments positions
+            for (BodySegment segment : body) {
+                playingField.getField()[segment.getPosition().getY()][segment.getPosition().getX()].setType("playerbody");
+                playingField.getField()[segment.getPosition().getY()][segment.getPosition().getX()].setPlayerID(pid);
+            }
+        
+            for (BodySegment segment : body) {
+                System.out.println("Segment at: (" + segment.getPosition().getX() + ", " + segment.getPosition().getY() + ")");
+            }
+            System.out.println("--------------------------------------------------------------");
         }
     }
 
@@ -397,27 +428,16 @@ public class Server {
             int xPos, yPos;
             boolean validPosition;
             int playerID = player.getPid();
-            int length = player.getLength();
         
             do {
                 xPos = new Random().nextInt(width);
                 yPos = new Random().nextInt(height);
-                validPosition = true;
-        
-                // Check if there is enough space for the snake
-                for (int i = 0; i < length; i++) {
-                    if (yPos - i < 0 || !field[yPos - i][xPos].getType().equals("empty")) {
-                        validPosition = false;
-                        break;
-                    }
-                }
+                validPosition = field[yPos][xPos].getType().equals("empty");
             } while (!validPosition);
         
-            // Place the snake on the field
-            for (int i = 0; i < length; i++) {
-                field[yPos - i][xPos].setType(i == 0 ? "head" : "body");
-                field[yPos - i][xPos].setPlayerID(playerID);
-            }
+            // Place the player on the field
+            field[yPos][xPos].setType("head");
+            field[yPos][xPos].setPlayerID(playerID);
         
             player.setHeadPos(xPos, yPos);
         }
@@ -426,8 +446,21 @@ public class Server {
             players.put(player.getPid(), player);
         }
 
-        public void removePlayer(int playerID) {
-            players.remove(playerID);
+        public void removePlayer(Player player) {
+            players.remove(player.getPid());
+
+            // Clear the head position
+            Position headPosition = player.getHeadPosition();
+            if (headPosition != null) {
+                field[headPosition.getY()][headPosition.getX()].clear();
+            }
+
+            // Clear the body positions
+            for (BodySegment segment : player.getBody()) {
+                Position pos = segment.getPosition();
+                field[pos.getY()][pos.getX()].clear();
+            }
+
         }
 
         public Player getPlayer(int playerID) {
