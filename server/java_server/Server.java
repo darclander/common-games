@@ -171,9 +171,9 @@ public class Server {
 
                     case "ADD_NEW_PLAYER": // ADD_NEW_PLAYER;name;color
 
-                        Player newPlayer = new Player(clientSocket, playerIDCounter++, params.get(0), params.get(1), playerIDCounter, playerIDCounter*50); // 0 = pid, 1 = name, 2 = color, 3 = xPosition, 4 = yPosition
+                        Player newPlayer = new Player(clientSocket, playerIDCounter++, params.get(0), params.get(1)); // 0 = pid, 1 = name, 2 = color
                         playingField.addPlayer(newPlayer);
-
+                        playingField.spawnPlayer(newPlayer);
 
                         msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getxPos(), newPlayer.getYPos(), playingField.getWidth(), playingField.getHeight());
                         send(msg, outputStream); // NEW_PLAYER_RESPONSE;pid;xPos;yPos;fieldWidth;fieldHeight
@@ -214,6 +214,7 @@ public class Server {
                     case "TEST":
                         System.out.println("Test command received");
                         System.out.println(playingField.encodeField());
+                        // playingField.printPlayingField();
                         break;
 
                     default:
@@ -295,6 +296,7 @@ public class Server {
     }
 
 
+
     public static class Player {
         private Socket playerSocket;
         private int pid;
@@ -305,13 +307,11 @@ public class Server {
         private int length;
         private List<BodySegment> body;
 
-        public Player(Socket playerSocket, int pid, String name, String color, int headXPos, int headYPos) {
+        public Player(Socket playerSocket, int pid, String name, String color) {
             this.playerSocket = playerSocket;
             this.pid = pid;
             this.name = name;
             this.color = color;
-            this.headXPos = headXPos;
-            this.headYPos = headYPos;
             this.length = 3;
             this.body = new ArrayList<>();
 
@@ -355,21 +355,13 @@ public class Server {
 
 
     public static class BodySegment {
-        private int xPos;
-        private int yPos;
+        private Position position;
 
         public BodySegment(int xPos, int yPos) {
-            this.xPos = xPos;
-            this.yPos = yPos;
+            this.position = new Position(xPos, yPos);
         }
 
-        public int getxPos() {
-            return xPos;
-        }
-
-        public int getyPos() {
-            return yPos;
-        }
+        public Position getPosition() { return position; }
     }
 
 
@@ -403,6 +395,34 @@ public class Server {
 
         public int getHeight() {
             return height;
+        }
+
+        public void spawnPlayer(Player player) {
+
+            int xPos, yPos;
+            boolean validPosition;
+            int playerID = player.getPid();
+            int length = player.getLength();
+        
+            do {
+                xPos = new Random().nextInt(width);
+                yPos = new Random().nextInt(height);
+                validPosition = true;
+        
+                // Check if there is enough space for the snake
+                for (int i = 0; i < length; i++) {
+                    if (xPos - i < 0 || !field[yPos][xPos - i].getType().equals("empty")) {
+                        validPosition = false;
+                        break;
+                    }
+                }
+            } while (!validPosition);
+        
+            // Place the snake on the field
+            for (int i = 0; i < length; i++) {
+                field[yPos][xPos - i].setType(i == 0 ? "head" : "body");
+                field[yPos][xPos - i].setPlayerID(playerID);
+            }
         }
 
         public void addPlayer(Player player) {
@@ -445,6 +465,15 @@ public class Server {
                 sb.append("\n");
             }
             return sb.toString();
+        }
+
+        public void printPlayingField() {
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    System.out.print(field[i][j].getType() + " ");
+                }
+                System.out.println();
+            }
         }
 
         // Spawns a score item on a random unoccupied square
@@ -528,6 +557,27 @@ public class Server {
         }
     }
 
+    public static class Position {
+        private int x;
+        private int y;
+
+        public Position(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        @Override
+        public String toString() {
+            return "Position{" +
+                    "x=" + x +
+                    ", y=" + y +
+                    '}';
+        }
+
+        public int getX() { return x; }
+
+        public int getY() { return y; }
+    }
 
     public static class Command {
         private String command;
