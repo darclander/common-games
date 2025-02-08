@@ -8,12 +8,6 @@
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
-        <!-- Protobuf runtime library -->
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-            <version>3.25.6</version>
-        </dependency>
         <!-- Add other dependencies here if needed -->
     </dependencies>
 
@@ -28,31 +22,6 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
-            </plugin>
-
-            <!-- Protobuf Maven plugin -->
-            <plugin>
-                <groupId>org.xolstice.maven.plugins</groupId>
-                <artifactId>protobuf-maven-plugin</artifactId>
-                <version>0.6.1</version>
-                <configuration>
-                    <!-- Adjust the OS classifier if not on Windows x86_64 -->
-                    <protocArtifact>com.google.protobuf:protoc:3.25.6:exe:windows-x86_64</protocArtifact>
-
-                    <!-- Where to put the generated Java files -->
-                    <outputDirectory>
-                        ${project.build.directory}/generated-sources/protobuf/java
-                    </outputDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>protobuf</id>
-                        <goals>
-                            <!-- Only use the standard compile goal -->
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
             <!-- Plugin for detecting your OS (used by protobuf-maven-plugin, if needed) -->

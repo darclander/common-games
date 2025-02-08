@@ -183,17 +183,14 @@ public class Server {
                         msg = appendDelimitor("NEW_PLAYER_RESPONSE", newPlayer.getPid(), newPlayer.getXPos(), newPlayer.getYPos(), playingField.getWidth(), playingField.getHeight());
                         send(msg, outputStream); // NEW_PLAYER_RESPONSE;pid;xPos;yPos;fieldWidth;fieldHeight
 
+                        sendGameState(newPlayer, outputStream);
+
                         //msg = appendDelimitor("PLAYING_FIELD", playingField.getWidth(), playingField.getHeight(), playingField.encodeField());
 // SEND PLAYING FIELD   send(msg, outputStream); // PLAYING_FIELD;fieldWidth;fieldHeight;|e|e|e|h/1|e|e|e|b/1|e|
 
                         msg = appendDelimitor("NEW_PLAYER", newPlayer.getPid(), newPlayer.getName(), newPlayer.getColor(), newPlayer.getXPos(), newPlayer.getYPos());
                         broadcast(msg, clientSocket); // NEW_PLAYER;pid;name;color;xPos;yPos
                         
-                        for (Player p : playingField.getPlayers().values()) {
-                            if (p == newPlayer) continue;
-                            msg = appendDelimitor("PLAYER_INFO", p.getPid(), p.getName(), p.getColor(), (p.getPid() + 1) * 50, (p.getPid() + 1)); // Merge with NEW_PLAYER????
-                            send(msg, outputStream); // PLAYER_INFO;pid;name;color;xPos;yPos
-                        }
 
                         break;
 
@@ -307,6 +304,40 @@ public class Server {
         }
     
         LoggerUtil.logMessage("Broadcasted: '" + message + "' to " + broadcastCount + " clients.");
+    }
+
+
+    private static void sendGameState(Player newPlayer, OutputStream outputStream) throws IOException {
+        String msg;
+        // Send positions of all berries to the new player
+        for (int y = 0; y < playingField.getHeight(); y++) {
+            for (int x = 0; x < playingField.getWidth(); x++) {
+                Square square = playingField.getField()[y][x];
+                if (square.getType().equals("berry")) {
+                    msg = appendDelimitor("BERRY_POSITION", x, y, square.getMagnitude());
+                    send(msg, outputStream); // BERRY_POSITION;xPos;yPos;magnitude
+                }
+            }
+        }
+
+        // Send positions of all existing players to the new player
+        for (Player p : playingField.getPlayers().values()) {
+            if (p == newPlayer)
+                continue;
+            // Append head position
+            StringBuilder playerInfo = new StringBuilder(
+                    appendDelimitor("PLAYER_INFO", p.getPid(), p.getName(), p.getColor()));
+            playerInfo.append(";").append(p.getXPos()).append(",").append(p.getYPos());
+
+            // Append body segments positions
+            for (BodySegment segment : p.getBody()) {
+                playerInfo.append(";").append(segment.getPosition().getX()).append(",")
+                        .append(segment.getPosition().getY());
+            }
+
+            msg = playerInfo.toString();
+            send(msg, outputStream); // PLAYER_INFO;pid;name;color;headxPos,headyPos;31,12;31,13;
+        }
     }
 
 
