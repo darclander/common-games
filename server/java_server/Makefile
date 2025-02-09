@@ -6,10 +6,10 @@ MAIN_CLASS = java_server.Server
 all: compile run
 
 compile:
-	$(JAVA_COMPILER) -d . *.java
+	mvn clean package
 
 run:
-	$(JAVA_RUNTIME) $(MAIN_CLASS)
+	java -jar target/java-server-1.0-SNAPSHOT.jar
 
 clean:
 	rm -rf *.class
