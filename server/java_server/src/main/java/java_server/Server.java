@@ -188,7 +188,7 @@ public class Server {
                         //msg = appendDelimitor("PLAYING_FIELD", playingField.getWidth(), playingField.getHeight(), playingField.encodeField());
 // SEND PLAYING FIELD   send(msg, outputStream); // PLAYING_FIELD;fieldWidth;fieldHeight;|e|e|e|h/1|e|e|e|b/1|e|
 
-                        msg = appendDelimitor("NEW_PLAYER", newPlayer.getPid(), newPlayer.getName(), newPlayer.getColor(), newPlayer.getXPos(), newPlayer.getYPos());
+                        msg = appendDelimitor("NEW_PLAYER", newPlayer.getPid(), newPlayer.getName(), newPlayer.getColor(), newPlayer.getLength(), newPlayer.getXPos(), newPlayer.getYPos());
                         broadcast(msg, clientSocket); // NEW_PLAYER;pid;name;color;xPos;yPos
                         
 
@@ -326,12 +326,14 @@ public class Server {
                 continue;
             // Append head position
             StringBuilder playerInfo = new StringBuilder(
-                    appendDelimitor("PLAYER_INFO", p.getPid(), p.getName(), p.getColor()));
-            playerInfo.append(";").append(p.getXPos()).append(",").append(p.getYPos());
+                    appendDelimitor("PLAYER_INFO", p.getPid(), p.getName(), p.getColor(), p.getLength()));
+            playerInfo.append(";").append(p.getXPos()).append(";").append(p.getYPos());
+            // playerInfo.append(";").append(p.getXPos()).append(",").append(p.getYPos());
 
             // Append body segments positions
             for (BodySegment segment : p.getBody()) {
-                playerInfo.append(";").append(segment.getPosition().getX()).append(",")
+                // playerInfo.append(";").append(segment.getPosition().getX()).append(",")
+                playerInfo.append(";").append(segment.getPosition().getX()).append(";")
                         .append(segment.getPosition().getY());
             }
 
