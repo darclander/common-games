@@ -255,10 +255,12 @@ public class Server {
 
     private static void send(String message, OutputStream outputStream) {
         try {
-            System.out.println(("Sending: ") + message);
+            System.out.println(("Sending: ") + message + "\\n");
+            message += "\n"; // Add delimitor to separate messages sent in rapid succession.
             outputStream.write(message.getBytes());
+            // Thread.sleep(100);
         } catch (IOException e) {
-                e.printStackTrace();
+            e.printStackTrace();
         }
 
     }
